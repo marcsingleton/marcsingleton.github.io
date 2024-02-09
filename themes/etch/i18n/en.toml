@@ -4,16 +4,18 @@
 [posts]
 
 [posts.title]
-other = "Posts"
+  other = "Posts"
+
+[posts.recent]
+  other = "Recent posts"
 
 [posts.date]
-other = "Jan 2, 2006"
-
+  other = "Jan 2, 2006"
 
 [post]
 
 [post.created]
-other = "January 2, 2006"
+  other = "January 2, 2006"
 
 [post.updated]
-other = "Updated January 2, 2006"
+  other = "Updated January 2, 2006"

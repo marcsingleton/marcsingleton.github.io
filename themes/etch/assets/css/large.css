@@ -1,4 +1,5 @@
 @media (min-width: 770px) {
+
 body {
     width: 600px;
     line-height: 1.5;
@@ -49,4 +50,5 @@ main#content pre {
     margin-left: -3.8%;
     padding: 1.5rem 2.2rem;
 }
+
 }

@@ -2,8 +2,8 @@
 {{ .Content }}
 <h3>{{ i18n "posts.recent" }}</h3>
 <ul id="posts">
-{{- range where site.RegularPages "Type" "in" site.Params.mainSections }}
-    {{ .Render "li" }}
-{{- end }}
+    {{- range where site.RegularPages "Type" "in" site.Params.mainSections -}}
+        {{ .Render "li" }}
+    {{- end -}}
 </ul>
 {{ end }}

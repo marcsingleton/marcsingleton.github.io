@@ -1,9 +1,13 @@
 <script src="https://d3js.org/d3.v7.js"></script>
 
 <!-- Create a div where the graph will be inserted -->
-<div id="{{ .Get 1 }}"></div>
+<div id="viz"></div>
 
-<!-- Insert JS script -->
-{{ with resources.Get (.Get 0) }}
+<!-- Insert JS scripts -->
+{{ with resources.Get "/data/data.js" }}
+    <script src="{{ .RelPermalink }}"></script>
+{{ end }}
+
+{{ with resources.Get "/js/force.js" }}
     <script src="{{ .RelPermalink }}"></script>
 {{ end }}

@@ -206,10 +206,27 @@ main#content blockquote {
     border-left: 2.5px solid #ccc;
 }
 
+/* Bounding box of highlight (space around coding rectangle) */
+main#content .highlight {
+    margin-top: 5px;
+    overflow-x: auto;  /* Activate scroll bar when window is too small */
+}
+
+/* Box of highlight (coding rectangle) */
 main#content .chroma {
-    border-radius: 10px;
-    padding: 0px;
-    margin: 5px;
+    border-radius: 5px;
+    margin: 0px;
+    overflow: auto; /* Expand rectangle when code is too long */
+}
+
+/* Box of highlight with line numbers */
+main#content div.highlight > div.chroma {
+    padding: 5px 5px 5px 5px;
+}
+
+/* Box of highlight without line numbers */
+main#content div.highlight > pre.chroma {
+    padding: 5px 15px;
 }
 
 main#content code {

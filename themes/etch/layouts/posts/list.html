@@ -3,8 +3,8 @@
     <h1>{{ i18n "posts.title" }}</h1>
 </header>
 <ul id="posts">
-{{- range where site.RegularPages "Type" "in" site.Params.mainSections }}
+{{ range where site.RegularPages "Type" "in" site.Params.mainSections }}
     {{ .Render "li" }}
-{{- end }}
+{{ end }}
 </ul>
 {{ end }}

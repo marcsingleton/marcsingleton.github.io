@@ -3,9 +3,9 @@ The following lines check if dark mode is on
 If not, it adds a command to target devices with dark color scheme preferences
 The lines at the end add the paired closing brace
 */
-{{ if not (eq .Site.Params.dark "on") -}}
+{{ if not (eq .Site.Params.dark "on") }}
 @media (prefers-color-scheme: dark) {
-{{ end -}}
+{{ end }}
 
 html {
     scrollbar-color: #6c6c6c #2e2e2e;
@@ -55,6 +55,6 @@ main#content header#post-header div {
     color: #a7a7a7;
 }
 
-{{- if not (eq .Site.Params.dark "on") -}}
+{{ if not (eq .Site.Params.dark "on") }}
 }
-{{- end -}}
+{{ end }}

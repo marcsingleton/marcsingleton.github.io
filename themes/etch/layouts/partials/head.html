@@ -28,5 +28,5 @@
     {{ printf `<link rel="stylesheet" href="%s">` $css.RelPermalink | safeHTML }}
 
     <link rel="canonical" href="{{ .Permalink }}" />
-    <title>{{ .Title }}</title>
+    <title>{{ .Title }} | {{ .Site.Title }}</title>
 </head>

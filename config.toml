@@ -25,6 +25,9 @@ enableInlineShortcodes = true
     url = "/about/"
     weight = 20
 
+[Taxonomies]
+  tag = "tags"
+
 [permalinks]
   posts = "/posts/:title/"
 

@@ -1,4 +1,5 @@
----
-title: "Home"
----
-This is some info about me.
++++
+title = "Home"
++++
+
+Hi! This website is under construction. Stay tuned while I update it!

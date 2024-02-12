@@ -29,18 +29,11 @@ enableInlineShortcodes = true
   posts = "/posts/:title/"
 
 [markup.goldmark.renderer]
-  # Allow HTML in Markdown
-  unsafe = true
-
-[markup.tableOfContents]
-  ordered = true
+  unsafe = true  # Allow HTML in Markdown
 
 [markup.highlight]
   codeFences = true
   guessSyntax = true
-  hl_Lines = ""
-  lineNoStart = 1
-  lineNos = true
-  lineNumbersInTable = true
+  lineNumbersInTable = true  # Put line numbers in separate table (not copied with code)
   tabWidth = 2
-  noClasses = false
+  noClasses = false  # Use local style site for syntax highlighting

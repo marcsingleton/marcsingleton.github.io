@@ -1,0 +1,9 @@
+<script src="https://d3js.org/d3.v7.js"></script>
+
+<!-- Create a div where the graph will be inserted -->
+<div id="{{ .Get 1 }}"></div>
+
+<!-- Insert JS script -->
+{{ with resources.Get (.Get 0) }}
+    <script src="{{ .RelPermalink }}"></script>
+{{ end }}

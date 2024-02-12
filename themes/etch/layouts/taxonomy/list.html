@@ -1,0 +1,15 @@
+{{ define "main" }}
+<header id="post-header">
+    <h1>{{ .Title }}</h1>
+</header>
+<ul id="posts">
+{{ range .Pages }}
+    <li>
+        <a href="{{ .Page.Permalink }}">
+            {{ .Page.Title }}
+            <small> {{ len .Pages }} </small>
+        </a>
+    </li>
+{{ end }}
+</ul>
+{{ end }}

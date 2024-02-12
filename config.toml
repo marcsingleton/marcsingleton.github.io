@@ -3,8 +3,6 @@ title = "Marc Singleton"
 theme = "etch"
 languageCode = "en-US"
 enableInlineShortcodes = true
-pygmentsCodeFences = true
-pygmentsUseClasses = true
 
 [params]
   description = "Marc Singleton's personal GitHub Pages site"
@@ -34,5 +32,15 @@ pygmentsUseClasses = true
   # Allow HTML in Markdown
   unsafe = true
 
-  [markup.tableOfContents]
-    ordered = true
+[markup.tableOfContents]
+  ordered = true
+
+[markup.highlight]
+  codeFences = true
+  guessSyntax = true
+  hl_Lines = ""
+  lineNoStart = 1
+  lineNos = true
+  lineNumbersInTable = true
+  tabWidth = 2
+  noClasses = false

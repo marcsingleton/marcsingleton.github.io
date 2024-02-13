@@ -5,7 +5,7 @@
 <ul id="posts">
 {{ range .Pages }}
     <li>
-        <a href="{{ .Page.Permalink }}">
+        <a href="{{ .Page.RelPermalink }}">
             {{ .Page.Title }}
             <small> {{ len .Pages }} </small>
         </a>

@@ -1,6 +1,5 @@
 baseURL = "https://marcsingleton.github.io/"
 title = "Marc Singleton"
-theme = "etch"
 languageCode = "en-US"
 enableInlineShortcodes = true
 

@@ -19,3 +19,8 @@
 
 [post.updated]
   other = "Updated January 2, 2006"
+
+[tags]
+
+[tags.title]
+  other = "Tags"

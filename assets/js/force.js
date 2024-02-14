@@ -1,3 +1,4 @@
+function draw_force(data, container) {
 // Specify the dimensions of the chart.
 const width = 600;
 const height = 400;
@@ -18,7 +19,7 @@ const simulation = d3.forceSimulation(nodes)
     .force("y", d3.forceY());
 
 // Create the SVG container.
-const svg = d3.select("#viz")
+const svg = d3.select(container)
     .append("svg")
         .attr("width", width)
         .attr("height", height)
@@ -85,8 +86,4 @@ if (!event.active) simulation.alphaTarget(0);
 event.subject.fx = null;
 event.subject.fy = null;
 }
-
-// When this cell is re-run, stop the previous simulation. (This doesn’t
-// really matter since the target alpha is zero and the simulation will
-// stop naturally, but it’s a good practice.)
-invalidation.then(() => simulation.stop());
+}

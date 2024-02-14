@@ -4,10 +4,14 @@
 <div id="viz"></div>
 
 <!-- Insert JS scripts -->
-{{ with resources.Get "/data/data.js" }}
+{{ with resources.Get "/js/force.js" }}
     <script src="{{ .RelPermalink }}"></script>
 {{ end }}
 
-{{ with resources.Get "/js/force.js" }}
-    <script src="{{ .RelPermalink }}"></script>
+{{ with resources.Get "/data/force.json" }}
+    <script>
+    fetch("{{ .RelPermalink }}")
+        .then(response => response.json())
+        .then(data => draw_force(data, "#viz"))
+    </script>
 {{ end }}

@@ -1,6 +1,10 @@
 @media (min-width: 800px) {
 
-body {
+main#content {
+    width: 800px;
+}
+
+footer#footer {
     width: 800px;
 }
 

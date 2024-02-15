@@ -14,7 +14,7 @@ body {
     font-size: 1.5rem;
     line-height: 1.5;
     overflow-wrap: break-word;
-    font-family: "Open Sans", -apple-system, BlinkMacSystemFont, sans-serif, "Apple Color Emoji", "Segoe UI", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-family: "Open Sans", sans-serif;
     color: #313a3d;
 }
 
@@ -43,6 +43,7 @@ header#banner h2 {
     display: inline;
     font-size: 20px;
     font-size: 2rem;
+    font-weight: 200;
 }
 
 header#banner nav {

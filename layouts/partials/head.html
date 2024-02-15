@@ -4,15 +4,13 @@
     {{ with .Site.Params.description }}
     <meta name="description" content="{{ . }}">
     {{ end }}
-    {{ printf `<link rel="shortcut icon" href="%s">` ("favicon.ico" | absURL) | safeHTML }}
+    
     {{ with .OutputFormats.Get "rss" }}
         {{ printf `<link rel="%s" type="%s" href="%s" title="%s">` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
     {{ end }}
 
     {{ $resources := slice }}
-
     {{ $resources = $resources | append (resources.Get "css/main.css") }}
-
     {{ $resources = $resources | append (resources.Get "css/large.css") }}
 
     {{ $dark := .Site.Params.dark | default "auto" }}
@@ -24,7 +22,7 @@
         {{ $resources = $resources | append (resources.Get "css/syntax.css") }}
     {{ end }}
 
-    {{ $css := $resources | resources.Concat "css/style.css" | minify }}
+    {{ $css := $resources | resources.Concat "css/style.css" }}
     {{ printf `<link rel="stylesheet" href="%s">` $css.RelPermalink | safeHTML }}
 
     <link rel="canonical" href="{{ .Permalink }}" />

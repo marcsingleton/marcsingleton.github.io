@@ -4,10 +4,10 @@
 [posts]
 
 [posts.title]
-  other = "Posts"
+  other = "posts"
 
 [posts.recent]
-  other = "Recent posts"
+  other = "recent posts"
 
 [posts.date]
   other = "Jan 2, 2006"
@@ -23,4 +23,4 @@
 [tags]
 
 [tags.title]
-  other = "Tags"
+  other = "tags"

@@ -5,10 +5,12 @@
     <meta name="description" content="{{ . }}">
     {{ end }}
     
+    <!--RSS feed-->
     {{ with .OutputFormats.Get "rss" }}
         {{ printf `<link rel="%s" type="%s" href="%s" title="%s">` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
     {{ end }}
 
+    <!--Local CSS-->
     {{ $resources := slice }}
     {{ $resources = $resources | append (resources.Get "css/main.css") }}
     {{ $resources = $resources | append (resources.Get "css/large.css") }}
@@ -24,7 +26,7 @@
 
     {{ $css := $resources | resources.Concat "css/style.css" }}
     {{ printf `<link rel="stylesheet" href="%s">` $css.RelPermalink | safeHTML }}
-
+    
     <link rel="canonical" href="{{ .Permalink }}" />
     <title>{{ .Title }} | {{ .Site.Title }}</title>
 </head>

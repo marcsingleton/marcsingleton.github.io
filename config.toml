@@ -11,18 +11,25 @@ enableInlineShortcodes = true
 
 [menu]
   [[menu.main]]
+    identifier = "home"
+    name = "home"
+    title = "home"
+    url = "/"
+    weight = 10
+
+  [[menu.main]]
     identifier = "posts"
     name = "posts"
     title = "posts"
     url = "/posts/"
-    weight = 10
+    weight = 20
 
   [[menu.main]]
-    identifier = "about"
-    name = "about"
-    title = "about"
-    url = "/about/"
-    weight = 20
+    identifier = "resources"
+    name = "resources"
+    title = "resources"
+    url = "/resources/"
+    weight = 30
 
 [Taxonomies]
   tag = "tags"

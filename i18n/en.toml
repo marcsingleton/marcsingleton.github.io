@@ -3,12 +3,6 @@
 
 [posts]
 
-[posts.title]
-  other = "posts"
-
-[posts.recent]
-  other = "recent posts"
-
 [posts.date]
   other = "Jan 2, 2006"
 
@@ -19,8 +13,3 @@
 
 [post.updated]
   other = "Updated January 2, 2006"
-
-[tags]
-
-[tags.title]
-  other = "tags"

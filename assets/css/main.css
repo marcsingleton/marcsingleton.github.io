@@ -19,6 +19,7 @@ body {
 }
 
 header#header {
+    z-index: 1;  /* Set to 1 to cover embedded YouTube videos and other content*/
     top: 0;
     left: 0;
     padding: 7.5px 10px;

@@ -14,4 +14,9 @@
     </header>
     {{ .Content }}
 </article>
+{{ if .Param "display_toc" }}
+<aside>
+    {{ .TableOfContents }}
+</aside>
+{{ end }}
 {{ end }}

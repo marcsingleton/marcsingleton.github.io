@@ -46,3 +46,7 @@ enableInlineShortcodes = true
   lineNumbersInTable = true  # Put line numbers in separate table (not copied with code)
   tabWidth = 2
   noClasses = false  # Use local style site for syntax highlighting
+
+[markup.tableOfContents]
+  startLevel = 2
+  endLevel = 3

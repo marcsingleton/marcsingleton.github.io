@@ -163,15 +163,17 @@ main#content cite > sup {
     scroll-margin-top: 50px; /* Adjust link scroll for header */
 }
 
-/* TABLE OF CONTENTS PROPERTIES */
-main#content aside {
-    float: right;
-    margin: 0;
-    top: 0;
-}
+.grid-container {
+    display: inline-grid;
+    grid-template-columns: 2.5fr 1fr;
+  }
 
+/* TABLE OF CONTENTS PROPERTIES */
 main#content nav#TableOfContents {
-    font-size: 15px;
+    position: sticky;
+    margin: 0;
+    top: 50px;
+    font-size: 12.5px;
 }
 
 main#content nav#TableOfContents ul {

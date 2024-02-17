@@ -10,7 +10,6 @@ html {
 body {
     margin: 0;
     padding: 0;
-    background-color: white;
     font-size: 15px;
     font-size: 1.5rem;
     line-height: 1.5;
@@ -19,13 +18,40 @@ body {
     color: #313a3d;
 }
 
+/* GRID PROPERTIES */
+.grid-body {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    grid-template-columns: 1fr 2fr 1fr;
+    background-color: white;
+  }
+
+header#header {
+    grid-row: 1;
+    grid-column: 1 / 4;
+}
+
+footer#footer {
+    grid-row: 3;
+    grid-column: 2;
+}
+
+main#content {
+    grid-row: 2;
+    grid-column: 2;
+}
+
+div#TableOfContents {
+    grid-row: 2;
+    grid-column: 3;
+}
+
 /* HEADER PROPERTIES */
 header#header {
     z-index: 1;  /* Set to 1 to cover embedded YouTube videos and other content*/
     top: 0;
-    left: 0;
-    padding: 7.5px 10px;
     position: sticky;
+    padding: 7.5px 10px;
     background-color: inherit;
     box-shadow: 0 0.125rem 0.5rem 0 rgba(0,0,0,0.1);;
 }
@@ -72,8 +98,7 @@ header#header nav ul li a {
 
 /* FOOTER PROPERTIES */
 footer#footer {
-    margin: 10px auto;
-    padding: 0 15px;
+    padding: 10px 0;
     font-size: 12.5px;
     font-size: 1.25rem;
     font-weight: 400;
@@ -82,11 +107,6 @@ footer#footer {
 
 
 /* GENERAL CONTENT PROPERTIES */
-main#content {
-    margin: 10px auto;
-    padding: 0 15px;
-}
-
 main#content a {
     color: #007dfa;
     text-decoration: none;
@@ -163,21 +183,22 @@ main#content cite > sup {
     scroll-margin-top: 50px; /* Adjust link scroll for header */
 }
 
-.grid-container {
-    display: inline-grid;
-    grid-template-columns: 2.5fr 1fr;
-  }
-
 /* TABLE OF CONTENTS PROPERTIES */
-main#content nav#TableOfContents {
+div#TableOfContents {
+    top: 70px;
     position: sticky;
-    margin: 0;
-    top: 50px;
-    font-size: 12.5px;
+    align-self: start;
+    margin: 0 10px;
+    padding: 0 5px;
+    font-size: 15px;
+    border-left: 1px solid #d8d8d8;
 }
 
-main#content nav#TableOfContents ul {
+div#TableOfContents ul {
+    margin: 0;
+    padding: 0 10px;
     list-style-type: none;
+    font-size: 12.5px;
 }
 
 /* POST LIST STYLES */

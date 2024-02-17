@@ -2,11 +2,19 @@
 <html lang="{{ .Site.Language.Lang }}">
     {{ partial "head.html" . }}
     <body>
-        {{ partial "header.html" . }}
-        <main id="content">
-        {{ block "main" . }}
-        {{ end }}
-        </main>
-        {{ partial "footer.html" . }}
+        <div class="grid-body">
+            {{ partial "header.html" . }}
+            <main id="content">
+            {{ block "main" . }}
+            {{ end }}
+            </main>
+            {{ if .Param "display_toc" }}
+                <div id="TableOfContents">
+                On this page
+                {{ .TableOfContents }}
+                </div>
+            {{ end }}
+            {{ partial "footer.html" . }}
+        </div>
     </body>
 </html>

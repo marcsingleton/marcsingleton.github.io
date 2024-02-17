@@ -1,5 +1,4 @@
 {{ define "main" }}
-<div class="grid-container">
 <article>
     <header id="post-header">
         <h1>{{ .Title }}</h1>
@@ -15,10 +14,4 @@
     </header>
     {{ .Content }}
 </article>
-{{ if .Param "display_toc" }}
-<aside>
-    {{ .TableOfContents }}
-</aside>
-</div>
-{{ end }}
 {{ end }}

@@ -11,10 +11,10 @@ enableInlineShortcodes = true
 
 [menu]
   [[menu.main]]
-    identifier = "home"
-    name = "home"
-    title = "home"
-    url = "/"
+    identifier = "about"
+    name = "about"
+    title = "about"
+    url = "/about"
     weight = 10
 
   [[menu.main]]

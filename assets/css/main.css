@@ -22,7 +22,7 @@ body {
 .grid-body {
     display: grid;
     grid-template-rows: auto 1fr auto;
-    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-columns: 1fr 5fr 1fr;
     background-color: white;
   }
 

@@ -14,7 +14,7 @@ body {
     font-size: 1.5rem;
     line-height: 1.5;
     overflow-wrap: break-word;
-    font-family: "Open Sans", sans-serif;
+    font-family: ui-sans-serif, system-ui;
     color: #313a3d;
 }
 
@@ -28,7 +28,7 @@ body {
 
 header#header {
     grid-row: 1;
-    grid-column: 1 / 4;
+    grid-column: 2 / 3;
 }
 
 footer#footer {
@@ -57,12 +57,41 @@ div#TableOfContents {
 
 /* HEADER PROPERTIES */
 header#header {
-    z-index: 1;  /* Set to 1 to cover embedded YouTube videos and other content*/
-    top: 0;
-    position: sticky;
-    padding: 7.5px 10px;
-    background-color: inherit;
-    box-shadow: 0 0.125rem 0.5rem 0 rgba(0,0,0,0.1);
+    padding: 40px 0 40px 0;
+    line-height: 2rem;
+}
+
+header#header h2 {
+    margin: 0;
+    padding: 0;
+    display: inline;
+    font-size: 18px;
+    font-size: 1.8rem;
+    font-weight: 600;
+    text-transform: none;
+}
+
+header#header nav {
+    float: right;
+}
+
+header#header nav ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    font-size: 18px;
+    font-size: 1.8rem;
+    font-weight: 600;
+    text-transform: none;
+}
+
+header#header nav ul li {
+    margin: 0 5px;
+    display: inline;
+}
+
+header#header nav ul li a {
+    color: #454545;
 }
 
 header#header a {
@@ -74,35 +103,6 @@ header#header a:hover {
     color: #007dfa;
     text-decoration: none;
     transition: 0.25s;
-}
-
-header#header h2 {
-    margin: 0;
-    display: inline;
-    font-size: 20px;
-    font-size: 2rem;
-    font-weight: 200;
-}
-
-header#header nav {
-    float: right;
-}
-
-header#header nav ul {
-    margin: 0;
-    padding: 0;
-    list-style-type: none;
-    font-size: 1.05em;
-    text-transform: none;
-}
-
-header#header nav ul li {
-    margin: 0 5px;
-    display: inline;
-}
-
-header#header nav ul li a {
-    color: #454545;
 }
 
 /* FOOTER PROPERTIES */
@@ -147,6 +147,7 @@ main#content h6 + p {
 
 main#content p {
     margin: 10px 0;
+    line-height: 2;
     color: #394548;
 }
 

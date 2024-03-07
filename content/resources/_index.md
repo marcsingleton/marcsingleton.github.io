@@ -2,20 +2,25 @@
 title = "Resources"
 +++
 
-Written in Go, Hugo is an open source static site generator available under the [Apache Licence 2.0.](https://github.com/gohugoio/hugo/blob/master/LICENSE) Hugo supports TOML, YAML and JSON data file types, Markdown and HTML content files and uses shortcodes to add rich content. Other notable features are taxonomies, multilingual mode, image processing, custom output formats, HTML/CSS/JS minification and support for Sass SCSS workflows.
+This is a page where I want to give shout outs to other great resources for all things coding, statistics, machine, learning, biology, etc. that I've come across on the web or elsewhere. I've at one point another found all of these useful for something I was trying to learn about, so I want to do my part to promote their hard work here (or at least boost their search results by feeding the ranking algorithms.)
 
-Hugo makes use of a variety of open source projects including:
+### Bioinformatics
+- [UCSC File Formats](https://genome.ucsc.edu/FAQ/FAQformat.html)
 
-* https://github.com/yuin/goldmark
-* https://github.com/alecthomas/chroma
-* https://github.com/muesli/smartcrop
-* https://github.com/spf13/cobra
-* https://github.com/spf13/viper
+### Mathematics
+- [3Blue1Brown](https://www.youtube.com/@3blue1brown)
+- [The Bright Side of Mathematics](https://www.youtube.com/@brightsideofmaths)
+- [Desmos Graphing Calculator](https://www.desmos.com/calculator)
 
-Hugo is ideal for blogs, corporate websites, creative portfolios, online magazines, single page applications or even a website with thousands of pages.
+### Coding
+- [mCoding](https://www.youtube.com/@mCoding)
+- [Reducible](https://www.youtube.com/@Reducible)
+- [Composing Programs](https://www.composingprograms.com/)
+- [Semantic Versioning](https://semver.org/)
 
-Hugo is for people who want to hand code their own website without worrying about setting up complicated runtimes, dependencies and databases.
+### Machine Learning
+- [Distill](https://distill.pub/)
 
-Websites built with Hugo are extremely fast, secure and can be deployed anywhere including, AWS, GitHub Pages, Heroku, Netlify and any other hosting provider.
-
-Learn more and contribute on [GitHub](https://github.com/gohugoio).
+### Scientific Writing
+- [doi2bib](https://www.doi2bib.org/)
+- [BibTex Tidy](https://flamingtempura.github.io/bibtex-tidy/)

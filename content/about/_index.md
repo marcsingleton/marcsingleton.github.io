@@ -1,5 +1,5 @@
 +++
-title = "about"
+title = "About"
 +++
 
 I'm a computational biologist who's currently a postdoc in the Eisen Lab at UC Berkeley where I also did my PhD in the Biophysics program. (I'm currently seeking new opportunities, so if I seem like a good fit for a role, don't hesitate to hit me up!) Before then, I did a brief stint at the NIH as a postbac where I worked in the NCATS DMPK Laboratory optimizing UPLC-MS/MS methods for candidate drug compounds. Though nowadays I'm more skilled with a keyboard than a pipette, I started my training at the bench as a chemistry major. In my first research experience, I was co-mentored by a stellar postdoc/grad student team split between a microbiology and mass spectrometry lab, respectively, which is how I landed a job doing bioanalytical chemistry right out of college. In the intervening years, I've steadily drifted towards the formal sciences. Fortunately, I also majored in applied math (another long story), so the transition was mostly a smooth one. I haven't forgotten my roots, however, and while I love a fancy machine learning model, I'm always an advocate of working with collaborators to design a better experiment over needlessly torturing a data set.

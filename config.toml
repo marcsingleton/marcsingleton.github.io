@@ -11,23 +11,23 @@ enableInlineShortcodes = true
 
 [menu]
   [[menu.main]]
-    identifier = "about"
-    name = "about"
-    title = "about"
+    identifier = "About"
+    name = "About"
+    title = "About"
     url = "/about"
     weight = 10
 
   [[menu.main]]
-    identifier = "posts"
-    name = "posts"
-    title = "posts"
+    identifier = "Posts"
+    name = "Posts"
+    title = "Posts"
     url = "/posts/"
     weight = 20
 
   [[menu.main]]
-    identifier = "resources"
-    name = "resources"
-    title = "resources"
+    identifier = "Resources"
+    name = "Resources"
+    title = "Resources"
     url = "/resources/"
     weight = 30
 

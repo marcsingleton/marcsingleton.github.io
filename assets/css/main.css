@@ -93,7 +93,7 @@ header#header nav ul {
     padding: 0;
     list-style-type: none;
     font-size: 1.05em;
-    text-transform: lowercase;
+    text-transform: none;
 }
 
 header#header nav ul li {

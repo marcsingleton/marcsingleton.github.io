@@ -1,10 +1,10 @@
 export function draw(data, container) {
 // Specify the dimensions of the chart.
-const width = 600;
-const height = 400;
+const width = 350;
+const height = 350;
 
 // Specify the color scale.
-const color = d3.scaleOrdinal(d3.schemeCategory10);
+const color = d3.scaleOrdinal(d3.schemeTableau10);
 
 // The force simulation mutates links and nodes, so create a copy
 // so that re-evaluating this cell produces the same result.
@@ -36,8 +36,6 @@ const link = svg.append("g")
     .attr("stroke-width", d => Math.sqrt(d.value));
 
 const node = svg.append("g")
-    .attr("stroke", "#fff")
-    .attr("stroke-width", 1.5)
 .selectAll("circle")
 .data(nodes)
 .join("circle")

@@ -30,18 +30,19 @@ const data = [
 ]
 
 // Declare the chart dimensions and margins.
-const width = 928;
-const height = 500;
-const marginTop = 30;
+const width = 500;
+const height = 250;
+const marginTop = 50;
 const marginRight = 0;
-const marginBottom = 30;
-const marginLeft = 40;
+const marginBottom = 50;
+const marginLeft = 50;
 
 // Declare the x (horizontal position) scale.
 const x = d3.scaleBand()
     .domain(d3.groupSort(data, ([d]) => -d.frequency, (d) => d.letter)) // descending frequency
     .range([marginLeft, width - marginRight])
-    .padding(0.1);
+    .paddingInner(0.4)
+    .paddingOuter(0.4);
 
 // Declare the y (vertical position) scale.
 const y = d3.scaleLinear()
@@ -58,7 +59,7 @@ const svg = d3.select(container)
 
 // Add a rect for each bar.
 svg.append("g")
-    .attr("fill", "steelblue")
+    .attr("fill", "#4e79a7")
     .selectAll()
     .data(data)
     .join("rect")
@@ -70,17 +71,23 @@ svg.append("g")
 // Add the x-axis and label.
 svg.append("g")
     .attr("transform", `translate(0,${height - marginBottom})`)
-    .call(d3.axisBottom(x).tickSizeOuter(0));
+    .call(d3.axisBottom(x).tickSizeOuter(0))
+    .call(g => g.append("text")
+        .attr("x", (marginLeft + width - marginRight) / 2)
+        .attr("y", 30)
+        .attr("text-anchor", "middle")
+        .attr("fill", "currentColor")
+        .text("Letter"));
 
-// Add the y-axis and label, and remove the domain line.
+// Add the y-axis and label.
 svg.append("g")
     .attr("transform", `translate(${marginLeft},0)`)
     .call(d3.axisLeft(y).tickFormat((y) => (y * 100).toFixed()))
-    .call(g => g.select(".domain").remove())
     .call(g => g.append("text")
-        .attr("x", -marginLeft)
-        .attr("y", 10)
+        .attr("x", -(marginTop + height - marginBottom) / 2)
+        .attr("y", -25)
+        .attr("transform", `rotate(-90)`)
+        .attr("text-anchor", "middle")
         .attr("fill", "currentColor")
-        .attr("text-anchor", "start")
-        .text("↑ Frequency (%)"));
+        .text("Frequency (%)"));
 }

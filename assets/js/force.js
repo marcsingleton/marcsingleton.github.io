@@ -1,4 +1,4 @@
-function draw(data, container) {
+export function draw(data, container) {
 // Specify the dimensions of the chart.
 const width = 600;
 const height = 400;

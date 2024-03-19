@@ -18,18 +18,17 @@ div_id: ID of container used to hold plot.
 {{/* Create a div where the plot will be inserted */}}
 <div id="{{ $div_id }}"></div>
 
-{{/* Insert JS script */}}
-{{ with resources.Get $script_path }}
-    <script src="{{ .RelPermalink }}"></script>
-{{ end }}
-
 {{/* Call draw function if data_path is given */}}
 {{ if $data_path }}
-    {{ with resources.Get $data_path }}
-        <script>
-        fetch("{{ .RelPermalink }}")
+    <script type="module">
+        import { draw } from "{{ (resources.Get $script_path).RelPermalink }}"
+        fetch("{{ (resources.Get $data_path).RelPermalink }}")
             .then(response => response.json())
-            .then(data => draw(data, "#{{ $div_id }}"  ))
-        </script>
-    {{ end }}
+            .then(data => draw(data, "#{{ $div_id }}"))
+    </script>
+{{ else }}
+    <script type="module">
+        import { draw } from "{{ (resources.Get $script_path).RelPermalink }}"
+        draw("#{{ $div_id }}")
+    </script>
 {{ end }}

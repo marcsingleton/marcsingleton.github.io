@@ -1,4 +1,6 @@
-data = [
+export function draw(container){
+// Declare data
+const data = [
     {"letter": "A", "frequency": 0.08167},
     {"letter": "B", "frequency": 0.01492},
     {"letter": "C", "frequency": 0.02782},
@@ -47,7 +49,7 @@ const y = d3.scaleLinear()
     .range([height - marginBottom, marginTop]);
 
 // Create the SVG container.
-const svg = d3.select("#viz")
+const svg = d3.select(container)
     .append("svg")
         .attr("width", width)
         .attr("height", height)
@@ -81,3 +83,4 @@ svg.append("g")
         .attr("fill", "currentColor")
         .attr("text-anchor", "start")
         .text("↑ Frequency (%)"));
+}

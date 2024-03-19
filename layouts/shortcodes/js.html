@@ -1,17 +1,35 @@
+{{/*
+Insert d3 plots into Markdown files.
+
+Parameters
+----------
+script_path: Path to JS file.
+data_path: Path to data used for draw function. If given, draw function in JS file is called with data.
+div_id: ID of container used to hold plot.
+*/}}
+
+{{ $script_path := .Get "script_path" }}
+{{ $data_path := .Get "data_path" }}
+{{ $div_id := .Get "div_id" }}
+
+{{/* Load d3 library */}}
 <script src="https://d3js.org/d3.v7.js"></script>
 
-<!-- Create a div where the graph will be inserted -->
-<div id="viz"></div>
+{{/* Create a div where the plot will be inserted */}}
+<div id="{{ $div_id }}"></div>
 
-<!-- Insert JS scripts -->
-{{ with resources.Get "/js/force.js" }}
+{{/* Insert JS script */}}
+{{ with resources.Get $script_path }}
     <script src="{{ .RelPermalink }}"></script>
 {{ end }}
 
-{{ with resources.Get "/data/force.json" }}
-    <script>
-    fetch("{{ .RelPermalink }}")
-        .then(response => response.json())
-        .then(data => draw_force(data, "#viz"))
-    </script>
+{{/* Call draw function if data_path is given */}}
+{{ if $data_path }}
+    {{ with resources.Get $data_path }}
+        <script>
+        fetch("{{ .RelPermalink }}")
+            .then(response => response.json())
+            .then(data => draw(data, "#{{ $div_id }}"  ))
+        </script>
+    {{ end }}
 {{ end }}

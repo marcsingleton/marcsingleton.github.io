@@ -1,4 +1,4 @@
-function draw_force(data, container) {
+function draw(data, container) {
 // Specify the dimensions of the chart.
 const width = 600;
 const height = 400;

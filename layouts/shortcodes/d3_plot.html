@@ -4,6 +4,10 @@ Insert d3 plots into Markdown files.
 The JS file must export a function draw which accepts the ID of a div element
 that is used to hold the plot as its first argument. It may optionally accept a
 data structure that is used to draw the plot elements as its second argument.
+Scripts and data are expected to be page resources, i.e., stored in a directory
+with an index.md as a leaf bundle, not global resources (which are stored under
+the assets/ directory at the root).
+
 This function does not insert the D3 library into the page, so any pages using
 this shortcode must also use the d3_library shortcode.
 
@@ -25,14 +29,14 @@ div_id: ID of div element used to hold plot.
 {{/* Call draw function if data_path is given */}}
 {{ if $data_path }}
     <script type="module">
-        import { draw } from "{{ (resources.Get $script_path).RelPermalink }}"
-        fetch("{{ (resources.Get $data_path).RelPermalink }}")
+        import { draw } from "{{ (.Page.Resources.Get $script_path).RelPermalink }}"
+        fetch("{{ (.Page.Resources.Get $data_path).RelPermalink }}")
             .then(response => response.json())
             .then(data => draw(data, "#{{ $div_id }}"))
     </script>
 {{ else }}
     <script type="module">
-        import { draw } from "{{ (resources.Get $script_path).RelPermalink }}"
+        import { draw } from "{{ (.Page.Resources.Get $script_path).RelPermalink }}"
         draw("#{{ $div_id }}")
     </script>
 {{ end }}

@@ -9,48 +9,42 @@ display_toc = true
 {{< d3_library >}}
 
 ## Introduction: When PNGs aren't enough
-I've created a lot of data visualizations in my life, but up to this point, most have them have been very static. A lot of this has to do with my training in a particularly *academic* flavor of data science. The product of research is always knowledge, but depending on the industry and use case, that knowledge can presented in a variety of different forms, for example as presentations, reports, dashboards, or even curated data sets. In academia, the primary measure of research output is papers, *i.e.*, relatively neat summaries of a series of experiments or analyses that combine a visual presentation of the data with textual narration. (I'm not going to wade into the broader philosophical issues on whether this is a useful measure of impact, but it suffices to say that [not everyone agrees.](https://www.theguardian.com/books/2022/apr/11/the-big-idea-should-we-get-rid-of-the-scientific-paper)) Historically, these were distributed as articles in physical journals, but in my experience most people use PDFs nowadays. On one hand, this approach has its benefits, as PDFs are a single objects that are easily stored and viewed. The format has also been around for over 30 years and has become a sort of lingua franca of digital documents, so it doesn't seem likely to go away any time soon. On the other hand, it's also surprising that in an age of digital displays and 3D graphics, we've settled on a medium for data communication that is trying its hardest to simulate a simple piece of paper.
+I've created a lot of data visualizations in my life, but up to this point, most have them have been very static. A lot of this has to do with my training in a particularly *academic* flavor of data science. The product of research is always knowledge, but depending on the industry and use case, that knowledge can presented in a variety of different forms, for example as presentations, reports, dashboards, or even curated data sets. In academia, the primary form of research output is papers, *i.e.*, relatively neat summaries of a series of experiments or analyses that combine a visual presentation of the data with textual narration. (I'm not going to wade into the broader philosophical issues on whether this is a useful measure of impact, but it suffices to say that [not everyone agrees.](https://www.theguardian.com/books/2022/apr/11/the-big-idea-should-we-get-rid-of-the-scientific-paper)) Historically, these were distributed as articles in physical journals, but in my experience most people use PDFs nowadays. On one hand, this approach has its benefits, as PDFs are a single objects that are easily stored and viewed. The format has also been around for over 30 years and has become a sort of lingua franca of digital documents, so it doesn't seem likely to go away any time soon. On the other hand, it's also surprising that in an age of digital displays and 3D graphics, we've settled on a medium for data communication that is trying its hardest to simulate a simple piece of paper.
 
 Today's data is often highly multivariate and organized in hierarchies or networks, so trying to understand the complex relationships between sets of variables using simple plots of X vs Y is at best inefficient and at worst missing the forest for the trees. I've also encountered these pitfalls of trying to operate in the static paradigm, and I'm glad no one can tally the number of hours I've spent clumsily toggling between various plots trying to get a handle on a data set. A few years ago, though, I came across [Distill](https://distill.pub/about/) whose goal was to create an alternate model of scientific publishing that fully embraced the interactivity of modern web pages. Unfortunately, it's now on indefinite hiatus, but its articles still set a high-water mark for scientific communication and have inspired me to incorporate interactive visualizations in my own work.
 
 ## Libraries and platform for interactive visualizations
-There's no shortage of libraries and platforms for creating interactive visualizations.
+There's no shortage of libraries and platforms for creating interactive visualizations. I'm no expert in this area, but here's a small selection of the available options:
 
-Brief discription of options
-- d3
-- plotly (built over d3)
-- matplotlib
+- D3
+- Observable Plot
+- Plotly
+- Dash
 - Tableau
 
-Decided to start with D3 for this project as it offers the most control
-Most of the work involved integrating D3 into development workflow rather than working with d3 library directly, so steps will likely be similar for plotly.js
+D3 is the Matplotlib of data visualization on the web. Like Matplotlib, it offers a powerful library of graphing primitives, like shapes, axes, layouts, color utilities, and much more. Unlike Matplotlib, it has no pre-made chart types, so everything, including even simple bar and scatter plots, is made from scratch and can require dozens of lines of code. As a result, D3 shines when creating visualizations that require the highest level of customization and control. For exploratory data analysis, other libraries like Observable Plot and Plotly are better fits. Observable Plot is from the same team that develops D3 and uses it as a foundation for a more concise and intuitive interface. Plotly fills a similar niche as Observable and supports a variety of chart types out of the box. Unlike D3 and Observable Plot which are exclusive to JavaScript, Plotly has bindings for a several languages including JavaScript, Python, R, and Julia. There are also solutions specifically designed for creating dashboards, like Dash and Tableau, where the former uses a low-code Python interface and the latter a purely graphical one. Finally, I should give an honorable mention to Matplotlib, which does support, if at a very low-level, widgets and integration into some graphical user interfaces.
 
 ## Inserting D3 plots into Markdown with Hugo
-This website is built with Hugo, so steps necessarily reflect some Hugo and Go specifics for stitching together the pieces, but I'll point these out as we go.
+For this exercise, I decided to use D3, as it offers the most control. Most of the work, though, involved integrating JavaScript code into my site generator, so the steps will likely be similar for other libraries. I use Hugo to build this site, so steps necessarily reflect some Hugo and Go specifics for stitching together the pieces, but I'll point these out as we go.
 
 ### Importing the D3 Library
-- Modern browsers can run Javascript out of the box, but they don't automatically load the D3 library
-- There are mechanisms for loading the library into your page roughly like Python's import system
-- The simplest of these is to include a script tag whose src is the URL to the D3 library
-- If you inspect the page source (right click on Chrome and click "Inspect" on the resulting context menu), you should see a line that looks something like 
+Modern browsers can run JavaScript out of the box, but they don't automatically load the D3 library. Fortunately, there are a few mechanisms for making it available to the JavaScript code running on a specific web page. The simplest of these is to include a script tag whose `src` is the URL to the D3 library. Inspecting this page's source in Chrome by right-clicking and selecting "Inspect" on the resulting context menu, should show a line that looks something like:
 
 ```html
 <script src="https://d3js.org/d3.v7.min.js"></script>
 ```
 
-- A Hugo-specific is that it builds HTML pages from Markdown files
-- It does offer a mechanism for inserting raw HTML, but I instead wrote a "shortcode" which is essentially a function that will generate the script tags when Hugo builds the page
-- For something so simple, using a shortcode is mostly for aesthetic reasons, but later we'll see where these shortcodes are useful for customizing the HTML depending on the conditions
+Static site generators typically build HTML files using content stored in plain-text formats like Markdown. Hugo does offer a mechanism for inserting raw HTML, but I instead wrote a "shortcode" which is essentially a function that generates the script tags when Hugo builds the page. I'll omit the details here for clarity, but for anyone who's interested the source is available the GitHub repo for this [site](https://github.com/marcsingleton/marcsingleton.github.io). Anyway, for a simple script tag, using a shortcode is mostly for aesthetic reasons, but in general shortcodes are incredibly useful for generating more complex and context-dependent HTML.
 
 ### Inserting a simple D3 plot
-- [Example](https://observablehq.com/@d3/bar-chart/2) is a bar graph of the relative frequencies of letters in the English language taken from D3 example library
-- Observable is a notebook-style frontend for D3, and its syntax differs slightly from the same plot would be generated in an HTML page
-- Luckily it's straightforward to adapt it
-- The Javascript code is available [here](https://github.com/marcsingleton/marcsingleton.github.io/blob/main/content/posts/d3-markdown/bars.js)
-- Highlights are
-  - Move code and data into body of `draw` function
-  - Make the div element that holds the graph an argument
-- Following HTML inserts into page (in practice done with Hugo shortcode to dynamically generate the correct paths)
+Now for the first [example](https://observablehq.com/@d3/bar-chart/2), which is a bar graph of the relative frequencies of letters in the English language taken from the D3 example gallery. Observable is a notebook-style frontend for D3, and its syntax differs slightly from the JavaScript needed to generate the same plot in an HTML page. Fortunately, the changes are minor. The final code is available [here](https://github.com/marcsingleton/marcsingletoxn.github.io/blob/main/content/posts/d3-markdown/bars.js), but the highlights are:
+ 
+  - Moving code and data into body of an exported `draw` function
+  - Making the `id` attribute of the \<div\> element which holds the plot an argument to `draw`
+
+For those new to HTML, \<div\> elements are generic containers. They're frequently used to group similar pieces of content together and apply consistent styles to them.
+
+The following HTML inserts the plot in the page, which in practice is done with a Hugo shortcode that dynamically generate the correct paths.
 
 ```html
 <div id="bars_div"></div>
@@ -60,18 +54,12 @@ This website is built with Hugo, so steps necessarily reflect some Hugo and Go s
 </script>
 ```
 
-- Script type module is necessary for the import statements to be allowed
-- Modules also have their own scope, which allows us to use the same name draw for different drawing functions without collisions 
+Setting the `type` attribute to `"module"` here is necessary for this code to work correctly. JavaScript code marked as modules are executed [slightly differently](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#other_differences_between_modules_and_standard_scripts) than standard scripts. The key details, though, are modules allow import statements and they also have their own scope, which permits using the same name `draw` for different drawing functions without collisions. This latter property is a bit of a Hugo- and me-specific requirement, as it's needed for displaying multiple plots in the same page with my custom shortcode. Anyway, the code will produce the following plot.
 
 {{< d3_plot script_path="bars.js" div_id="bars_div" >}}
 
 ### A more complex example
-- That's a nice starting point, but it's something I could have put together in a few lines of Python using matplotlib.
-- This next example is also taken from the [D3 gallery](https://observablehq.com/@d3/force-directed-graph/2) and shows the network of character co-occurence in *Les Misérables*
-- Converting the code from the D3 gallery follows similar steps as before
-- Largest difference is data relatively large (over 1000 lines), so is stored in separate file
-- Data is also passed as second function argument
-- Loading this data into the runtime requires a few extra steps
+That's a nice starting point, but it's something I could have put together in a few lines of Python using Matplotlib. This next example shows much more of D3's ability to create interactive visualizations, though it's really just the tip of the iceberg. It's also taken from the [D3 gallery](https://observablehq.com/@d3/force-directed-graph/2) and shows the network of character co-occurences in *Les Misérables*. Adapting the code for use in a JavaScript runtime follows similar steps as before. The largest difference is the data that encodes the network structure is relatively large, spanning over 1000 lines, so I stored it in a separate JSON file. As a result, the data is loaded at runtime and passed as the second argument to the `draw` function, which requires a few extra steps shown below.
 
 ```html
 <div id="network_div"></div>
@@ -83,12 +71,11 @@ This website is built with Hugo, so steps necessarily reflect some Hugo and Go s
 </script>
 ```
 
-- Javascript has built-in functionality for asynchronous execution of its code (you don't want your entire page to stall while a resource is loading from a server)
-- Must use fetch then idiom to ensure data is loaded before draw function is called
-- Again in practice accomplished with a Hugo shortcode to correctly generate the correct paths to the script and data
+The Fetch API is used for accessing resources over the network. Even though the data is stored on this web site, it's not directly saved in this page itself, so the browser needs to "fetch" it to make it available for the JavaScript code. Fetch is an asynchronous method, which is useful for ensuring code execution doesn't grind to a halt while a resource is loading from a server. This example, however, requires the data is fully loaded before passing it to the `draw` function, which is accomplished by chaining the return value to `then` method calls. Again, this is done in practice with a Hugo shortcode which correctly generates the correct paths to the script and data.
 
 {{< d3_plot script_path="network.js" data_path="network.json" div_id="network_div" >}}
 
-Finally! An interactive visualization! You can grab the nodes and move them around by clicking and dragging. 
+Finally, an interactive visualization! You can grab the nodes and move them around by clicking and dragging. 
 
 ## Conclusion
+This brings me to the end of this post, which has hopefully demonstrated that integrating D3 plots into Markdown documents with Hugo isn't too complicated. The hardest part was actually writing the shortcodes to generate the correct paths when Hugo builds the HTML files. I've deliberately omitted the details here for clarity, but for anyone who's interested in diving deeper, the source code for these shortcodes is available [here](https://github.com/marcsingleton/marcsingleton.github.io/tree/main/layouts/shortcodes).

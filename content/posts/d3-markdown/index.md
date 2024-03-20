@@ -1,6 +1,6 @@
 +++
 author = "Marc Singleton"
-title = "Using D3 in Markdown Posts"
+title = "Using D3 in Markdown Posts (draft)"
 date = "2024-03-18"
 tags = ["d3", "visualization", "interactive"]
 display_toc = true

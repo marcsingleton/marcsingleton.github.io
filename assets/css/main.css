@@ -139,7 +139,7 @@ main#content h5,
 main#content h6 {
     margin-bottom: 0;
     line-height: 1.15;
-    scroll-margin-top: 50px; /* Adjust link scroll for header */
+    scroll-margin-top: 0px; /* Adjust link scroll for header */
 }
 
 main#content h1 + p,
@@ -153,7 +153,7 @@ main#content h6 + p {
 
 main#content p {
     margin: 10px 0;
-    line-height: 2;
+    line-height: 1.75;
     color: #394548;
 }
 
@@ -196,7 +196,7 @@ main#content .footnotes {
 }
 
 main#content cite > sup {
-    scroll-margin-top: 50px; /* Adjust link scroll for header */
+    scroll-margin-top: 0px; /* Adjust link scroll for header */
 }
 
 /* TABLE OF CONTENTS PROPERTIES */

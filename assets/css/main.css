@@ -282,3 +282,9 @@ main#content code {
     font-size: 12.5px;
     font-size: 1.25rem;
 }
+
+main#content p > code {
+    background-color: #f2f2f2;
+    border-radius: 2.5px;
+    padding: 2.5px;
+}

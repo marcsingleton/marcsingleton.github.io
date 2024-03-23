@@ -29,10 +29,10 @@ Everyone working with code eventually has to come to terms with versioning. Vers
 Composing Programs is the companion text to UC Berkeley's introductory computer science class, CS 61A. Though it uses Python for its examples, its focus is less on the specifics of that language and more on general concepts in computing, such as recursion and abstraction. While it's not the first or only resource I would use when learning Python, I would recommend it and the lecture materials from [previous iterations of the course](https://inst.eecs.berkeley.edu/~cs61a/archives.html) for those who already have a grasp of Python basics and are looking for a deeper understanding of computer science fundamentals.
 
 #### [The Linux Command Line](https://linuxcommand.org/tlcl.php)
-The Linux command line text
+Knowing the command line is essential for taking full advantage of the Linux operating system, and some tasks can't even be done without it. To quote this book, "Graphical user interfaces make easy tasks easy, while command line interfaces make difficult tasks possible." While there's no shortage of introductions to the Linux command line, I particularly enjoy this one for both its breadth and accessibility, covering a cross-section of topics in a conversational style that lays a strong foundation for deeper dives with other sources. It also has interludes that explain the historical context behind certain design choices, which ensures the reader comes away knowing both the *what* and the *why* of the command line.
 
 #### [Pro Git](https://git-scm.com/book/en/v2)
-Git text
+Like the Linux command line, Git is another piece of computing infrastructure that is extremely powerful but also highly intimidating to new users. While there are other guides that will get someone up and running with Git much faster, it's worth developing familiarity with this resource for both its clear explanations of Git fundamentals and its internal "plumbing."
 
 ### Machine Learning
 #### [Distill](https://distill.pub/)

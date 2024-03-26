@@ -35,7 +35,7 @@ svg {
 }
 
 /* GRID PROPERTIES */
-.grid-body {
+#grid-body {
     display: grid;
     grid-template-rows: auto 1fr auto;
     grid-template-columns: 1fr 5fr 1fr;
@@ -59,7 +59,7 @@ main#content {
     padding: 0px var(--margin-padding);
 }
 
-.grid-main {
+#grid-main {
     display: grid;
     grid-template-columns: 3fr 1fr;
 }

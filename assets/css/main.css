@@ -109,6 +109,7 @@ header#header nav ul li {
 header#header a {
     color: var(--heading-dark);
     text-decoration: none;
+    transition: 0.5s;
 }
 
 header#header a:hover {

@@ -29,11 +29,6 @@ body {
     color: var(--text-dark);
 }
 
-svg {
-    display: block;
-    margin: auto;
-}
-
 /* GRID PROPERTIES */
 #grid-body {
     display: grid;
@@ -193,6 +188,11 @@ main#content .footnotes {
 
 main#content cite > sup {
     scroll-margin-top: var(--scroll-margin-top);
+}
+
+main#content div.d3_plot > svg {
+    display: block;
+    margin: auto;
 }
 
 /* TABLE OF CONTENTS PROPERTIES */

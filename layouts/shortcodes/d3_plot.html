@@ -24,7 +24,7 @@ div_id: ID of div element used to hold plot.
 {{ $div_id := .Get "div_id" }}
 
 {{/* Create a div where the plot will be inserted */}}
-<div id="{{ $div_id }}"></div>
+<div class="d3_plot" id="{{ $div_id }}"></div>
 
 {{/* Call draw function if data_path is given */}}
 {{ if $data_path }}

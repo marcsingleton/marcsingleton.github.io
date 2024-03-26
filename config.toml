@@ -6,7 +6,7 @@ enableInlineShortcodes = true
 [params]
   description = "Marc Singleton's personal GitHub Pages site"
   copyright = "Copyright © 2024 Marc Singleton"
-  dark = "auto"
+  dark = "off"
   highlight = true
 
 [menu]

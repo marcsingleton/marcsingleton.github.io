@@ -29,7 +29,6 @@ svg {
     display: grid;
     grid-template-rows: auto 1fr auto;
     grid-template-columns: 1fr 5fr 1fr;
-    background-color: white;
   }
 
 header#header {
@@ -50,7 +49,6 @@ main#content {
 .grid-main {
     display: grid;
     grid-template-columns: 3fr 1fr;
-    background-color: white;
 }
 
 article {

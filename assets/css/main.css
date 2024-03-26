@@ -1,4 +1,18 @@
 /* GLOBAL PROPERTIES */
+:root {
+    /* COLORS */
+    --heading-dark: #0a0a0a;
+    --heading-light: #a3a3a3;
+    --text-dark: #525252;
+    --text-medium: #a3a3a3;
+    --text-light: #d4d4d4;
+    --link: #047857;
+    --link-hover: #10b981;
+    /* OTHER PROPERTIES */
+    --scroll-margin-top: 0px; /* Adjust link scroll for header */
+    --margin-padding: 10px;
+  }
+
 html {
     font-size: 62.5%;
     scrollbar-gutter: stable both-edges;
@@ -12,7 +26,7 @@ body {
     line-height: 1.5;
     overflow-wrap: break-word;
     font-family: ui-sans-serif, system-ui;
-    color: #313a3d;
+    color: var(--text-dark);
 }
 
 svg {
@@ -30,16 +44,19 @@ svg {
 header#header {
     grid-row: 1;
     grid-column: 2 / 3;
+    padding: 40px var(--margin-padding);
 }
 
 footer#footer {
     grid-row: 3;
     grid-column: 2;
+    padding: 10px var(--margin-padding);
 }
 
 main#content {
     grid-row: 2;
     grid-column: 2;
+    padding: 0px var(--margin-padding);
 }
 
 .grid-main {
@@ -57,7 +74,6 @@ div#TableOfContents {
 
 /* HEADER PROPERTIES */
 header#header {
-    padding: 40px 0 40px 0;
     line-height: 2rem;
 }
 
@@ -90,34 +106,29 @@ header#header nav ul li {
     display: inline;
 }
 
-header#header nav ul li a {
-    color: #454545;
-}
-
 header#header a {
-    color: #313a3d;
+    color: var(--heading-dark);
     text-decoration: none;
 }
 
 header#header a:hover {
-    color: #007dfa;
+    color: var(--link-hover);
     text-decoration: none;
     transition: 0.25s;
 }
 
 /* FOOTER PROPERTIES */
 footer#footer {
-    padding: 10px 0;
     font-size: 12.5px;
     font-size: 1.25rem;
     font-weight: 400;
-    color: #b3b3b3;
+    color: var(--text-light);
     }
 
 
 /* GENERAL CONTENT PROPERTIES */
 main#content a {
-    color: #007dfa;
+    color: var(--link);
     text-decoration: none;
 }
 
@@ -132,37 +143,27 @@ main#content h4,
 main#content h5,
 main#content h6 {
     margin-bottom: 0;
-    line-height: 1.15;
-    scroll-margin-top: 0px; /* Adjust link scroll for header */
-}
-
-main#content h1 + p,
-main#content h2 + p,
-main#content h3 + p,
-main#content h4 + p,
-main#content h5 + p,
-main#content h6 + p {
-    margin-top: 5px;
+    line-height: 1;
+    scroll-margin-top: var(--scroll-margin-top);
 }
 
 main#content p {
     margin: 10px 0;
     line-height: 1.75;
-    color: #394548;
+    color: var(--text-dark);
 }
 
 main#content header#post-header h1 {
     display: block;
     font-size: 25px;
     font-size: 2.5rem;
-    font-weight: 600;
-    line-height: 1.15;
 }
 
 main#content header#post-header > div {
     display: block;
+    margin: 5px 0;
     font-size: 0.9em;
-    color: #767676;
+    color: var(--text-medium);
 }
 
 main#content abbr {
@@ -175,14 +176,14 @@ main#content blockquote {
     margin-bottom: 10px;
     margin-left: 50px;
     padding-left: 15px;
-    border-left: 2.5px solid #ccc;
+    border-left: 2.5px solid var(--text-light);
     font-style: italic;
 }
 
 main#content hr {
     height: 1px;
     border: 0;
-    background: #d8d8d8;
+    background: var(--text-light);
 }
 
 main#content .footnotes {
@@ -190,18 +191,18 @@ main#content .footnotes {
 }
 
 main#content cite > sup {
-    scroll-margin-top: 0px; /* Adjust link scroll for header */
+    scroll-margin-top: var(--scroll-margin-top);
 }
 
 /* TABLE OF CONTENTS PROPERTIES */
 div#TableOfContents {
-    top: 70px;
+    top: 25px;
     position: sticky;
     align-self: start;
     margin: 0 10px;
     padding: 0 5px;
     font-size: 15px;
-    border-left: 1px solid #d8d8d8;
+    border-left: 1px solid var(--text-light);
 }
 
 div#TableOfContents ul {
@@ -246,15 +247,16 @@ main#content ul#posts li {
 main#content ul#posts small {
     margin-left: 10px;
     font-size: 0.8em;
-    color: #767676;
+    color: var(--text-medium);
 }
 
 main#content ul#posts li a {
+    color: var(--link);
     text-decoration: none;
 }
 
 main#content ul#posts li a:hover {
-    color: #369aff;
+    color: var(--link-hover);
 }
 
 main#content ul#posts li a:hover small {
@@ -292,7 +294,7 @@ main#content code {
 }
 
 main#content p > code {
-    background-color: #f2f2f2;
+    background-color: var(--text-light);
     border-radius: 2.5px;
     padding: 2.5px;
 }

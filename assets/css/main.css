@@ -1,11 +1,7 @@
 /* GLOBAL PROPERTIES */
-*, *:before, *:after {
-    box-sizing: border-box;
-}
-
 html {
     font-size: 62.5%;
-    scroll-behavior: smooth;
+    scrollbar-gutter: stable both-edges;
 }
 
 body {
@@ -218,6 +214,20 @@ div#TableOfContents ul {
 div#TableOfContents ul > li:before {
     content: "- ";
   }
+
+
+/* HOME PAGE PROPERTIES */
+main#content header#post-header-home {
+    text-align: center;
+}
+
+main#content header#post-header-home img {
+    border-radius: 50%;
+}
+
+main#content section#content-home {
+    text-align: center;
+}
 
 /* POST LIST STYLES */
 main#content ul#posts {

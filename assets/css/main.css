@@ -142,6 +142,7 @@ main#content h6 {
     margin-bottom: 0;
     line-height: 1;
     scroll-margin-top: var(--scroll-margin-top);
+    color: var(--heading-dark)
 }
 
 main#content p {

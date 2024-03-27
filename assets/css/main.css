@@ -10,7 +10,7 @@
     --link-hover: #10b981;
     /* OTHER PROPERTIES */
     --scroll-margin-top: 0px; /* Adjust link scroll for header */
-    --margin-padding: 10px;
+    --margin-padding: 5px;
   }
 
 html {
@@ -82,6 +82,18 @@ header#header h2 {
     text-transform: none;
 }
 
+header#header a {
+    color: var(--heading-dark);
+    text-decoration: none;
+    transition: 0.5s;
+}
+
+header#header a:hover {
+    color: var(--link-hover);
+    text-decoration: none;
+    transition: 0.25s;
+}
+
 header#header nav {
     float: right;
 }
@@ -99,18 +111,6 @@ header#header nav ul {
 header#header nav ul li {
     margin: 0 7.5px;
     display: inline;
-}
-
-header#header a {
-    color: var(--heading-dark);
-    text-decoration: none;
-    transition: 0.5s;
-}
-
-header#header a:hover {
-    color: var(--link-hover);
-    text-decoration: none;
-    transition: 0.25s;
 }
 
 /* FOOTER PROPERTIES */

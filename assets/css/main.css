@@ -55,16 +55,15 @@ main#content {
 }
 
 #grid-main {
-    display: grid;
-    grid-template-columns: 3fr 1fr;
+    display: flex;
 }
 
 article {
-    grid-column: 1;
+    flex-basis: 80%;
 }
 
 div#TableOfContents {
-    grid-column: 2;
+    flex-basis: 20%;
 }
 
 /* HEADER PROPERTIES */
@@ -325,4 +324,19 @@ main#content p > code {
     background-color: var(--text-light);
     border-radius: 2.5px;
     padding: 2.5px;
+}
+
+/* SMALL SCREEN PROPERTIES */
+@media only screen and (max-width: 750px) {
+    #grid-main {
+        flex-direction: column;
+    }
+
+    header#header nav ul li {
+        display: block;
+    }
+
+    div#TableOfContents {
+        display: none;
+    }
 }

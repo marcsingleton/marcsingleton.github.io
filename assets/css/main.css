@@ -299,14 +299,20 @@ main#content ul#posts li a:hover small {
 /* Bounding box of highlight (space around coding rectangle) */
 main#content .highlight {
     margin-top: 5px;
-    overflow-x: auto;  /* Activate scroll bar when window is too small */
+    border-radius: 5px;
+    overflow: hidden;
 }
 
 /* Box of highlight (coding rectangle) */
 main#content .chroma {
     margin: 0;
-    overflow: auto; /* Expand rectangle when code is too long */
-    border-radius: 5px;
+    overflow-x: auto;
+    scrollbar-color: #7f7f7f #272822;
+    scrollbar-width: thin;
+}
+
+main#content code {
+    
 }
 
 /* Box of highlight with line numbers */

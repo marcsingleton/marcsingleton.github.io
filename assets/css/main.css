@@ -351,6 +351,10 @@ main#content p > code {
 
 /* SMALL SCREEN */
 @media only screen and (max-width: 600px) {
+    header#header {
+        padding: 10px var(--margin-padding);
+    }
+
     header#header nav ul li {
         display: block;
     }

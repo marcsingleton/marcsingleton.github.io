@@ -11,7 +11,7 @@
     /* OTHER PROPERTIES */
     --scroll-margin-top: 0px; /* Adjust link scroll for header */
     --scrollbar-padding: 15px;
-    --margin-padding: 5px;
+    --margin-padding: 15px;
     --content-width: 1000px
   }
 
@@ -311,10 +311,6 @@ main#content .chroma {
     scrollbar-width: thin;
 }
 
-main#content code {
-    
-}
-
 /* Box of highlight with line numbers */
 main#content div.highlight > div.chroma {
     padding: 5px 5px 5px 5px;
@@ -339,7 +335,7 @@ main#content p > code {
 
 /* REMOVING TABLE OF CONTENTS */
 /* (see content-width variable for size + buffer) */
-@media only screen and (max-width: 1020px) {
+@media only screen and (max-width: 992px) {
     #grid-body {
         grid-template-columns: 0 auto 0;
       }
@@ -349,7 +345,7 @@ main#content p > code {
     }
 
     article {
-        width: calc(100vw - 2 * var(--margin-padding) - 2 * var(--scrollbar-padding));
+        width: 100%;
     }
 
     main#content .highlight {
@@ -362,9 +358,9 @@ main#content p > code {
 }
 
 /* SMALL SCREEN */
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 768px) {
     header#header {
-        padding: 10px var(--margin-padding);
+        padding: 15px var(--margin-padding);
     }
 
     header#header nav ul li {

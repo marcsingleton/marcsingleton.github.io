@@ -3,7 +3,7 @@ author = "Marc Singleton"
 title = "Using D3 in Markdown Posts"
 date = "2024-03-21"
 summary = "A quick tutorial on inserting D3 plots into Markdown files with Hugo."
-tags = ["d3", "visualization", "interactive", "hugo"]
+tags = ["d3", "hugo", "markdown", "html", "visualization", "interactive"]
 showTableOfContents = true
 +++
 

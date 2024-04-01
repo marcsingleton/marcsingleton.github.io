@@ -3,7 +3,7 @@ author = "Marc Singleton"
 title = "Using D3 in Markdown Posts"
 date = "2024-03-21"
 tags = ["d3", "visualization", "interactive", "hugo"]
-display_toc = true
+showTableOfContents = true
 +++
 
 {{< d3_library >}}

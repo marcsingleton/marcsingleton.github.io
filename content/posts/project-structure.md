@@ -8,42 +8,76 @@ showTableOfContents = true
 +++
 
 ## Introduction: Why organize your work?
-We've all heard it at one point or another in our lives: To get credit, you need to show your work. In data science, there's a similar idea with organizing your work. Because creating an analysis usually requires writing some code, it's easy enough to point to it as the "work" that is "shown", but anyone who's spent some time digging into someone else's code knows that when it comes to understanding what it's doing, there are magnitudes of difference between a well-organized repository and a series of Jupyter notebooks held together with the coding-equivalent of duct tape. When working in teams, organizational norms are essential to prevent a codebase from collapsing into a mess of bugs at a bare minimum, but ideally they allow large numbers of contributors to work together without inferring with each other's efforts. However, organizing data science projects isn't just about helping other people (whether it's you in six months, your immediate teammates, or a broader community) understand your code. Organizational norms are also powerful mental frameworks. They force you to break down hard problems into smaller, more manageable tasks. This is in part why teachers are so fixated on having their students show their work. Writing the knowns and unknowns in a physics question or each step of the long division algorithm makes you slow down, take stock of the problem, and execute each step properly.
+We've all heard it at one point or another in our lives: To get credit, you need to show your work. In data science, there's a similar idea with organizing your work. Because creating an analysis usually requires writing some code, it's easy enough to point to it as the "work" that is "shown," but anyone who's spent some time digging into someone else's code knows that when it comes to understanding what it's doing, there are magnitudes of difference between a well-organized repository and a series of Jupyter notebooks held together with the coding equivalent of duct tape. When working in teams, organizational norms at a bare minimum prevent a codebase from collapsing into a intractible mess, but ideally they allow large numbers of contributors to work together efficiently and with minimal interference. However, organizing data science projects isn't just about helping other people (whether it's you in six months, your immediate teammates, or a broader community) understand your code. Organizational norms are also powerful mental frameworks. They force you to break down hard problems into smaller, more manageable tasks. This is in part why teachers are so fixated on having their students show their work. Writing the knowns and unknowns in a physics question or each step of the long division algorithm makes you slow down, take stock of the problem, and execute each step properly. Project structures in data science work in a similar way. Rather than trying to clean, model, and interpret your data all at once, they allow you to focus on smaller, more manageable tasks where the outputs of one step flow smoothly into the inputs of another.
 
-End previous paragraph with connection back to data science
-This post is an overview of my approach to project structure, which has been refined over several years
-Coming from a particular place of academic data science where work is done independently or small teams, but I've sought to make my approach general
-Many of these ideas are originally my own, but similar to the recommendations from Cookiecutter
-    Excellent reference and has refined my own thinking, so highly recommend checking it out for a variation on these ideas
-    https://drivendata.github.io/cookiecutter-data-science/
-Structured as 
+This post is an overview of my approach to project structure. I should note my perspective comes from an academic flavor of data science where the work is done independently or in small teams and the data sets are generally static, but I've sought to make my approach general. When I started writing code for data science, I originally followed William Noble's [guide](https://doi.org/10.1371/journal.pcbi.1000424), but over the years I've refined his suggestions into a more modern structure. Many of my ideas are also similar to the recommendations from [Cookiecutter](https://drivendata.github.io/cookiecutter-data-science/). It's an excellent reference for data science project structure that has refined my own thinking, so I highly recommend checking it out for alternate take on this topic.
 
-## Directory Structure
-Structured for primarily computational projects with a limited set of distinct (though possibly large) data sets
-Not as appropriate for experimentalists with a large number of small data sets with needs for storing protocols and other documentation alongside the data itself
+The rest of this post is broken into two parts. In the first, I'll give an overview of my recommended project structure, and in the second, I'll discuss some broader principles that inform how that structure is put into practice.
+
+## Directory structure
+The following structure is designed for primarily computational projects using the "pipeline" model, *i.e.*, those that begin with a limited number of distinct and static data sets and transform them over a series of operations into a set of outputs. For the experimentalists out there, this structure will likely require some modifications to accommodate projects with a wet lab component. If there aren't many experiments, protocols and other documentation can be stored alongside each data set in a dedicated subdirectory. Projects that are primarily wet lab with shorter and more contained analyses may require a more "experiment-centric" structure, however. In other words, I don't necessarily recommend this structure as a lab notebook in its current form, but its overall ideas of separating data, code, and results would likely still apply.
 
 ```
-data
-docs
-logs
-code
-    src
-    notebooks
-    scripts
-reports
-outputs
-
-README.md
-LICENSE
-.gitignore
+project_root/
+    ├── data/
+    │   ├── data_set_1/
+    │   ⋮
+    │   └── data_set_n/
+    ├── docs/
+    ├── references/
+    ├── bin/
+    ├── code/
+    │   ├── src/
+    │   ├── scripts/
+    │   ├── notebooks/
+    ├── reports/
+    ├── results/
+    ├── logs/
+    ├── README.md
+    ├── LICENSE.txt
+    └── .gitignore
 ```
 
 ## Principles
-Analysis is a DAG
-    Use workflow managers to store constants that are shared across analyses
-Data is immutable
-    Outputs (including data transformations) are stored in a dedicated directory
-Separation of computation from visualization
-    Separation of concerns
-    Computational steps are resource intensive
-    Visualization can involve a lot of trial and error -- don't want to re-run an intensive computation just because you caught a typo on your plot's y-axis
+### Data analysis is a DAG
+- Data analysis is a series of operations where the outputs of one operation become the inputs of another
+- Convenient to visualization this as a flow chart or, more mathematically, a directed acyclic graph
+  - In this model, operations are nodes and dependencies between them are edges
+  - The graph is directed to reflect the one-way dependence of the operations
+    - For example, code that fits a model to cleaned data depends on the code that cleans the data, but not the other way around
+  - The graph is acyclic to prevent circular dependencies. If cleaning the data depends on a model fit to the cleaned data, there's no way to reproduce an analysis from the scratch
+- It's possible to hard code the paths between various scripts and manually run them in sequence, but this quickly becomes unmanageable
+  - Increases cognitive load
+  - Violates DRY principle, so any changes to paths must be reflected in multiple locations
+- Instead use workflow managers
+  - Proper "glue" for stitching together scripts that minimizes need for manually specifying paths
+  - Convenient mechanism for storing "global parameters" that influence the way an analysis is executed but are also distinct from "data" itself
+  - Biggest strength is automatic inference of dependencies between outputs and propagation of updates
+  
+### Data is immutable and isolated from the results
+- Outputs (including data transformations) are stored in a dedicated directory
+- Generally should be flat with one output subdirectory per script
+  - The internal structure of these subdirectories can be arbitrary
+- In some cases, may be appropriate to group related outputs together into a subdirectory
+  - A related series of visualizations where some plots may require extensive computation time to generate for example
+  - Be aware of the separation of computation from visualization principle though, but there are no hard rules here
+
+### There are three types of code you write
+- Scripts, libraries, and notebooks
+
+### Separate computation from visualization
+- Separation of concerns
+- Computational steps are resource intensive
+- Visualization can involve a lot of trial and error -- don't want to re-run an intensive computation just because you caught a typo on your  plot's y-axis
+- Divide computationally intensive steps for a single visualization as well
+  - Some visualization steps like t-SNE may require significant computation when applied to large data sets
+
+### Projects are isolated structures
+- All paths should only refer locations under the root
+- Non-standard executables installed on the system should be linked in bin; data stored in other locations should be linked in data
+
+### Requirements are frozen
+- Use environment managers at a minimum
+  - venv good for Python only
+  - conda good for Python and many other commonly used packages in scientific computing
+  - Sometimes requirements don't fit neatly into a standard package manager; Use containers like Docker or Singularity to capture an entire computing environment

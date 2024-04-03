@@ -66,17 +66,24 @@ project_root/
   - Proper "glue" for stitching together scripts that minimizes need for manually specifying paths
   - Convenient mechanism for storing "global parameters" that influence the way an analysis is executed but are also distinct from "data" itself
   - Biggest strength is automatic inference of dependencies between outputs and propagation of updates
-  
-### Data is immutable and isolated from the results
+
+### Projects are isolated from the file system
+When writing code for data analysis, it can be tempting for many beginners to use absolute rather than relative file paths. After all, the absolute path from the root of the file system **is** the address of a file, which ensures any code using an absolute path will always unambiguously refer to a specific file, no matter where it is run. However, this approach immediately breaks down when more than one machine is involved. Often these other machines are your teammates' computers. Just as you'll likely store the project root somewhere under your home directory on your local machine, so will your teammates, and unless all of you have the same name and file system structure, the code will quickly grind to a halt. Even when working individually or on a common file system in the cloud, it is sometimes necessary to run certain steps on more powerful computing infrastructure, which creates the same issues.
+
+That said, all paths should be relative rather than absolute. However, this then raises the question of relative to what exactly because depending on where the code is run, relative paths will have completely different meanings in the file system. My convention is to assume all code is run from the project root because this allows relative paths to be written without all those dreaded double dots (`..`) to refer to parent directories. Jupyter notebooks usually run from the directory that contains them, which requires either using double dots or implementing some additional configuration steps to change the default working directory. On the other hand, I don't recommend Jupyter notebooks for creating reproducible analyses anyway (see the section on the [three types of code](#there-are-three-types-of-code-you-write)), so following a strict convention here is not as necessary.
+
+Sometimes it's not possible to directly access all a project's resources under its root, for example, if a large data set is stored on some kind of external or network drive. However, this issue is easily solved by mounting those drives and adding a link to the required files or folders in the `data/` directory. Another example is linking to external programs in the `bin/` directory if for whatever reason they are not on the system `PATH` variable. In both cases, the project's documentation should give explicit directions on how to configure the computing environment properly (see the section on [requirements](#requirements-are-frozen-and-explicit) for more details). 
+
+### Data is immutable
 - Outputs (including data transformations) are stored in a dedicated directory
 - Generally should be flat with one output subdirectory per script
   - The internal structure of these subdirectories can be arbitrary
 - In some cases, may be appropriate to group related outputs together into a subdirectory
   - A related series of visualizations where some plots may require extensive computation time to generate for example
   - Be aware of the separation of computation from visualization principle though, but there are no hard rules here
-
+  
 ### There are three types of code you write
-- Scripts, libraries, and notebooks
+- Scripts, modules, and notebooks
 
 ### Separate computation from visualization
 - Separation of concerns
@@ -85,11 +92,7 @@ project_root/
 - Divide computationally intensive steps for a single visualization as well
   - Some visualization steps like t-SNE may require significant computation when applied to large data sets
 
-### Projects are isolated structures
-- All paths should only refer locations under the root
-- Non-standard executables installed on the system should be linked in bin; data stored in other locations should be linked in data
-
-### Requirements are frozen
+### Requirements are frozen and explicit
 - Use environment managers at a minimum
   - venv good for Python only
   - conda good for Python and many other commonly used packages in scientific computing

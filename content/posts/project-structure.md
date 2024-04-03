@@ -15,27 +15,40 @@ This post is an overview of my approach to project structure. I should note my p
 The rest of this post is broken into two parts. In the first, I'll give an overview of my recommended project structure, and in the second, I'll discuss some broader principles that inform how that structure is put into practice.
 
 ## Directory structure
-The following structure is designed for primarily computational projects using the "pipeline" model, *i.e.*, those that begin with a limited number of distinct and static data sets and transform them over a series of operations into a set of outputs. For the experimentalists out there, this structure will likely require some modifications to accommodate projects with a wet lab component. If there aren't many experiments, protocols and other documentation can be stored alongside each data set in a dedicated subdirectory. Projects that are primarily wet lab with shorter and more contained analyses may require a more "experiment-centric" structure, however. In other words, I don't necessarily recommend this structure as a lab notebook in its current form, but its overall ideas of separating data, code, and results would likely still apply.
+The following structure is designed for primarily computational projects using the "pipeline" model, *i.e.*, those that begin with a limited number of distinct and static data sets and transform them over a series of operations into a set of outputs. It's intended for *ad hoc* analyses of specific data sets rather than for the development of standalone, installable packages. However, its structure does encourage good software design practices like separation of concerns and modularity, so a project developed with this framework could be converted into a re-usable pipeline without many modifications. Additionally, though it contains some Python-specific elements for demonstration purposes, this structure is compatible with any scripting language commonly used for data science, like R, Julia, or even a mix of them!
+
+For the experimentalists out there, this structure will likely require some modifications to accommodate projects with a wet lab component. If there aren't many experiments, protocols and other documentation can be stored alongside each data set in a dedicated subdirectory. Projects that are primarily wet lab with shorter and more contained analyses may require a more "experiment-centric" structure, however. In other words, I don't necessarily recommend this structure as a lab notebook in its current form, but its overall ideas of separating data, code, and results would likely still apply.
 
 ```
 project_root/
-    ├── data/
-    │   ├── data_set_1/
-    │   ⋮
-    │   └── data_set_n/
-    ├── docs/
-    ├── references/
-    ├── bin/
-    ├── code/
-    │   ├── src/
-    │   ├── scripts/
-    │   ├── notebooks/
-    ├── reports/
-    ├── results/
-    ├── logs/
-    ├── README.md
-    ├── LICENSE.txt
-    └── .gitignore
+    ├── data/                 <- All raw data
+    │   ├── data_set_1/           <- Put different data sets in different subdirectories
+    │   ⋮  
+    │   └── data_set_n/  
+    ├── references/           <- Data dictionaries, manuals, log entries, and all other explanatory materials
+    ├── docs/                 <- Formal documentation systems, e.g. Sphinx; not necessary for most projects
+    ├── bin/                  <- "Binaries," i.e. external programs used in this project
+    ├── code/                 <- All code written written specifically for this project
+    │   ├── src/                  <- Re-usable functions for common tasks across project
+    │   │   ├── __init__.py           <- Necessary to make src/ a Python module
+    │   │   ├── module_1/             <- Organize functions into related modules
+    │   │   ⋮
+    │   │   └── module_n/
+    │   ├── scripts/              <- Code to execute individual pipeline steps
+    │   │   ├── clean_data.py         <- Give files readable but brief names
+    │   │   ├── fit_model.py
+    │   │   └── make_plots.py
+    │   └── notebooks/            <- Notebook-style code for exploratory analyses
+    ├── results/              <- All outputs produced by the pipeline
+    │   ├── clean_data/           <- Subdirectories should match the name of the script that produced them
+    │   ├── fit_model/
+    │   └── make_plots/
+    ├── reports/              <- Formal reports compiled from individual results; not necessary for many projects
+    ├── logs/                 <- Log files produced by workflow managers and other programs
+    ├── README.md             <- Give a high-level overview of the purpose and structure of the project
+    ├── LICENSE.txt           <- Include a license to be explicit about how others can use your code!
+    ├── requirements.txt      <- Requirements file for reproducing the project's computing environment
+    └── .gitignore            <- Files and folders ignored by Git (or some other VCS)
 ```
 
 ## Principles

@@ -36,7 +36,7 @@ project_root/
     │   │   └── module_n.py
     │   ├── scripts/              <- Code to execute individual pipeline steps
     │   │   ├── clean_data.py         <- Give files readable but brief names
-    │   │   ├── fit_model.py
+    │   │   ├── fit_models.py
     │   │   └── make_plots.py
     │   └── notebooks/            <- Notebook-style code for exploratory analyses
     ├── results/              <- All outputs produced by the pipeline
@@ -45,6 +45,7 @@ project_root/
     │   └── make_plots/
     ├── reports/              <- Formal reports compiled from individual results; not necessary for many projects
     ├── logs/                 <- Log files produced by workflow managers and other programs
+    ├── workflow.nf           <- Workflow file; here a Nextflow file, but many options are available
     ├── README.md             <- Give a high-level overview of the purpose and structure of the project
     ├── LICENSE.txt           <- Include a license to be explicit about how others can use your code!
     ├── requirements.txt      <- Requirements file for reproducing the project's computing environment
@@ -55,19 +56,19 @@ project_root/
 This next section dives deep into some principles that inform how the previous structure is used in practice. Some are directly related to explaining the purpose of individual directories whereas others are broader ideas that outline best practices for data science. I also wanted to shout-out the [Cookiecutter project](https://drivendata.github.io/cookiecutter-data-science/) again since their post on this topic has influenced several of these principles.
 
 ### Data analysis is a DAG
-- Data analysis is a series of operations where the outputs of one operation become the inputs of another
-- Convenient to visualization this as a flow chart or, more mathematically, a directed acyclic graph
-  - In this model, operations are nodes and dependencies between them are edges
-  - The graph is directed to reflect the one-way dependence of the operations
-    - For example, code that fits a model to cleaned data depends on the code that cleans the data, but not the other way around
-  - The graph is acyclic to prevent circular dependencies. If cleaning the data depends on a model fit to the cleaned data, there's no way to reproduce an analysis from the scratch
-- It's possible to hard code the paths between various scripts and manually run them in sequence, but this quickly becomes unmanageable
-  - Increases cognitive load
-  - Violates DRY principle, so any changes to paths must be reflected in multiple locations
-- Instead use workflow managers
-  - Proper "glue" for stitching together scripts that minimizes need for manually specifying paths
-  - Convenient mechanism for storing "global parameters" that influence the way an analysis is executed but are also distinct from "data" itself
-  - Biggest strength is automatic inference of dependencies between outputs and propagation of updates
+Data analysis is a series of operations where the outputs of one operation become the inputs of another. It's convenient to visualize this as a flow chart or, more mathematically, a directed acyclic graph. In this model, operations are nodes and dependencies between them are edges. (The graph is directed to reflect the one-way dependence of the operations, and the graph is acyclic to prevent circular dependencies.) While it's technically possible to describe a pipeline down to individual lines of code using this framework, the most natural units are "tasks," which bundle a set of related operations into standalone, executable units. I say tasks here rather than processes because in the context of the parallel computing techniques that are increasingly necessary in an age of big data, an individual task may launch thousands of processes distributed across hundreds of machines. In practice, the division of a pipeline's operations into tasks is highly context-dependent, and part of the art of data science is choosing when to merge and split related operations into tasks based the needs of any stakeholders and the available computing resources, among other factors.
+
+To make these concepts more concrete, let's quickly examine a toy example. This "pipeline," whose components are reflected in the previous project structure, consists of some number of input data sets and three tasks that create a set of outputs. More specifically, these tasks are Python scripts that clean the data, fit models, and plot the results. However, it's more intuitive to visualize this pipeline as the following flow chart:
+
+INSERT SIMPLE WORKFLOW
+
+From this perspective, it's clear the pipeline is a directed acylic graph. For example, `fit_models.py` depends on `clean_data.py`, but not the other way around. Additionally, it's acyclic since there are no "loops." This latter property is essential since, for example, if cleaning the data depended on a model fit to the cleaned data, there would be no way to reproduce the analysis from scratch.
+
+Because this example is extremely simple, it would be straightforward to hard code the paths between the various inputs and outputs of the scripts and manually run them in sequence, but this quickly becomes unmanageable for larger and more complex pipelines. For example, it's easy to imagine that this pipeline could grow to encompass multiple cleaning, fitting, or plotting scripts with non-linear dependendencies, like the following:
+
+INSERT COMPLEX WORKFLOW
+
+While it's still possible to run this pipeline manually, it's significantly more difficult to remember and execute the various scripts in the proper order, diverting valuable mental resources from high-level analysis to tedious bookkeeping. Instead workflow managers are the proper "glue" for binding together the component tasks of a complex pipeline. There are many options available each with its own strengths and weaknesses, but Snakemake and Nextflow are popular in the scientific computing community. However, all focus on automating the execution of pipelines, typically via workflow languages that describe the relationships between the inputs and outputs of various tasks rather than the details of their execution. This high-level approach has the added benefit of discouraging the use of hard coded paths, which greatly enhances the robustness and portability of a pipeline. Many workflow managers also include other quality-of-life features that that support their integration with environment managers and cloud computing platforms as well as the ability to only execute tasks whose inputs or code have changed to minimize the duplication of work.
 
 ### Projects are isolated from the file system
 When writing code for data analysis, it can be tempting for many beginners to use absolute rather than relative file paths. After all, the absolute path from the root of the file system **is** the address of a file, which ensures any code using an absolute path will always unambiguously refer to a specific file, no matter where it is run. However, this approach immediately breaks down when more than one machine is involved. Often these other machines are your teammates' computers. Just as you'll likely store the project root somewhere under your home directory on your local machine, so will your teammates, and unless all of you have the same name and file system structure, the code will quickly grind to a halt. Even when working individually or on a common file system in the cloud, it is sometimes necessary to run certain steps on more powerful computing infrastructure, which creates the same problems.

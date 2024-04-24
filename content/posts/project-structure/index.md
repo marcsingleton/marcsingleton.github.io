@@ -1,7 +1,7 @@
 +++
 author = "Marc Singleton"
-title = "Project Structure in Data Science (draft)"
-date = "2024-04-01"
+title = "Project Structure in Data Science"
+date = "2024-04-24"
 summary = "An overview of my approach to organizing data science projects"
 tags = ["best-practices"]
 showTableOfContents = true

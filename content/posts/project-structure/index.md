@@ -60,13 +60,13 @@ Data analysis is a series of operations where the outputs of one operation becom
 
 To make these concepts more concrete, let's quickly examine a toy example. This "pipeline," whose components are reflected in the previous project structure, consists of some number of input data sets and three tasks that create a set of outputs. More specifically, these tasks are Python scripts that clean the data, fit models, and plot the results. However, it's more intuitive to visualize this pipeline as the following flow chart:
 
-INSERT SIMPLE WORKFLOW
+{{< figure src="simple_workflow.svg" >}}
 
 From this perspective, it's clear the pipeline is a directed acylic graph. For example, `fit_models.py` depends on `clean_data.py`, but not the other way around. Additionally, it's acyclic since there are no "loops." This latter property is essential since, for example, if cleaning the data depended on a model fit to the cleaned data, reproducing the analysis from scratch would be impossible.
 
 Because this example is extremely simple, it would be straightforward to hard code the paths between the various inputs and outputs of the scripts and manually run them in sequence, but this quickly becomes unmanageable for larger and more complex pipelines. For example, it's easy to imagine that this pipeline could grow to encompass multiple cleaning, fitting, or plotting scripts with non-linear dependencies, like the following:
 
-INSERT COMPLEX WORKFLOW
+{{< figure src="complex_workflow.svg" >}}
 
 While it's still possible to run this pipeline manually, it's significantly more difficult to remember and execute the various scripts in the proper order, diverting valuable mental resources from high-level analysis to tedious bookkeeping. Instead workflow managers are the proper "glue" for binding together the component tasks of a complex pipeline. There are many options available each with its own strengths and weaknesses, but Snakemake and Nextflow are popular in the scientific computing community. However, all focus on automating the execution of pipelines, typically via workflow languages that describe the relationships between the inputs and outputs of various tasks rather than the details of their execution. This high-level approach has the added benefit of discouraging the use of hard coded paths, which greatly enhances the robustness and portability of a pipeline. Many workflow managers also include other quality-of-life features that that support their integration with environment managers and cloud computing platforms as well as the ability to only execute tasks whose inputs or code have changed to minimize the duplication of work.
 

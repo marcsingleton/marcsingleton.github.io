@@ -199,6 +199,11 @@ main#content div.d3-plot > svg {
     margin: auto;
 }
 
+main#content figure > img {
+    display: block;
+    margin: auto;
+}
+
 /* TABLE OF CONTENTS PROPERTIES */
 div#TableOfContents {
     top: 25px;

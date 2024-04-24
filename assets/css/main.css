@@ -194,7 +194,7 @@ main#content cite > sup {
     scroll-margin-top: var(--scroll-margin-top);
 }
 
-main#content div.d3_plot > svg {
+main#content div.d3-plot > svg {
     display: block;
     margin: auto;
 }

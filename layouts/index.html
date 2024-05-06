@@ -15,10 +15,12 @@
 <section id="content-home">  
     {{ .Content }}
 </section>
-<h3>{{ "Recent Posts" }}</h3>
-<ul id="posts">
-    {{ range first 3 (where site.RegularPages "Type" "in" site.Params.mainSections) }}
-        {{ .Render "li-date" }}
-    {{ end }}
+<section id="recent-posts-home">
+    <h3>{{ "Recent Posts" }}</h3>
+    <ul id="posts">
+        {{ range first 3 (where site.RegularPages "Type" "in" site.Params.mainSections) }}
+            {{ .Render "li-date" }}
+        {{ end }}
+</section>
 </ul>
 {{ end }}

@@ -40,13 +40,13 @@ body {
     grid-template-columns: auto var(--content-width) auto;
   }
 
-header#header {
+header#site {
     grid-row: 1;
     grid-column: 2 / 3;
     padding: 40px var(--margin-padding);
 }
 
-footer#footer {
+footer#site {
     grid-row: 3;
     grid-column: 2;
     padding: 10px var(--margin-padding);
@@ -71,11 +71,11 @@ aside.table-of-contents {
 }
 
 /* HEADER PROPERTIES */
-header#header {
+header#site {
     line-height: 2rem;
 }
 
-header#header h2 {
+header#site h2 {
     margin: 0;
     padding: 0;
     display: inline;
@@ -85,23 +85,23 @@ header#header h2 {
     text-transform: none;
 }
 
-header#header a {
+header#site a {
     color: var(--heading-dark);
     text-decoration: none;
     transition: 0.5s;
 }
 
-header#header a:hover {
+header#site a:hover {
     color: var(--link-hover);
     text-decoration: none;
     transition: 0.25s;
 }
 
-header#header nav {
+header#site nav {
     float: right;
 }
 
-header#header nav ul {
+header#site nav ul {
     margin: 0;
     padding: 0;
     list-style-type: none;
@@ -111,19 +111,18 @@ header#header nav ul {
     text-transform: none;
 }
 
-header#header nav ul li {
+header#site nav ul li {
     margin: 0 7.5px;
     display: inline;
 }
 
 /* FOOTER PROPERTIES */
-footer#footer {
+footer#site {
     font-size: 12.5px;
     font-size: 1.25rem;
     font-weight: 400;
     color: var(--text-light);
     }
-
 
 /* GENERAL CONTENT PROPERTIES */
 main#content a {
@@ -153,13 +152,13 @@ main#content p {
     color: var(--text-dark);
 }
 
-main#content header#post-header h1 {
+main#content header#post-site h1 {
     display: block;
     font-size: 25px;
     font-size: 2.5rem;
 }
 
-main#content header#post-header > div {
+main#content header#post-site > div {
     display: block;
     margin: 5px 0;
     font-size: 0.9em;
@@ -228,15 +227,15 @@ aside.table-of-contents ul > li:before {
   }
 
 /* HOME PAGE PROPERTIES */
-main#content header#post-header-home {
+main#content header#post-site-home {
     text-align: center;
 }
 
-main#content header#post-header-home img {
+main#content header#post-site-home img {
     border-radius: 50%;
 }
 
-main#content header#post-header-home h2 {
+main#content header#post-site-home h2 {
     margin: 5px 0;
     font-size: 20px;
     font-size: 2rem;
@@ -244,11 +243,11 @@ main#content header#post-header-home h2 {
     color: var(--text-medium);
 }
 
-main#content header#post-header-home div#links-home {
+main#content header#post-site-home div#links-home {
     display: inline-flex;
 }
 
-main#content header#post-header-home div#links-home svg {
+main#content header#post-site-home div#links-home svg {
     width: 25px;
     height: 25px;
     margin: 10px;
@@ -256,7 +255,7 @@ main#content header#post-header-home div#links-home svg {
     transition: 0.25s;
 }
 
-main#content header#post-header-home div#links-home svg:hover {
+main#content header#post-site-home div#links-home svg:hover {
     transform: scale(1.5);
     fill: var(--link-hover);
     transition: 0.25s;
@@ -364,11 +363,11 @@ main#content p > code {
 
 /* SMALL SCREEN */
 @media only screen and (max-width: 768px) {
-    header#header {
+    header#site {
         padding: 15px var(--margin-padding);
     }
 
-    header#header nav ul li {
+    header#site nav ul li {
         display: block;
     }
 }

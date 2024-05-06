@@ -1,8 +1,10 @@
 +++
 author = "Marc Singleton"
-title = "A Crash Course in AWS"
+title = "A Crash Course in AWS (draft)"
+date = "2024-05-01"
+summary = "An overview of concepts in cloud computing and their relation to AWS"
 tags = ["aws", "hpc", "cloud-computing", "crash-course", "explanation"]
-draft = true
+showTableOfContents = true
 +++
 
 ## Introduction: Data science in the cloud
@@ -29,21 +31,48 @@ draft = true
     - Along the way also link to some user and how-to guides that show in detail how these resources are configured
 
 ## The three resource cards
-- Computing resources can broadly be divided into storage and compute.
-  - Storage is ...
-  - Compute is ...
-  - Network is ...
-
-### Storage
-- See notes
+- Computing resources can broadly be divided into compute, storage, and network
+- From a data science perspective, we can frame these resources in terms of how they interact with data
+  - Compute: Manipulating data
+  - Storage: Storing data
+  - Network: Transferring data
+- Amazon offers different services for different needs in each of these categories
+- For the most part, they can be mixed and matched, which gives a high (if at first overwhelming) amount of flexibility
 
 ### Compute
-- EC2 is basic computation unit
-- Think of it has checking out a laptop with a clean install of your chosen computing environment (MacOS, Linux)
-  - Called images
-- Can be clean install or come pre-packaged with your favorite software
-  - Cost differences?
-- Other services built over EC2
+- Basic computation unit is EC2 (Elastic Cloud Compute)
+	- Allows provisioning of compute resources called instances on demand
+	- Each instance is a node with specified hardware and computing environment
+  	- The environment includes the operating system and any software which is built from a template called an image
+  	- Think of it as checking out a laptop with a clean install of your system
+  	- Amazon has a library of images for launching instances, but there are also options for buying them from a marketplace or creating your own
+    	- Possible solution for avoiding installing standard packages every time an instance is launched
+    	- Alternative approach is using containerization software like Docker or Singularity, which is less prone to vendor lock-in
+- Many other services are built over EC2 that abstract or automate the details of managing nodes
+	- Lambda can run code as functions on demand and is event-driven, e.g. performing computations on files on their appearance in an S3 bucket
+	- ECS (Elastic Container Service) automates creation and configuration of containers
+		- Appears intended for deployment of ML models at scale
+		- Every user of Google Photos needs a unique model for recognizing people in photos
+		- Need to spin up nodes for training and running these models on demand or at specific intervals
+		- Not feasible to manually request instances and manage their computing environments for millions of users
+		- Instead use ECS with to automatically request computing resources and configure computing environments
+
+### Storage
+- Many storage options depending on availability, persistence, and performance
+- S3 (Simple Storage Solution)
+	- Stores objects in buckets which are flat containers for data
+	- Objects have maximum size of 5 TB, and buckets have no total size or object limits
+	- Objects are available through web interfaces, e.g. https
+	- Appears intended for archiving large amounts of unstructured data for databases or long-term storage
+		- Has interfaces for querying data in place like Athena
+- EBS (Elastic Block Storage)
+	- Hierarchical file system storage for a single EC2 instance, offering the lowest-latency access to data
+- EFS (Elastic File System)
+ 	- Hierarchical file system that can connect to thousands of EC2 instances, acting as a shared file system
+	- Files are automatically moved into different priced-tiered storage classes based on access patterns
+	- EFS is closest to a shared drive where teams can directly access and manipulate common resources
+  	- Likely best option for collaborative analysis of large data sets to prevent transfer time and charges
+  	- Does require some additional configuration to mount these file systems as network drives
 
 ### Network
  - Everything in AWS is done over the internet (that's the cloud in computing computing), so it's impossible to use without understanding some basic networking terminology

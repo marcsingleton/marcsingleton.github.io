@@ -58,7 +58,7 @@ main#content {
     padding: 0px var(--margin-padding);
 }
 
-#grid-main {
+#grid-post {
     display: flex;
 }
 
@@ -345,7 +345,7 @@ main#content p > code {
         grid-template-columns: 0 auto 0;
       }
 
-    #grid-main {
+    #grid-post {
         flex-direction: column;
     }
 

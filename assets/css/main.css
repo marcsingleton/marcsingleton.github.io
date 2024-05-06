@@ -66,7 +66,7 @@ article {
     width: 75%;
 }
 
-div#TableOfContents {
+aside.TableOfContents {
     width: 25%;
 }
 
@@ -205,7 +205,7 @@ main#content figure > img {
 }
 
 /* TABLE OF CONTENTS PROPERTIES */
-div#TableOfContents {
+aside.TableOfContents {
     top: 25px;
     position: sticky;
     align-self: start;
@@ -216,14 +216,14 @@ div#TableOfContents {
     border-left: 1px solid var(--text-light);
 }
 
-div#TableOfContents ul {
+aside.TableOfContents ul {
     margin: 0;
     padding: 0 10px;
     list-style-type: none;
     font-size: 12.5px;
 }
 
-div#TableOfContents ul > li:before {
+aside.TableOfContents ul > li:before {
     content: "- ";
   }
 
@@ -357,7 +357,7 @@ main#content p > code {
         width: calc(100vw - 2 * var(--margin-padding) - 2 * var(--scrollbar-padding));
     }
 
-    div#TableOfContents {
+    aside.TableOfContents {
         display: none;
     }
 }

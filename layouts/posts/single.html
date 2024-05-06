@@ -16,10 +16,10 @@
         {{ .Content }}
     </article>
     {{ if .Param "showTableOfContents" }}
-    <div id="TableOfContents">
+    <aside class="TableOfContents">
     On this page
     {{ .TableOfContents }}
-    </div>
+    </aside>
     {{ end }}
     </div>
 {{ end }}

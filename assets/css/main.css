@@ -244,10 +244,6 @@ main#content header#post-site-home h2 {
     color: var(--text-medium);
 }
 
-main#content header#post-site-home div#links-home {
-    display: inline flex;
-}
-
 main#content header#post-site-home div#links-home svg {
     width: 25px;
     height: 25px;

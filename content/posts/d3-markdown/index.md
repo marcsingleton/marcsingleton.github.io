@@ -14,7 +14,7 @@ I've created a lot of data visualizations in my life, but up to this point, most
 
 Today's data is often highly multivariate and organized in hierarchies or networks, so trying to understand the complex relationships between sets of variables using fixed plots of X vs Y is at best inefficient and at worst missing the forest for the trees. I've regularly encountered the pitfalls of trying to operate in this static paradigm, and I'm glad no one can tally the number of hours I've spent clumsily toggling between various plots trying to get a handle on a data set. A few years ago, though, I came across [Distill](https://distill.pub/about/) whose goal was to create an alternate model of scientific publishing that fully embraced the interactivity of modern web pages. Unfortunately, it's now on indefinite hiatus, but its articles still set a high-water mark for scientific communication and have inspired me to incorporate interactive visualizations in my own work.
 
-## Libraries and platform for interactive visualizations
+## Libraries and platforms for interactive visualizations
 There's no shortage of libraries and platforms for creating interactive visualizations. I'm no expert in this area, but here's a small selection of the available options:
 
 - D3

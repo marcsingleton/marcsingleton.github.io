@@ -8,16 +8,8 @@ showTableOfContents = true
 +++
 
 ## Introduction: Data science in the cloud
-- In an age of big data, it's increasingly convenient and even necessary to do data science in the cloud
-  - Using on-demand computing resources that are effectively rented from a provider rather than building and maintaining one's own computing infrastructure
-- Two main reasons
-  - The first is maintenance
-    - Encompasses the resources to build and upkeep computing infrastructure
-    - Also includes more abstract consideration like availability and security
-  - The second is flexibility, the ability to easily scale resources (and costs) up and down to match the current needs
-    - Storage: Pay for exactly what is used
-    - Compute: Access high performance hardware only when needed
-  - Like any utility, computing becomes cheaper at scale, but that scale beyond the scope of all but the largest and most resourced companies
+In an age of big data, it's increasingly convenient and even necessary to do data science in the cloud, *i.e.*, using on-demand computing resources that are effectively rented from a provider rather than building and maintaining private computing infrastructure. There are two main reasons that the cloud has exploded in popularity over the past fifteen years. The first of these is maintenance. This includes the raw capital needed to both build and upkeep computing infrastructure, but also more abstract considerations like availability and security. Like any utility, computing becomes cheaper at scale, but that scale is beyond the scope of all but the largest and most resourced companies. As a result, for startups and smaller companies, it's simply more efficient to rent their computing resources from a provider rather than invest in their own. The second reason is flexibility, or the ability to easily scale resources up and down to match the current needs. From a web development perspective, this is often framed as provisioning resources for a server to the match the current demand for a website or service. However, elasticity also applies to a data science context where storage and compute needs may suddenly spike due to the acquisition of a TB-sized data set or the one-off training of a large language model.
+
 - Many services from the expected players (Amazon, Microsoft, Google) including some more boutique providers that repackage those services in other forms for specific applications
 - Amazon's cloud computing service, AWS, is one of the oldest and largest, and accordingly has a vast array of products that cover a variety of use cases
   - Some example use cases

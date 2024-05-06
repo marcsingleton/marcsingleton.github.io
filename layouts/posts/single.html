@@ -1,6 +1,6 @@
 {{ define "main" }}
 <div id="grid-post">
-    <article>
+    <article id="post">
         <header id="post-site">
             <h1>{{ .Title }}</h1>
             <div>
@@ -16,7 +16,7 @@
         {{ .Content }}
     </article>
     {{ if .Param "showTableOfContents" }}
-    <aside class="table-of-contents">
+    <aside id="table-of-contents">
     On this page
     {{ .TableOfContents }}
     </aside>

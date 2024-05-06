@@ -66,7 +66,7 @@ article {
     width: 75%;
 }
 
-aside.TableOfContents {
+aside.table-of-contents {
     width: 25%;
 }
 
@@ -205,7 +205,7 @@ main#content figure > img {
 }
 
 /* TABLE OF CONTENTS PROPERTIES */
-aside.TableOfContents {
+aside.table-of-contents {
     top: 25px;
     position: sticky;
     align-self: start;
@@ -216,14 +216,14 @@ aside.TableOfContents {
     border-left: 1px solid var(--text-light);
 }
 
-aside.TableOfContents ul {
+aside.table-of-contents ul {
     margin: 0;
     padding: 0 10px;
     list-style-type: none;
     font-size: 12.5px;
 }
 
-aside.TableOfContents ul > li:before {
+aside.table-of-contents ul > li:before {
     content: "- ";
   }
 
@@ -357,7 +357,7 @@ main#content p > code {
         width: calc(100vw - 2 * var(--margin-padding) - 2 * var(--scrollbar-padding));
     }
 
-    aside.TableOfContents {
+    aside.table-of-contents {
         display: none;
     }
 }

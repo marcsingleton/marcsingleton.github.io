@@ -16,15 +16,15 @@ Parameters
 script_path: Path to JS file.
 data_path: Path to data used for draw function. If given, draw function in JS
     file is called with data.
-div_id: ID of div element used to hold plot.
+element_id: ID of div element used to hold plot.
 */}}
 
 {{ $script_path := .Get "script_path" }}
 {{ $data_path := .Get "data_path" }}
-{{ $div_id := .Get "div_id" }}
+{{ $element_id := .Get "element_id" }}
 
 {{/* Create a div where the plot will be inserted */}}
-<div class="d3-plot" id="{{ $div_id }}"></div>
+<figure class="d3-plot" id="{{ $element_id }}"></figure>
 
 {{/* Call draw function if data_path is given */}}
 {{ if $data_path }}
@@ -32,11 +32,11 @@ div_id: ID of div element used to hold plot.
         import { draw } from "{{ (.Page.Resources.Get $script_path).RelPermalink }}"
         fetch("{{ (.Page.Resources.Get $data_path).RelPermalink }}")
             .then(response => response.json())
-            .then(data => draw(data, "#{{ $div_id }}"))
+            .then(data => draw(data, "#{{ $element_id }}"))
     </script>
 {{ else }}
     <script type="module">
         import { draw } from "{{ (.Page.Resources.Get $script_path).RelPermalink }}"
-        draw("#{{ $div_id }}")
+        draw("#{{ $element_id }}")
     </script>
 {{ end }}

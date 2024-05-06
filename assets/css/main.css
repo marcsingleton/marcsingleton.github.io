@@ -193,14 +193,15 @@ main#content cite > sup {
     scroll-margin-top: var(--scroll-margin-top);
 }
 
-main#content div.d3-plot > svg {
+/*
+max-width prevents SVGs from expanding flexbox
+user-select prevents selection of text in SVG 
+*/
+main#content figure > * {
     display: block;
     margin: auto;
-}
-
-main#content figure > img {
-    display: block;
-    margin: auto;
+    max-width: 100%;
+    user-select: none;
 }
 
 /* TABLE OF CONTENTS PROPERTIES */
@@ -244,7 +245,7 @@ main#content header#post-site-home h2 {
 }
 
 main#content header#post-site-home div#links-home {
-    display: inline-flex;
+    display: inline flex;
 }
 
 main#content header#post-site-home div#links-home svg {

@@ -57,7 +57,7 @@ The following HTML inserts the plot in the page, which in practice is done with 
 
 Setting the `type` attribute to `"module"` is necessary for this code to work correctly. JavaScript code marked as modules are executed [a little differently](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#other_differences_between_modules_and_standard_scripts) than standard scripts. The key details, though, are modules allow import statements and they also have their own scope, which permits using the same name `draw` for different drawing functions without collisions. This latter property is a bit of a Hugo- and me-specific requirement, as it's needed for displaying multiple plots in the same page with my custom shortcode. Anyway, the code will produce the following plot.
 
-{{< d3_plot script_path="bars.js" div_id="bars_plot" >}}
+{{< d3_plot script_path="bars.js" element_id="bars_plot" >}}
 
 ### A more complex example
 That's a nice starting point, but it's also something I could have put together in a few lines of Python using Matplotlib. This next example shows much more of D3's ability to create interactive visualizations, though it's really just the tip of the iceberg. It's taken from the [D3 gallery](https://observablehq.com/@d3/force-directed-graph/2) as well and shows the network of character co-occurrences in *Les Misérables*. Adapting the code for use in a JavaScript runtime follows similar steps as before. The largest difference is the data that encodes the network structure is relatively large, spanning over 1000 lines, so I stored it in a separate JSON file. As a result, the data is loaded at runtime and passed as the second argument to the `draw` function, which requires a few extra steps shown below.
@@ -74,7 +74,7 @@ That's a nice starting point, but it's also something I could have put together 
 
 The Fetch API is used for accessing resources over the network. Even though the data is stored on this web site, it's not directly saved in the page itself, so the browser needs to "fetch" it to make it available for the JavaScript code. Fetch is an asynchronous method, which is useful for ensuring code execution doesn't grind to a halt while a resource is loading from a server. This example, however, requires the data is fully loaded before passing it to the `draw` function, which is accomplished by chaining the return value to `then` method calls. Again, this is done in practice with a Hugo shortcode which correctly generates the correct paths to the script and data.
 
-{{< d3_plot script_path="network.js" data_path="network.json" div_id="network_plot" >}}
+{{< d3_plot script_path="network.js" data_path="network.json" element_id="network_plot" >}}
 
 Finally, an interactive visualization! You can grab the nodes and move them around by clicking and dragging. 
 

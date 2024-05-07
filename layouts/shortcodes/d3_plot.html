@@ -29,14 +29,14 @@ element_id: ID of div element used to hold plot.
 {{/* Call draw function if data_path is given */}}
 {{ if $data_path }}
     <script type="module">
-        import { draw } from "{{ (.Page.Resources.Get $script_path).RelPermalink }}"
-        fetch("{{ (.Page.Resources.Get $data_path).RelPermalink }}")
+        import { draw } from "{{ $script_path }}"
+        fetch("{{ $data_path }}")
             .then(response => response.json())
             .then(data => draw(data, "#{{ $element_id }}"))
     </script>
 {{ else }}
     <script type="module">
-        import { draw } from "{{ (.Page.Resources.Get $script_path).RelPermalink }}"
+        import { draw } from "{{ $script_path }}"
         draw("#{{ $element_id }}")
     </script>
 {{ end }}

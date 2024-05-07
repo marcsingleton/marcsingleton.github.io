@@ -1,6 +1,6 @@
 /* ## GLOBAL PROPERTIES */
 :root {
-    /* COLORS */
+    /* ### COLORS */
     --heading-dark: #0a0a0a;
     --heading-light: #a3a3a3;
     --text-dark: #525252;
@@ -8,13 +8,12 @@
     --text-light: #d4d4d4;
     --link: #047857;
     --link-hover: #10b981;
-    /* OTHER PROPERTIES */
+    /* ### OTHER PROPERTIES */
     --scroll-margin-top: 0px; /* Adjust link scroll for header */
     --scrollbar-padding: 15px;
     --margin-padding: 15px;
     --content-width: 1000px
   }
-
 
 html {
     font-size: 62.5%;
@@ -34,6 +33,7 @@ body {
 }
 
 /* ## GRID PROPERTIES */
+/* ### BODY GRID */
 #grid-body {
     display: grid;
     grid-template-rows: auto 1fr auto;
@@ -58,6 +58,7 @@ main#content {
     padding: 0px var(--margin-padding);
 }
 
+/* ### POST GRID */
 #grid-post {
     display: flex;
 }
@@ -75,16 +76,6 @@ header#site {
     line-height: 2rem;
 }
 
-header#site h2 {
-    margin: 0;
-    padding: 0;
-    display: inline;
-    font-size: 18px;
-    font-size: 1.8rem;
-    font-weight: 600;
-    text-transform: none;
-}
-
 header#site a {
     color: var(--heading-dark);
     text-decoration: none;
@@ -95,6 +86,16 @@ header#site a:hover {
     color: var(--link-hover);
     text-decoration: none;
     transition: 0.25s;
+}
+
+header#site h2 {
+    margin: 0;
+    padding: 0;
+    display: inline;
+    font-size: 18px;
+    font-size: 1.8rem;
+    font-weight: 600;
+    text-transform: none;
 }
 
 header#site nav {
@@ -134,37 +135,6 @@ main#content a:hover {
     text-decoration: underline;
 }
 
-main#content h1,
-main#content h2,
-main#content h3,
-main#content h4,
-main#content h5,
-main#content h6 {
-    margin-bottom: 0;
-    line-height: 1;
-    scroll-margin-top: var(--scroll-margin-top);
-    color: var(--heading-dark)
-}
-
-main#content p {
-    margin: 10px 0;
-    line-height: 1.75;
-    color: var(--text-dark);
-}
-
-main#content header#post-site h1 {
-    display: block;
-    font-size: 25px;
-    font-size: 2.5rem;
-}
-
-main#content header#post-site > div {
-    display: block;
-    margin: 5px 0;
-    font-size: 0.9em;
-    color: var(--text-medium);
-}
-
 main#content abbr {
     cursor: help;
     text-underline-offset: 2.5px;
@@ -179,14 +149,32 @@ main#content blockquote {
     font-style: italic;
 }
 
+main#content .footnotes {
+    font-size: 0.9em;
+}
+
+main#content h1,
+main#content h2,
+main#content h3,
+main#content h4,
+main#content h5,
+main#content h6 {
+    margin-bottom: 0;
+    line-height: 1;
+    scroll-margin-top: var(--scroll-margin-top);
+    color: var(--heading-dark)
+}
+
 main#content hr {
     height: 1px;
     border: 0;
     background: var(--text-light);
 }
 
-main#content .footnotes {
-    font-size: 0.9em;
+main#content p {
+    margin: 10px 0;
+    line-height: 1.75;
+    color: var(--text-dark);
 }
 
 main#content cite > sup {
@@ -202,6 +190,19 @@ main#content figure > * {
     margin: auto;
     max-width: 100%;
     user-select: none;
+}
+
+main#content header#post-site h1 {
+    display: block;
+    font-size: 25px;
+    font-size: 2.5rem;
+}
+
+main#content header#post-site > div {
+    display: block;
+    margin: 5px 0;
+    font-size: 0.9em;
+    color: var(--text-medium);
 }
 
 /* ## TABLE OF CONTENTS PROPERTIES */
@@ -228,12 +229,13 @@ aside#table-of-contents ul > li:before {
   }
 
 /* ## HOME PAGE PROPERTIES */
-main#content header#post-site-home {
+main#content section#content-home {
+    margin: 35px 10vw;
     text-align: center;
 }
 
-main#content header#post-site-home img {
-    border-radius: 50%;
+main#content header#post-site-home {
+    text-align: center;
 }
 
 main#content header#post-site-home h2 {
@@ -242,6 +244,10 @@ main#content header#post-site-home h2 {
     font-size: 2rem;
     font-weight: 300;
     color: var(--text-medium);
+}
+
+main#content header#post-site-home img {
+    border-radius: 50%;
 }
 
 main#content header#post-site-home div#links-home svg {
@@ -256,11 +262,6 @@ main#content header#post-site-home div#links-home svg:hover {
     transform: scale(1.5);
     fill: var(--link-hover);
     transition: 0.25s;
-}
-
-main#content section#content-home {
-    margin: 35px 10vw;
-    text-align: center;
 }
 
 /* ## POST LIST STYLES */

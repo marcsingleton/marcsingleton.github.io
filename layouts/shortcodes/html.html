@@ -1,0 +1,2 @@
+{{ $html_path := .Get "html_path" }}
+{{ ( .Page.Resources.Get $html_path).Content | safeHTML }}

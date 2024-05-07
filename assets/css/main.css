@@ -1,4 +1,4 @@
-/* GLOBAL PROPERTIES */
+/* ## GLOBAL PROPERTIES */
 :root {
     /* COLORS */
     --heading-dark: #0a0a0a;
@@ -33,7 +33,7 @@ body {
     color: var(--text-dark);
 }
 
-/* GRID PROPERTIES */
+/* ## GRID PROPERTIES */
 #grid-body {
     display: grid;
     grid-template-rows: auto 1fr auto;
@@ -70,7 +70,7 @@ aside#table-of-contents {
     width: 25%;
 }
 
-/* HEADER PROPERTIES */
+/* ## HEADER PROPERTIES */
 header#site {
     line-height: 2rem;
 }
@@ -116,7 +116,7 @@ header#site nav ul li {
     display: inline;
 }
 
-/* FOOTER PROPERTIES */
+/* ## FOOTER PROPERTIES */
 footer#site {
     font-size: 12.5px;
     font-size: 1.25rem;
@@ -124,7 +124,7 @@ footer#site {
     color: var(--text-light);
     }
 
-/* GENERAL CONTENT PROPERTIES */
+/* ## GENERAL CONTENT PROPERTIES */
 main#content a {
     color: var(--link);
     text-decoration: none;
@@ -204,7 +204,7 @@ main#content figure > * {
     user-select: none;
 }
 
-/* TABLE OF CONTENTS PROPERTIES */
+/* ## TABLE OF CONTENTS PROPERTIES */
 aside#table-of-contents {
     top: 25px;
     position: sticky;
@@ -227,7 +227,7 @@ aside#table-of-contents ul > li:before {
     content: "- ";
   }
 
-/* HOME PAGE PROPERTIES */
+/* ## HOME PAGE PROPERTIES */
 main#content header#post-site-home {
     text-align: center;
 }
@@ -263,7 +263,7 @@ main#content section#content-home {
     text-align: center;
 }
 
-/* POST LIST STYLES */
+/* ## POST LIST STYLES */
 main#content ul#posts {
     margin-top: 10px;
     padding: 0;
@@ -296,7 +296,7 @@ main#content ul#posts li a:hover small {
     color: inherit;
 }
 
-/* CODING PROPERTIES */
+/* ## CODING PROPERTIES */
 /* Bounding box of highlight (space around coding rectangle) */
 main#content .highlight {
     margin-top: 5px;
@@ -334,7 +334,7 @@ main#content p > code {
     padding: 2.5px;
 }
 
-/* REMOVING TABLE OF CONTENTS */
+/* ## REMOVING TABLE OF CONTENTS */
 /* (see content-width variable for size + buffer) */
 @media only screen and (max-width: 992px) {
     #grid-body {
@@ -358,7 +358,7 @@ main#content p > code {
     }
 }
 
-/* SMALL SCREEN */
+/* ## SMALL SCREEN */
 @media only screen and (max-width: 768px) {
     header#site {
         padding: 15px var(--margin-padding);

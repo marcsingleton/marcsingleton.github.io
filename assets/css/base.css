@@ -339,19 +339,11 @@ main#content p > code {
 /* (see content-width variable for size + buffer) */
 @media only screen and (max-width: 992px) {
     #grid-body {
-        grid-template-columns: 0 auto 0;
+        grid-template-columns: 0 100% 0;
       }
-
-    #grid-post {
-        flex-direction: column;
-    }
 
     article#post {
         width: 100%;
-    }
-
-    main#content .highlight {
-        width: calc(100vw - 2 * var(--margin-padding) - 2 * var(--scrollbar-padding));
     }
 
     aside#table-of-contents {

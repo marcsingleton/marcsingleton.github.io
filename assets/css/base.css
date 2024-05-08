@@ -149,6 +149,10 @@ main#content blockquote {
     font-style: italic;
 }
 
+main#content figure {
+    margin: 0;
+}
+
 main#content .footnotes {
     font-size: 0.9em;
 }

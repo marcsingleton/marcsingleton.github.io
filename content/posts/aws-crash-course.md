@@ -15,31 +15,18 @@ There are a variety of cloud services from the expected players (Amazon, Google,
 As a result, I tend to approach topics in computing from a bottom-up perspective, and in this post I'll explain what I see as the building blocks of AWS that many of its other services are built on. This is an [explanation rather than a tutorial or how-to guide](https://docs.divio.com/documentation-system/), so I won't walk through the specific steps for setting up an account on AWS and getting an instance up and running with your favorite data science environment. Instead I'll focus on how big picture concepts in cloud computing relate to the specific services offered by AWS. Along the way I'll also link to some user and how-to guides that show in detail how these resources are configured. As a final note, I should mention that I'm not affiliated with Amazon in any way and that my choice of AWS as the topic of this post is mostly a reflection of its popularity rather than a endorsement over its competitors.
 
 ## The three resource cards
-- Computing resources can broadly be divided into compute, storage, and network
-- From a data science perspective, we can frame these resources in terms of how they interact with data
-  - Compute: Manipulating data
-  - Storage: Storing data
-  - Network: Transferring data
-- Amazon offers different services for different needs in each of these categories
-- For the most part, they can be mixed and matched, which gives a high (if at first overwhelming) amount of flexibility
+Computing resources in cloud can broadly be divided into three categories: compute, storage, and network. However, to make this model more concrete for our data science perspective, we can frame these resources in terms of how they interact with data:
+
+- Compute: manipulating data
+- Storage: storing data
+- Network: transferring data
+
+Amazon offers different services for different needs in each of these categories, and for the most part, they can be mixed and matched, which gives a high (if at first overwhelming) amount of flexibility. In the next sections, I'll cover the highlights and relationships between each in more detail with an emphasis on applications in data science.
 
 ### Compute
-- Basic computation unit is EC2 (Elastic Cloud Compute)
-	- Allows provisioning of compute resources called instances on demand
-	- Each instance is a node with specified hardware and computing environment
-  	- The environment includes the operating system and any software which is built from a template called an image
-  	- Think of it as checking out a laptop with a clean install of your system
-  	- Amazon has a library of images for launching instances, but there are also options for buying them from a marketplace or creating your own
-    	- Possible solution for avoiding installing standard packages every time an instance is launched
-    	- Alternative approach is using containerization software like Docker or Singularity, which is less prone to vendor lock-in
-- Many other services are built over EC2 that abstract or automate the details of managing nodes
-	- Lambda can run code as functions on demand and is event-driven, e.g. performing computations on files on their appearance in an S3 bucket
-	- ECS (Elastic Container Service) automates creation and configuration of containers
-		- Appears intended for deployment of ML models at scale
-		- Every user of Google Photos needs a unique model for recognizing people in photos
-		- Need to spin up nodes for training and running these models on demand or at specific intervals
-		- Not feasible to manually request instances and manage their computing environments for millions of users
-		- Instead use ECS with to automatically request computing resources and configure computing environments
+The basic compute unit in AWS is an EC2 instance. EC2 stands for Elastic Cloud Compute and refers to the ability to provision compute resources called instances on demand. Each instance has a specified hardware and computing environment where the environment includes the operating system and any pre-installed software. You can think of provisioning an EC2 instance as effectively renting a laptop with a clean install of the desired computing environment. In practice, these instances are often virtual machines running on a more powerful system, but for our purposes we can think of them as independent computational units. The computing environments are built from templates called images, and Amazon has a library of images for launching instances, though there are also options for buying them from a marketplace or creating your own. These images are one method to avoid the time-consuming and error-prone installation and configuration of standard packages every time an instance is launched. An alternative solution is using containerization software like Docker or Singularity, which is less prone to vendor lock-in.
+
+Many other services are built over EC2 that abstract or automate the details of managing nodes. For example, Lambda is a "serverless" compute service that can execute code on demand in response to events. For example, a Lambda function can automatically run on each file uploaded to a data storage bucket to perform some computation. Of course behind the scenes, a server is spinning up the compute instance and running the code, but these details are hidden from the users. A similar service is ECS (Elastic Container Service), which automates the creation and configuration of containers. Lambda currently has an execution time limit of 15 minutes, so ECS is intended for more intensive and long-running compute needs. One use case is the deployment of machine learning models where every user of a photo storage service needs a unique model for recognizing the specific faces in their library. Since it's not possible to manually request instances and manage their computing environments for millions of users, ECS offers an interface for managing containers at scale.
 
 ### Storage
 - Many storage options depending on availability, persistence, and performance

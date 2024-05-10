@@ -34,54 +34,60 @@ In contrast to its compute services, which are all built with a single fundament
 The remaining two services are much more analogous to the kinds of storage that are used with a personal computer. For example, EFS (Elastic File System) is a hierarchical file system that can store files in a tree of directories. Additionally, EFS file systems can also connect to thousands of EC2 instances, allowing it to act as a shared drive. As a result, EFS file systems are likely the best option for collaborative analyses of large data sets, since team members can directly access and manipulate common resources. The downside is that mounting EFS file systems on EC2 instances requires a little more configuration. The EC2 instance launcher fortunately has options that will automatically mount an EFS file system. In cases where more a programmatic approach is necessary, though, the following guides demonstrate how to mount an EFS file system through a command line interface [one time](docs.aws.amazon.com/efs/latest/ug/wt1-getting-started.html) and on [reboot](docs.aws.amazon.com/efs/latest/ug/nfs-automount-efs.html). Finally, EBS (Elastic Block Storage) are like flash drives which can be attached to EC2 instances. EBS volumes offer the lowest-latency access and persist between connections, unlike instance "stores" which are erased even when their instances are temporarily paused. As a result, EBS blocks are best for high-performance applications with persistent data. However, unlike EFS file systems, EBS blocks come in fixed sizes and have greater restrictions on the number of ECS instances they can simultaneously connect to, so they are a less flexible option for shared file storage.
 
 ### Network
-- Everything in AWS is done over the internet (that's the cloud in computing computing), so it's impossible to use without understanding some basic networking terminology
-- Networking basics
-  - IP addresses are labels assigned to devices connected to a computer network
-    - The basic idea is to uniquely identify every device, but in practice it's a little more complex
-    - IP addresses come in two formats: IPv4 and IPv6
-      - Currently internet in process of transitioning to IPv6, but IPv4 remains widely used
-  - IPv4
-    - 32-bit integer commonly represented as a sequence of four bytes in decimal-dot notation
-      - 127.0.0.1 is same as 01111111 00000000 00000000 00000001
-    - CIDR notation
-      - IP addresses allocated in blocks where high bits refer to a block of related addresses (network address) and the low bits designate a specific device (host address)
-        - Devices hosted on same subnetwork, which improves the efficiency of routing requests
-      - Often represented in CIDR notation, which is an extension of IPv4 decimal-dot notation
-        - Number of bits, n, that designate the network address portion counting from left to right indicated with /n
-          - 198.51.100.14/24 represents the IPv4 address 198.51.100.14 and its associated network prefix 198.51.100.0
-        - Can also be used to compactly represent range of IPv4 addresses
-          - a.b.0.0/16 represents range of address from a.b.0.0 to a.b.255.255
-    - Special IPv4 addresses
-      - Some IP addresses refer to special network locations
-      - 127.0.0.1 is the "localhost" or refers to the current machine
-        - Might seem strange to access own machine via networking request, but perfectly normal for debugging purposes or even accessing services which can be hosted locally and through a network, e.g. Jupyter notebooks
-        - IPv4 actually reserves entire block 127.0.0.0/8 of over 16 million address for loopback purposes, but often only the previous is supported
-        - In many browsers, localhost automatically resolves to this address internally
-      - 192.168.0.0/16 reserved for local communication, and often routers have an IP address in this range
-  - IPv6
-    - IPv4 only offers about 4.3 billion unique address, and many were reserved from the onset
-    - With the rapid growth of the internet, the last have blocks of IPv4 addresses were allocated throughout the 2010s
-      - Anticipated many years in advance, prompting creation of IPv6
-    - 128-bit integer represented as a sequence of eight groups of four hexadecimal digits separated by colons
-      - 2001:0db8:0000:0000:0000:ff00:0042:8329
-      - Has its own syntax for abbreviating this representation that I won't go over here
-  - Ports
-    - Final ingredient of networking puzzle and allow operating system of device to route network communications to the correct programs 
-    - Devices are receiving a stream of information from the network
-    - Operating system must be able to pass this data to the right programs, as programs don't directly control networking for security purposes
-    - Ports are numbers attached to different kinds of communication protocols
-      - For example, HTTP requests are made over port 80
-- AWS networking infrastructure
-  - Regions are physical locations where data centers are clustered
-  	- A group of logical data centers is called an availability zone (AZ)
-  - Regions consist of at least three isolated and physically separate AZs in a geographic area
-  - Summary
-  	- AZs are the base unit of AWS infrastructure
-  		- They may be composed of separate physical data centers, but they are geographically close and effectively operate as one
-  		- Like how the kilogram is the base unit of SI but can also be subdivided into grams
-  	- Regions are groups of AZs that offer redundancy and low-latency/high-bandwidth communication
+- Everything in AWS happens over interconnected computers, so effectively managing communications between the various services and resources requires understanding the basics of these networks as well as the organization of Amazon's physical computing infrastructure
+- Accordingly, this section accordingly has two formal parts
+  - In the first, I cover some networking fundamentals
+  - In the second, I dive into specifics of AWS's physical infrastructure and networking configuration
+#### Networking basics
+- A basic goal in networking is transferring data between devices, and much like letters are sent between physical addresses, network information is sent between network addresses.
+- There are a few types of these addresses depending on the scope of the network, but IP (Internet Protocol) addresses are used for communications over the global network of computers called the Internet.
+- IP addresses are labels assigned to devices connected to a computer network
+  - The basic idea is to give every device connected to the Internet a unique label in the form of an IP address, but in practice it's a little more complex
+  - For now we'll ignore those nuances and instead focus on the structure and organization of IP addresses
+    - They come in two flavors: IPv4 and IPv6
+    - Currently the internet is in process of transitioning to IPv6, but IPv4 remains widely used, so we'll start there
+- IPv4
+  - IPv4 addresses are 32-bit integers commonly represented as a sequence of four bytes in decimal-dot notation
+    - For example, 01111111 00000000 00000000 00000001 is the same as 127.0.0.1
+  - CIDR notation
+    - IP addresses are allocated in blocks to providers where high bits refer to a block of related addresses (network address) and the low bits designate a specific device (host address)
+      - Because devices on the same subnetwork are typically close in physical space, this hierarchical organization improves the efficiency of routing requests
+    - This division between network and host portions of the address is given in CIDR notation, which is an extension of IPv4 decimal-dot notation
+      - Number of bits, n, that designate the network address portion counting from left to right indicated with /n
+        - For example, 198.51.100.14/24 represents the IPv4 address 198.51.100.14 and its associated network prefix 198.51.100.0
+      - It can also compactly communicate a range of IPv4 addresses
+        - a.b.0.0/16 means all addresses from a.b.0.0 to a.b.255.255
+  - Reserved IPv4 addresses
+    - Some IP addresses are reserved for special network locations
+    - That first address I mentioned, 127.0.0.1, is the "localhost" or refers to the current machine
+      - While it might seem strange to access your own machine via networking request, it's extremely useful for debugging purposes or even accessing services which can be hosted both locally and through a network, e.g. Jupyter notebooks
+      - IPv4 actually reserves entire block 127.0.0.0/8 of over 16 million address for loopback purposes, but often only the previous one is supported
+      - Additionally, in many browsers, the name "localhost" automatically resolves to the designated loopback address internally
+    - Another example of a reserved block is 192.168.0.0/16, which intended for local communication, so routers often have an IP address in this range
+- IPv6
+  - The 32-bits in IPv4 only offer about 4.3 billion unique address, so with the rapid growth of the internet, the last have blocks of IPv4 addresses were allocated throughout the 2010s
+    - This was fortunately anticipated many years in advance, prompting the creation of a second addressing scheme called IPv6
+  - It's conceptually the same except addresses are 128-bit integers, conventionally represented as a sequence of eight groups of four hexadecimal digits separated by colons
+    - 2001:0db8:0000:0000:0000:ff00:0042:8329
+    - It has its own syntax for abbreviating this representation and a few other differences that I won't go over here for brecity
+- Ports
+  - Ports are the final ingredient of networking puzzle and allow devices to route network communications to the correct processes
+  - It may seem strange to require another layer of addressing after the data reaches its intended device, but it helps to consider it from the perspective of an operating system managing the network communications of various processes
+  - For security and efficiency, processes don't directly control networking but instead use the operating system as a middle man
+  - Port numbers, then, are essentially addresses that operating systems use to route streams of incoming information from the network to the correct endpoints
+  - I mention endpoints in plural because multiple processes can listen or "subscribe" to a single port
+  - For example, the email protocol IMAP is assigned port 143, so multiple email clients can listen on this port to have the operating system pass them data tagged with this value
+#### AWS infrastructure
+- Regions are physical locations where data centers are clustered
+	- A group of logical data centers is called an availability zone (AZ)
+- Regions consist of at least three isolated and physically separate AZs in a geographic area
+- Summary
+	- AZs are the base unit of AWS infrastructure
+		- They may be composed of separate physical data centers, but they are geographically close and effectively operate as one
+		- Like how the kilogram is the base unit of SI but can also be subdivided into grams
+	- Regions are groups of AZs that offer redundancy and low-latency/high-bandwidth communication
 - VPCs and security groups
-  - EC2 instances exist in a virtual private cloud (VPC) that allows complete control over its networking configuration
-  	- Can assign IP addresses for most resources in VPC
-  - VPC contain security groups which define rules that control the inbound and outbound traffic from a network
-    - Biggest gotcha is setting permissions and security groups
+- EC2 instances exist in a virtual private cloud (VPC) that allows complete control over its networking configuration
+	- Can assign IP addresses for most resources in VPC
+- VPC contain security groups which define rules that control the inbound and outbound traffic from a network
+  - Biggest gotcha is setting permissions and security groups

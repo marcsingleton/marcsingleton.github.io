@@ -34,10 +34,11 @@ In contrast to its compute services, which are all built with a single fundament
 The remaining two services are much more analogous to the kinds of storage that are used with a personal computer. For example, EFS (Elastic File System) is a hierarchical file system that can store files in a tree of directories. Additionally, EFS file systems can also connect to thousands of EC2 instances, allowing it to act as a shared drive. As a result, EFS file systems are likely the best option for collaborative analyses of large data sets, since team members can directly access and manipulate common resources. The downside is that mounting EFS file systems on EC2 instances requires a little more configuration. The EC2 instance launcher fortunately has options that will automatically mount an EFS file system. In cases where more a programmatic approach is necessary, though, the following guides demonstrate how to mount an EFS file system through a command line interface [one time](docs.aws.amazon.com/efs/latest/ug/wt1-getting-started.html) and on [reboot](docs.aws.amazon.com/efs/latest/ug/nfs-automount-efs.html). Finally, EBS (Elastic Block Storage) are like flash drives which can be attached to EC2 instances. EBS volumes offer the lowest-latency access and persist between connections, unlike instance "stores" which are erased even when their instances are temporarily paused. As a result, EBS blocks are best for high-performance applications with persistent data. However, unlike EFS file systems, EBS blocks come in fixed sizes and have greater restrictions on the number of ECS instances they can simultaneously connect to, so they are a less flexible option for shared file storage.
 
 ### Network
-- Everything in AWS happens over interconnected computers, so effectively managing communications between the various services and resources requires understanding the basics of these networks as well as the organization of Amazon's physical computing infrastructure
-- Accordingly, this section accordingly has two formal parts
+- Everything in AWS happens over interconnected computers, so effectively managing communications between the various services requires understanding the basics of these networks and how that relates to the organization of Amazon's physical computing infrastructure
+- Accordingly, this section accordingly has three parts
   - In the first, I cover some networking fundamentals
-  - In the second, I dive into specifics of AWS's physical infrastructure and networking configuration
+  - Then in the second, I dive into specifics of AWS's physical infrastructure
+  - Finally in the third, I discuss some specifics of configuring network settings in AWS
 #### Networking basics
 - A basic goal in networking is transferring data between devices, and much like letters are sent between physical addresses, network information is sent between network addresses.
 - There are a few types of these addresses depending on the scope of the network, but IP (Internet Protocol) addresses are used for communications over the global network of computers called the Internet.
@@ -69,7 +70,7 @@ The remaining two services are much more analogous to the kinds of storage that 
     - This was fortunately anticipated many years in advance, prompting the creation of a second addressing scheme called IPv6
   - It's conceptually the same except addresses are 128-bit integers, conventionally represented as a sequence of eight groups of four hexadecimal digits separated by colons
     - 2001:0db8:0000:0000:0000:ff00:0042:8329
-    - It has its own syntax for abbreviating this representation and a few other differences that I won't go over here for brecity
+    - It has its own syntax for abbreviating this representation and a few other differences that I won't go over here for brevity
 - Ports
   - Ports are the final ingredient of networking puzzle and allow devices to route network communications to the correct processes
   - It may seem strange to require another layer of addressing after the data reaches its intended device, but it helps to consider it from the perspective of an operating system managing the network communications of various processes
@@ -78,16 +79,24 @@ The remaining two services are much more analogous to the kinds of storage that 
   - I mention endpoints in plural because multiple processes can listen or "subscribe" to a single port
   - For example, the email protocol IMAP is assigned port 143, so multiple email clients can listen on this port to have the operating system pass them data tagged with this value
 #### AWS infrastructure
-- Regions are physical locations where data centers are clustered
-	- A group of logical data centers is called an availability zone (AZ)
-- Regions consist of at least three isolated and physically separate AZs in a geographic area
-- Summary
+- Though the internet can feel like an intangible place that is somehow both everywhere and nowhere, ultimately the information beamed across the web does exist in a physical data center
+- In Amazon's infrastructure, these data centers are organized into units called availability zones (AZs)
 	- AZs are the base unit of AWS infrastructure
-		- They may be composed of separate physical data centers, but they are geographically close and effectively operate as one
-		- Like how the kilogram is the base unit of SI but can also be subdivided into grams
-	- Regions are groups of AZs that offer redundancy and low-latency/high-bandwidth communication
-- VPCs and security groups
-- EC2 instances exist in a virtual private cloud (VPC) that allows complete control over its networking configuration
+  - They may be composed of separate physical buildings, but they are geographically close and effectively operate as one
+- Regions form the next level of organization and consist of at least three isolated and physically separated AZs in a geographic area
+  - They are, however, connected with low latency, high throughput network connections
+- All the building components of the various AWS services exist as physical hardware, and in many cases to possible provision them, for example EC2 instances or S3 buckets, in specific regions
+  - Prices vary across regions, meaning some services are cheaper in certain regions and more expensive in others
+  - However, access times also depend on the physical distance between the server and the device requesting a resource, so applications requiring low latencies may need to run in multiple regions simultaneously
+  - On the other hand, as data transfer charges are typically less within AZs or regions, consolidating resources within a single region can reduce costs
+  - All these considerations depend on the exact services and regions in question, so making generalizations is difficult
+    - Fortunately these decisions are usually the responsibility of data architects and engineers rather than scientists
+    - However, a basic understanding of AWS's physical infrastructure is essential for properly configuring the network settings of various services, as I discuss in the next section
+#### AWS network configuration
+- AWS resources in a virtual private cloud (VPC) that allows complete control over its networking configuration
 	- Can assign IP addresses for most resources in VPC
-- VPC contain security groups which define rules that control the inbound and outbound traffic from a network
+- VPCs contain security groups which define rules that control the inbound and outbound traffic from a network
+  - EC2, EFS, others resources all exist in specific security groups
   - Biggest gotcha is setting permissions and security groups
+  - Need to specifically allow connections by SSH to connect to EC2 instances for example
+  - Good security practice but raises barrier to entry by adding another configuration step

@@ -12,7 +12,7 @@ In an age of big data, it's increasingly convenient and even necessary to do dat
 
 There are a variety of cloud services from the expected players (Amazon, Google, Microsoft) including some more boutique providers that repackage those services in other forms for specific applications, like Netlify and (formerly) Dropbox. However, Amazon's cloud computing service, AWS, is one of the oldest and largest, and accordingly has a vast array of products that cover a variety of use cases, depending on the desired level of control over configuration. I'm not a web developer or data engineer, so I'm by no means an expert on any of these services and the trade-offs between them. I instead come from computational biology and bioinformatics, so my point of view is influenced by high-performance computing. [Cloud](https://cloud.google.com/learn/what-is-cloud-computing) and [high-performance](https://cloud.google.com/discover/what-is-high-performance-computing) computing overlap significantly since the latter generally involves requesting and configuring computing resources over a network. HPC, though, more specifically refers to computationally intensive applications where the work is distributed over clusters of individual computing units called nodes.
 
-As a result, I tend to approach topics in computing from a bottom-up perspective, and in this post I'll explain what I see as the building blocks of AWS that many of its other services are built on. This is an [explanation rather than a tutorial or how-to guide](https://docs.divio.com/documentation-system/), so I won't walk through the specific steps for setting up an account on AWS and getting an instance up and running with your favorite data science environment. Instead I'll focus on how big picture concepts in cloud computing relate to the specific services offered by AWS. Along the way I'll also link to some user and how-to guides that show in detail how these resources are configured. As a final note, I should mention that I'm not affiliated with Amazon in any way and that my choice of AWS as the topic of this post is mostly a reflection of its popularity rather than a endorsement over its competitors.
+As a result, I tend to approach topics in computing from a bottom-up perspective, and in this post I'll explain what I see as the building blocks of AWS that many of its other services are built on. This is an [explanation rather than a tutorial or how-to guide](https://docs.divio.com/documentation-system/), so I won't walk through the specific steps for setting up an account on AWS and getting an instance up and running with your favorite data science environment. Instead I'll focus on how big picture concepts in cloud computing relate to the specific services offered by AWS. Along the way I'll also link to some user and how-to guides that show in detail how these resources are configured. As a final note, I should mention that I'm not affiliated with Amazon and that my choice of AWS as the topic of this post is mostly a reflection of its popularity rather than a endorsement over its competitors.
 
 ## The three resource cards
 Computing resources in cloud can broadly be divided into three categories: compute, storage, and network. However, to make this model more concrete for our data science perspective, we can frame these resources in terms of how they interact with data:
@@ -40,8 +40,8 @@ The remaining two services are much more analogous to the kinds of storage that 
   - Then in the second, I dive into specifics of AWS's physical infrastructure
   - Finally in the third, I discuss some specifics of configuring network settings in AWS
 #### Networking basics
-- A basic goal in networking is transferring data between devices, and much like letters are sent between physical addresses, network information is sent between network addresses.
-- There are a few types of these addresses depending on the scope of the network, but IP (Internet Protocol) addresses are used for communications over the global network of computers called the Internet.
+- A basic goal in networking is transferring data between devices, and much like how letters are sent between physical addresses, network information is sent between network addresses
+- There are a few types of these addresses depending on the scope of the network, but IP (Internet Protocol) addresses are used for communications over the global network of computers called the Internet
 - IP addresses are labels assigned to devices connected to a computer network
   - The basic idea is to give every device connected to the Internet a unique label in the form of an IP address, but in practice it's a little more complex
   - For now we'll ignore those nuances and instead focus on the structure and organization of IP addresses
@@ -79,24 +79,29 @@ The remaining two services are much more analogous to the kinds of storage that 
   - I mention endpoints in plural because multiple processes can listen or "subscribe" to a single port
   - For example, the email protocol IMAP is assigned port 143, so multiple email clients can listen on this port to have the operating system pass them data tagged with this value
 #### AWS infrastructure
-- Though the internet can feel like an intangible place that is somehow both everywhere and nowhere, ultimately the information beamed across the web does exist in a physical data center
-- In Amazon's infrastructure, these data centers are organized into units called availability zones (AZs)
+- Though the internet can feel like an intangible place that is somehow both everywhere and nowhere, ultimately the information beamed across the web does exist in a physical location
+- In Amazon's infrastructure, these are data centers which are organized into units called Availability Zones (AZs)
 	- AZs are the base unit of AWS infrastructure
   - They may be composed of separate physical buildings, but they are geographically close and effectively operate as one
 - Regions form the next level of organization and consist of at least three isolated and physically separated AZs in a geographic area
   - They are, however, connected with low latency, high throughput network connections
-- All the building components of the various AWS services exist as physical hardware, and in many cases to possible provision them, for example EC2 instances or S3 buckets, in specific regions
-  - Prices vary across regions, meaning some services are cheaper in certain regions and more expensive in others
+- In many cases, it is possible to provision resources, such as EC2 instances or S3 buckets, in specific regions
+  - Prices vary across regions, meaning some resources are cheaper in certain regions and more expensive in others
   - However, access times also depend on the physical distance between the server and the device requesting a resource, so applications requiring low latencies may need to run in multiple regions simultaneously
   - On the other hand, as data transfer charges are typically less within AZs or regions, consolidating resources within a single region can reduce costs
-  - All these considerations depend on the exact services and regions in question, so making generalizations is difficult
+  - All these considerations depend on the exact application in question, so making generalizations is difficult
     - Fortunately these decisions are usually the responsibility of data architects and engineers rather than scientists
-    - However, a basic understanding of AWS's physical infrastructure is essential for properly configuring the network settings of various services, as I discuss in the next section
+    - However, a basic understanding of AWS's physical infrastructure is essential for properly configuring the network settings of various resources, as I discuss in the next section
 #### AWS network configuration
-- AWS resources in a virtual private cloud (VPC) that allows complete control over its networking configuration
-	- Can assign IP addresses for most resources in VPC
-- VPCs contain security groups which define rules that control the inbound and outbound traffic from a network
-  - EC2, EFS, others resources all exist in specific security groups
-  - Biggest gotcha is setting permissions and security groups
-  - Need to specifically allow connections by SSH to connect to EC2 instances for example
-  - Good security practice but raises barrier to entry by adding another configuration step
+- AWS resources exist in a logically isolated virtual network called a Virtual Private Cloud (VPC) which gives users fine-grained control over their networking configuration
+- Each VPC in turn contains subnets spanning a range of IP addresses where individual addresses correspond to AWS resources, for example an EC2 instance
+- While VPCs and subnets are networking abstractions, the underlying physical infrastructure does constrain their organization
+  - For example, VPCs exist within regions, and subnets exist within Availability Zones
+- In addition to VPCs, AWS has another concept for controlling network traffic called [security groups](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html) which are sets of rules that specify the kind of traffic allowed to and from a resource
+  - These rules can specify the address, port, and protocol for outbound or inbound communication, and any traffic not matching those patterns is rejected, effectively acting as a firewall
+- To me, security groups are the biggest gotcha when configuring AWS resources since not applying the correct security groups will block the desired kind of traffic
+  - For example, to connect to EC2 instances over SSH, they need to be launched with a security group that allows SSH communication from your IP address
+  - Otherwise, the requests won't receive a response and will eventually timeout
+- The EC2 launcher contains a menu that specifies the security groups of the instance, even allowing the creation of a new security group on the fly
+  - However, it's best to create security groups in advance for common configurations to avoid the proliferation of groups with identical rule sets
+  - Since security groups can apply to multiple types of resources in the AWS ecosystem, this menu is instead found under the VPC dashboard

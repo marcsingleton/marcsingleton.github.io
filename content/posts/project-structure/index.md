@@ -21,35 +21,35 @@ For the experimentalists out there, this structure will likely require some modi
 
 ```
 project_root/
-    ├── data/                 <- All raw data
-    │   ├── data_set_1/           <- Put different data sets in different subdirectories
-    │   ⋮  
-    │   └── data_set_n/  
-    ├── references/           <- Data dictionaries, manuals, log entries, and all other explanatory materials
-    ├── docs/                 <- Formal documentation systems, e.g. Sphinx; not necessary for most projects
-    ├── bin/                  <- "Binaries," i.e., external programs used in this project
-    ├── code/                 <- All code written written specifically for this project
-    │   ├── src/                  <- Re-usable functions for common tasks across project
-    │   │   ├── __init__.py           <- Necessary to make src/ a Python package
-    │   │   ├── module_1.py             <- Organize functions into related modules
-    │   │   ⋮
-    │   │   └── module_n.py
-    │   ├── scripts/              <- Code to execute individual pipeline steps
-    │   │   ├── clean_data.py         <- Give files readable but brief names
-    │   │   ├── fit_models.py
-    │   │   └── make_plots.py
-    │   └── notebooks/            <- Notebook-style code for exploratory analyses
-    ├── outputs/              <- All outputs produced by the pipeline
-    │   ├── clean_data/           <- Subdirectories should match the name of the script that produced them
-    │   ├── fit_model/
-    │   └── make_plots/
-    ├── reports/              <- Formal reports compiled from individual outputs; not necessary for many projects
-    ├── logs/                 <- Log files produced by workflow managers and other programs
-    ├── workflow.nf           <- Workflow file; a Nextflow file here, but many options are available
-    ├── README.md             <- Give a high-level overview of the purpose and structure of the project
-    ├── LICENSE.txt           <- Include a license to be explicit about how others can use your code!
-    ├── requirements.txt      <- Requirements file for reproducing the project's computing environment
-    └── .gitignore            <- Files and folders ignored by Git (or some other VCS)
+├── data/                 <- All raw data
+│   ├── data_set_1/           <- Put different data sets in different subdirectories
+│   ⋮  
+│   └── data_set_n/  
+├── references/           <- Data dictionaries, manuals, log entries, and all other explanatory materials
+├── docs/                 <- Formal documentation systems, e.g. Sphinx; not necessary for most projects
+├── bin/                  <- "Binaries," i.e., external programs used in this project
+├── code/                 <- All code written written specifically for this project
+│   ├── src/                  <- Re-usable functions for common tasks across project
+│   │   ├── __init__.py           <- Necessary to make src/ a Python package
+│   │   ├── module_1.py             <- Organize functions into related modules
+│   │   ⋮
+│   │   └── module_n.py
+│   ├── scripts/              <- Code to execute individual pipeline steps
+│   │   ├── clean_data.py         <- Give files readable but brief names
+│   │   ├── fit_models.py
+│   │   └── make_plots.py
+│   └── notebooks/            <- Notebook-style code for exploratory analyses
+├── outputs/              <- All outputs produced by the pipeline
+│   ├── clean_data/           <- Subdirectories should match the name of the script that produced them
+│   ├── fit_model/
+│   └── make_plots/
+├── reports/              <- Formal reports compiled from individual outputs; not necessary for many projects
+├── logs/                 <- Log files produced by workflow managers and other programs
+├── workflow.nf           <- Workflow file; a Nextflow file here, but many options are available
+├── README.md             <- Give a high-level overview of the purpose and structure of the project
+├── LICENSE.txt           <- Include a license to be explicit about how others can use your code!
+├── requirements.txt      <- Requirements file for reproducing the project's computing environment
+└── .gitignore            <- Files and folders ignored by Git (or some other VCS)
 ```
 
 ## Principles

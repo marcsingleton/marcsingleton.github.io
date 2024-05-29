@@ -29,6 +29,7 @@ https://www.thenewdynamic.com/article/hugo-data/
   - The third and longest then relates these ideas to how Hugo builds a website
 
 ## Web development basics
+### Web technologies
 - The pillars of modern web development are three interrelated but distinct technologies: HTML, CSS, JavaScript
 - Each handles different facets of a web page
   - HTML: structure and content
@@ -42,18 +43,19 @@ https://www.thenewdynamic.com/article/hugo-data/
   - For example, CSS contains a feature called pseudo-classes that allow styling changes in response to user actions, and Tailwind is a CSS framework that allows styling directly in HTML code
 - There are many resources for learning the basics of each, but the [Mozilla Developer Network](https://developer.mozilla.org/) is a great place to start
 
-## Static site generators
-- No one writes a full website completely by hand
-- Instead use code to write HTML, i.e., constructing websites from smaller pieces
-  - How a web developer can efficiently re-use portions and achieve a consistent look without copying and pasting code
-- Static site generators generate web sites before hand
-  - Web pages are largely fixed in the content they can display
-  - Great for blogs and documentation where content doesn't need to be adjusted to individual users
-    - There are some tricks with CSS and JavaScript to make pages feel more dynamic
-  - In contrast, dynamic web pages which are constructed on the fly and sent to the browser for display
-    - Allows pages that are tailored to individual users, like online shopping carts or account configuration
-  - Though the pages on a static site are pre-generated, the HTML pages that display the content are still constructed using code
-    - This is called building the site and is distinct from writing that code (development) and making the site's pages available on a server (deployment)
+### Static site generators
+- As websites are just collections of plaintext HTML pages, it is possible to create a complete website by hand, though it would be an inefficient, bug-ridden nightmare
+- Instead web developers use code to write HTML, allowing them to divide a website into distinct parts and build the final page from these smaller pieces
+  - Similar to subroutines or functions, this how web developers can efficiently re-use portions and achieve a consistent look without copying and pasting code
+- One model for creating these pages then is for the server to use this code and a database to construct them on the fly
+  - This allows the server to tailor those pages to individual users with data that are specific to them or frequently change, like account configuration or shopping cart information
+- While these dynamic pages are a good fit for these use cases, they're also overkill for websites like blogs and documentation where the content doesn't change from user to user
+- Instead a common approach is to render the pages statically, *i.e.* entirely beforehand, using a program called a static site generator
+- While the content itself
+- This style of content delivery greatly simplifies development since the server essentially delivers fixed files to users which are addressed by specific URLs
+  - Additionally, while the content isn't there are some tricks with modern CSS and JavaScript to make pages feel more dynamic
+- However, while the pages on a static site are pre-generated, the HTML pages that display the content are still constructed using code
+- This is called building the site and is distinct from writing that code (development) and making the site's pages available on a server (deployment)
 
 ## Hugo concepts
 - Hugo builds websites from smaller pieces
@@ -61,6 +63,7 @@ https://www.thenewdynamic.com/article/hugo-data/
 - It's not necessary to manually specify for every page how exactly to build common elements like the navigation bar because Hugo will automatically apply a default layout specified in your project
 - This means the learning curve for customizing the structure of a site or the layout of pages can be extremely steep at first because many things in Hugo are done implicitly
 - Hugo's documentation is a solid reference, but it's missing explanations that give a big picture understanding of how Hugo projects are structured and how the various pieces fit together
+- There's also a fair amount of Hugo-specific jargon
 - In this post, I'll try to fill that gap by highlighting the important pieces of documentation and linking them together in narrative format
 
 ### An overview of Hugo's directory structure
@@ -104,8 +107,8 @@ my-site/
 - The web is essentially a tangled collection of linked HTML documents which is impossible to navigate without search engines
 - Web sites, though, are small pieces of that web that should be intuitively organized, allowing the user to build a mental model of where to find information
 - There are several [common structural prototypes](https://webstyleguide.com/wsg3/3-information-architecture/3-site-structure.html), but hierarchies are especially common across the web and the model that Hugo largely imposes as well
-- Accordingly, the structure of the `content/` directory largely determines the structure of the rendered website
-- The ideas are straightforward and similar to how you would use folders to organize files, but Hugo uses a lot of jargon that can confuse its basic principles
+- Accordingly, the organization of the `content/` directory largely determines the organization of the rendered website
+- The ideas are straightforward and similar to how a file system uses folders to organize files, but Hugo uses a lot of jargon that can confuse its basic principles
 - We'll use the following example to illustrate these concepts more concretely which is adapted from [this page](https://gohugo.io/content-management/sections/) in the documentation
 
 ```
@@ -144,38 +147,48 @@ content/
 └── about.md
 ```
 
-- This is a website that has a home page, about page, pages of content on articles and products, and pages that list those article and product pages
-- First major concept is that Hugo uses the directory structure in content to generate the URLs for the pages where each level in the path of the file or directory becomes a segment in its URL
-- Let's assume our Hugo project is configured to build our website at www.example.org
-  - about.md -> www.example.org/about
-  - content/articles/2023/article-3.md -> www.example.org/articles/2023/article-3
-  - Footnote: Actually exist as HTML file www.example.org/articles/2023/article-3/index.html, but convention for many servers is to provide the index HTML file
-  - Footnote: Can set custom URLs for specific pages or globally: https://gohugo.io/content-management/urls/
-- Clear that the Markdown content pages are converted into individual pages, but the directories can be turned into pages as well
-  - For example, we may want a page at www.example.org/products/ that contains information about all the products
-  - By default Hugo creates these for any top-level directory in content/, so Hugo will try to create a page for both articles and products
-  - However, for more nested directories we have to explicitly tell Hugo to do this by including an _index.md file directly under that directory
-  - You can see that product-1/ and product-2/ have these _index.md files, so Hugo will create pages at www.example.org/products/product-1/ and www.example.org/products/product-2/, respectively
-  - In contrast, the 2022/ and 2023/ directories don't have these, so Hugo won't build pages at www.example.org/articles/2022/ and www.example.org/articles/2023
-- In Hugo's jargon, directories with an _index.md file are called [sections](https://gohugo.io/content-management/sections/)
-- These _index.md files are more than just for marking directories as sections
+#### Sections and pages
+- As suggested by its collection of Markdown files, this `content/` directory corresponds to a website that has an about page and pages of content on articles and products
+  - For example, `about.md` would contain the text used for this company's about page
+- The first major concept for understanding how Hugo creates a website is that it uses the directory structure in `content/` to generate the URLs for the pages where each level in the path of the file becomes a segment in its URL
+- To illustrate this, let's assume our Hugo project is configured to build our website at www.example.org
+  - `about.md` -> `www.example.org/about`
+  - `content/articles/2023/article-3.md` -> `www.example.org/articles/2023/article-3`
+  - Footnote: This page actually exists as HTML file `www.example.org/articles/2023/article-3/index.html`, but the convention for many servers is to provide the index file located at that URL
+  - Footnote: These examples illustrate the default method Hugo uses to map URLs to pages, but it's possible to change this behavior by configuring the [URL management settings](https://gohugo.io/content-management/urls/)
+- We'll cover the contents of these Markdown files and how Hugo renders them into HTML in a later section, but for now let's turn to the directories in this hierarchy
+- It's often convenient to navigate a website exactly like a file system and have pages that correspond to the directories as well
+  - For example, we may want a page at `www.example.org/products/` that contains information about all the products
+- Hugo supports (and encourages!) this structure and has mechanisms for converting directories into pages
+  - By default Hugo creates a page for any top-level directory in `content/`, so Hugo will create a page for both articles and products
+  - However, for more nested directories we have to explicitly tell Hugo to do this by including an `_index.md` file directly under that directory
+  - You can see that `product-1/` and `product-2/` have these `_index.md` files, so Hugo will create pages at `www.example.org/products/product-1/` and `www.example.org/products/product-2/`, respectively
+  - In contrast, the `2022/` and `2023/` directories don't have these, so Hugo won't build pages at `www.example.org/articles/2022/` and `www.example.org/articles/2023`
+- However, these _index.md files are more than just for marking directories as sections
   - They can also contain content that is used for building those section pages
-  - For example, products/product-2/_index.md can contain a description of the product as a whole
-  - For this reason it's common for content/ to contain an _index.md file that acts as the site's homepage
+  - For example, `products/product-2/_index.md` would contain a description of the product as a whole
+  - For this reason, it's common for `content/` to contain an `_index.md` file that acts as the site's homepage as shown here
+- In Hugo's jargon, top-level directories or directories with an `_index.md` file are called [sections](https://gohugo.io/content-management/sections/)
 
 #### Bundles
-- https://gohugo.io/content-management/page-bundles/
-- A concept for associating resources with content
-  - A single may have some associated images
-  - Want to organize these into a single unit
-- Leaf bundle: a directory that contains an index.md file and zero or more resources
-  - Instead of blog-post.md we have blog-post/ with index.md and image file as children
-  - Convert to directory diagram
-- Branch bundle: a directory that contains an _index.md file and zero or more resources
-  - Note that a directory with an _index.md file is a section
-  - Sections may also need additional resources
+- Interestingly, there's also a similarly named `index.md` file located under the `article-1/` directory
+- Though it looks like `index.md` is marking `article-1/` as a section with a page, something slightly different is going on here
+- Sometimes it's convenient to associate additional resources with a page, for example image, video, or script files
+  - (Hugo has extensions to Markdown called shortcodes that allow the easy inclusion of these resources when the HTML files are generated)
+  - The templates can access these files as [page resources](https://gohugo.io/content-management/page-resources/) to manipulate them more programmatically
+- To keep the project structure tidy, it's convenient to group these files together under a directory but still have Hugo treat it as a content file
+- To do this, we mark `article-1/` as a leaf bundle by including an `index.md` which contains the Markdown text for the article itself
+  - Under the URL creation scheme we discussed earlier, this yields an HTML file located at `www.example.com/articles/2022/article-1/`
+- Incidentally, when directories contain an `_index.md` and other resources, this creates a branch bundle, which work similarly as leaf bundles
+  - Footnote: Because `_index.md` files mark sections, all branch bundles are also sections. The converse isn't true, however, since not all sections contain `_index.md` or additional resources.
+- What's the point then of having the two types of bundles that are distinguished by files which differ by a single underscore?
+  - As their name suggests, leaf bundles are intended to be terminal directories in the directory tree, so there [are some minor differences](https://gohugo.io/content-management/page-bundles/#comparison) in how Hugo associates resources with them as opposed to branch bundles
+  - The more important distinction, however, is Hugo treats leaf and branch bundles as having single- and list-type layouts, respectively
+  - We'll cover this in more detail in the section on the `layout/` directory, but Hugo by default associates different templates with the two layout types
+  - The motivation for this is that leaf bundles correspond to terminal entries in the site structure and should primarily display single pieces of content
+  - In contrast, branch bundles and, more generally, sections link different levels of the hierarchy together and should display lists of content
 
-#### Anatomy of a content file
+#### Content files
 - Front matter in yaml or toml
   - Example of both
 - Can set parameters
@@ -183,28 +196,28 @@ content/
   - author
 - Available as parameters in templates
 
-#### Page kinds
+### The layout directory in-depth
+- Foundational concept in Hugo is the relationship between the content and layout directories
+- The general idea is that every piece of content has a corresponding layout that is used to generate the HTML page
+- Taken to an extreme, it's possible to specify a template for each content file
+- However, Hugo defines [a series of fallbacks](https://gohugo.io/templates/lookup-order/) that depend on both the structure and content attributes to try to find a matching template
+  - Makes Hugo robust and flexible, but also very confusing at first
+- Overview of structure
+  - _default, partials, sections, shortcodes
+
+#### Page kinds, types, and layouts
 - https://gohugo.io/templates/section-templates/#page-kinds
-- An attribute associated with a page that determines its function and in turn how it's rendered
+- Attributes associated with a page that determines its function and in turn how it's rendered
+- Kind has higher priority
 - Default kinds
   - home
   - page
   - section
   - taxonomy
   - term
+- Types are user-defined categories?
 
-### The layout directory in-depth
-- Overview of structure
-- _default, partials, sections, shortcodes
-
-### Content-layout relationship
-- Foundational concept in Hugo is the relationship between the content and layout directories
-- The general idea is that every piece of content has a corresponding layout that is used to generate the HTML page
-- Taken to an extreme, it's possible to specify a template for each content file
-- However, Hugo defines [a series of fallbacks](https://gohugo.io/templates/lookup-order/) that depend on both the structure and content attributes to try to find a matching template
-  - Makes Hugo robust and flexible, but also very confusing at first
-
-### Single and list
+#### Single and list
 - Some pages display content (singles); others display collections of those singles (lists)
 - Page kinds that are lists
   - home

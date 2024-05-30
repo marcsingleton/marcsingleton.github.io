@@ -43,26 +43,24 @@ draft = false
 
 ### Static site generators
 - As websites are just collections of HTML pages, it is possible to create a complete website by hand, though it would be an inefficient, bug-ridden nightmare
-- Instead web developers use code to write HTML, allowing them to divide a website into distinct parts and build the final page from these smaller pieces
-  - Similar to subroutines or functions, this how web developers can efficiently re-use portions and achieve a consistent look without copying and pasting code
-- One model for creating these pages then is for the server to use this code and a database to construct them on the fly
-  - This allows the server to tailor those pages to individual users with data that are specific to them or frequently change, like account configuration or shopping cart information
+- Instead web developers use code to write HTML, permitting them to divide a website into distinct parts and build the final page from these smaller pieces
+  - Similar to subroutines or functions, this how they can efficiently re-use portions and achieve a consistent look without copying and pasting code
+- Using code to create pages in turn allows servers to construct them on the fly, enabling it to tailor those pages to individual users with data that are specific to them or frequently change, like account configuration details or shopping cart information
 - While these dynamic pages are a good fit for these use cases, they're also overkill for websites like blogs and documentation where the content doesn't change from user to user
 - Instead a common approach is to render the pages statically, *i.e.* entirely beforehand, using a program called a static site generator
-- While the content itself
-- This style of content delivery greatly simplifies development since the server essentially delivers fixed files to users which are addressed by specific URLs
-  - Additionally, while the content isn't there are some tricks with modern CSS and JavaScript to make pages feel more dynamic
-- However, while the pages on a static site are pre-generated, the HTML pages that display the content are still constructed using code
-- This is called building the site and is distinct from writing that code (development) and making the site's pages available on a server (deployment)
+- Even though these pages are created in advance, static site generators still use code to construct the HTML pages that display the content
+  - The main difference is content delivery occurs in two distinct steps where the HTML files are first created and stored (building) and then made available on a server (deployment)
+- The advantage of this style of content delivery is that it greatly simplifies development since the server only has to deliver stored files to users which are addressed by specific URLs
+  - Furthermore, although the content itself is fixed, that doesn't mean the website itself isn't interactive, as modern CSS and JavaScript have plenty of tricks to pages dynamic using only the browser
 
 ## Hugo concepts
-- Hugo builds websites from smaller pieces
-- Its power comes from relying on a reasonable set of defaults encoded by the directory structure of the project
-- It's not necessary to manually specify for every page how exactly to build common elements like the navigation bar because Hugo will automatically apply a default layout specified in your project
+- Like other static site generators, Hugo is a framework for building websites, but its main claim to fame is it uses the highly performant Go language to build its pages
+- However, another strength is that it renders and organizes pages using a reasonable set of default templates encoded by the directory structure of the project
+- As a result, it's not necessary to manually specify for every page how exactly to build common elements like the navigation bar because Hugo will automatically apply a default layout specified in your project
 - This means the learning curve for customizing the structure of a site or the layout of pages can be extremely steep at first because many things in Hugo are done implicitly
-- Hugo's documentation is a solid reference, but it's missing explanations that give a big picture understanding of how Hugo projects are structured and how the various pieces fit together
-- There's also a fair amount of Hugo-specific jargon
-- In this post, I'll try to fill that gap by highlighting the important pieces of documentation and linking them together in narrative format
+- The official documentation is an excellent reference, but it's missing explanations that give a big picture understanding of how Hugo projects are structured and how the various pieces fit together
+- There's also a fair amount of Hugo-specific jargon scattered throughout which is never defined in context
+- Thus in the rest of this post, I'll try to fill that gap by highlighting the important pieces of documentation and linking them together in narrative format
 
 ### An overview of Hugo's directory structure
 - The directory structure of a project is the first place I like to start since it's essentially a roadmap to the codebase
@@ -93,13 +91,13 @@ my-site/
     - Modern method is to put these in `assets/`, which offers greater control for how these files are incorporated into the build with asset pipelines
   - `data/` is for specifically JSON, TOML, YAML, or XML files
     - Automatically parsed and fields are directly available in Hugo's templating language
-- Theme directory
-  - Place where external themes are installed
-  - Not necessary for a project using a custom layout, but I'm including it here for any users looking to transition from an external theme to a custom, or vice-versa
 - Config file (or directory)
   - Sets various settings when Hugo builds the site
   - Can be a single TOML, YAML, or JSON file, but can also be a directory for more complex configurations
   - Formerly the prefix was config rather than hugo, so older projects may have a config.toml file
+- Theme directory
+  - Place where external themes are installed
+  - Not necessary for a project using a custom layout, but I'm including it here for any users looking to transition from an external theme to a custom, or vice-versa
 
 ### The `content/` directory in-depth
 - The web is essentially a tangled collection of linked HTML documents which is impossible to navigate without search engines
@@ -214,6 +212,7 @@ The content goes here!
 ```
 
 ### The layout directory in-depth
+- Now that we've covered the basics of the `content/` directory, let's turn to the other 
 - Foundational concept in Hugo is the relationship between the content and layout directories
 - The general idea is that every piece of content has a corresponding layout that is used to generate the HTML page
 - Taken to an extreme, it's possible to specify a template for each content file

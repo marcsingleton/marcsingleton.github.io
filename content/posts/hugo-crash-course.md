@@ -1,13 +1,11 @@
 +++
 author = "Marc Singleton"
 title = "A Crash Course in Hugo (draft)"
-tags = ["hugo", "html", "css", "javascript", "crash-course", "explanation"]
-draft = true
+date = "2024-05-30"
+tags = ["hugo", "html", "crash-course", "explanation"]
+showTableOfContents = true
+draft = false
 +++
-
-## Links
-https://zwbetz.com/make-a-hugo-blog-from-scratch/
-https://www.thenewdynamic.com/article/hugo-data/
 
 ## Introduction: Why make a blog?
 - I started developing this website for a few reasons
@@ -44,7 +42,7 @@ https://www.thenewdynamic.com/article/hugo-data/
 - There are many resources for learning the basics of each, but the [Mozilla Developer Network](https://developer.mozilla.org/) is a great place to start
 
 ### Static site generators
-- As websites are just collections of plaintext HTML pages, it is possible to create a complete website by hand, though it would be an inefficient, bug-ridden nightmare
+- As websites are just collections of HTML pages, it is possible to create a complete website by hand, though it would be an inefficient, bug-ridden nightmare
 - Instead web developers use code to write HTML, allowing them to divide a website into distinct parts and build the final page from these smaller pieces
   - Similar to subroutines or functions, this how web developers can efficiently re-use portions and achieve a consistent look without copying and pasting code
 - One model for creating these pages then is for the server to use this code and a database to construct them on the fly
@@ -172,7 +170,7 @@ content/
 
 #### Bundles
 - Interestingly, there's also a similarly named `index.md` file located under the `article-1/` directory
-- Though it looks like `index.md` is marking `article-1/` as a section with a page, something slightly different is going on here
+- Though it looks like `index.md` is marking `article-1/` as a section (with an associated page), something slightly different is going on here
 - Sometimes it's convenient to associate additional resources with a page, for example image, video, or script files
   - (Hugo has extensions to Markdown called shortcodes that allow the easy inclusion of these resources when the HTML files are generated)
   - The templates can access these files as [page resources](https://gohugo.io/content-management/page-resources/) to manipulate them more programmatically
@@ -181,20 +179,39 @@ content/
   - Under the URL creation scheme we discussed earlier, this yields an HTML file located at `www.example.com/articles/2022/article-1/`
 - Incidentally, when directories contain an `_index.md` and other resources, this creates a branch bundle, which work similarly as leaf bundles
   - Footnote: Because `_index.md` files mark sections, all branch bundles are also sections. The converse isn't true, however, since not all sections contain `_index.md` or additional resources.
-- What's the point then of having the two types of bundles that are distinguished by files which differ by a single underscore?
+- What's the point then of having the two types of bundles that are distinguished by files differing by a single underscore?
   - As their name suggests, leaf bundles are intended to be terminal directories in the directory tree, so there [are some minor differences](https://gohugo.io/content-management/page-bundles/#comparison) in how Hugo associates resources with them as opposed to branch bundles
   - The more important distinction, however, is Hugo treats leaf and branch bundles as having single- and list-type layouts, respectively
   - We'll cover this in more detail in the section on the `layout/` directory, but Hugo by default associates different templates with the two layout types
-  - The motivation for this is that leaf bundles correspond to terminal entries in the site structure and should primarily display single pieces of content
-  - In contrast, branch bundles and, more generally, sections link different levels of the hierarchy together and should display lists of content
+  - The motivation for this is that leaf bundles correspond to terminal entries in the site structure and should primarily display **single** pieces of content
+  - In contrast, branch bundles and, more generally, sections link different levels of the hierarchy together and should display **lists** of content
 
 #### Content files
-- Front matter in yaml or toml
-  - Example of both
-- Can set parameters
-  - title
-  - author
-- Available as parameters in templates
+- Finally at the bottom of our hierarchy are content files themselves
+- Hugo supports a variety of markup formats, but [Markdown](https://commonmark.org/) is the most common
+- Regardless of content format, though, all content must have [front matter](https://gohugo.io/content-management/front-matter/) at the top of the file
+- This front matter is essentially metadata about the content, preferably including `title` and `date` fields at a minimum
+- However, Hugo supports a variety of fields out of the box that control how the content is displayed or organized
+- It's possible to define custom parameters in the front matter as well, though these are [accessed differently](https://gohugo.io/content-management/front-matter/#parameters) than the builtin fields
+- As far as the format of this front matter, Hugo supports JSON, TOML, or YAML
+- I won't go into the differences here as the Hugo documentation has plenty of examples, but they all can communicate the same information
+  - The choice between them is really a matter of taste
+  - However, of the three, I lean towards TOML
+- It uses three plus signs to delimit the front matter and equals signs to assign key-value pairs
+- The content then follows the front matter as shown below
+
+```toml
++++
+date = 2024-02-02T04:14:54-08:00
+draft = false
+title = 'Example'
+weight = 10
+[params]
+  author = 'John Smith'
++++
+
+The content goes here!
+```
 
 ### The layout directory in-depth
 - Foundational concept in Hugo is the relationship between the content and layout directories
@@ -239,3 +256,8 @@ content/
   - Be sure to check "Disable cache"
   - Hugo also doesn't always rebuild assets automatically while serving, so sometimes necessary to stop and re-start the `hugo serve` process
 - Build website to examine outputs directly
+
+## Links
+- https://zwbetz.com/make-a-hugo-blog-from-scratch/
+- https://www.thenewdynamic.com/article/hugo-data/
+- https://www.jakewiesler.com/blog/hugo-directory-structure/

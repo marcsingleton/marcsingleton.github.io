@@ -254,9 +254,7 @@ The sum of 1 and 2 is {{ add 1 2 }}
 yields the following HTML.
 
 ```html
-123 Main St.
-<br>
-The sum of 1 and 2 is 3
+123 Main St.<br>The sum of 1 and 2 is 3
 ```
 
 My final note on identifying template code is flow control structures like if statements or loops (initiated with the `range` keyword) are composed of multiple sets of brackets and closed with `{{ end }}`, as shown by the following if block.

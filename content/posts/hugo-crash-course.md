@@ -20,7 +20,7 @@ draft = false
       - I was especially inspired by the articles from [Distill](https://distill.pub/) on machine learning topics that combined clear explanations with interactive visualizations
         - The [*t*-SNE article](https://distill.pub/2016/misread-tsne/) in particular did more to help me intuitively understand how the algorithm represents high-dimensional data more than any number of derivations or still images
 - These two goals launched me into a crash course on web development, starting with how to make a blog using a popular development framework called Hugo
-  - The learning curve can be steep at first, but once you grasp the basics, making clean and attractive web pages is straightforward
+  - The learning curve can be steep at first, but once you grasp the basics, building your own website is straightforward
 - The rest of this post is divided into three major parts
   - The first covers some web development basics
   - The second describes static site generation
@@ -53,7 +53,7 @@ draft = false
 - The advantage of this style of content delivery is that it greatly simplifies development since the server only has to deliver stored files to users which are addressed by specific URLs
   - Furthermore, although the content itself is fixed, that doesn't mean the website itself isn't interactive, as modern CSS and JavaScript have plenty of tricks to pages dynamic using only the browser
 
-## Hugo concepts
+## Hugo introduction
 - Like other static site generators, Hugo is a framework for building websites, but its main claim to fame is it uses the highly performant Go language to build its pages
 - However, another strength is that it renders and organizes pages using a reasonable set of default templates encoded by the directory structure of the project
 - As a result, it's not necessary to manually specify for every page how exactly to build common elements like the navigation bar because Hugo will automatically apply a default layout specified in your project
@@ -99,7 +99,7 @@ my-site/
   - Place where external themes are installed
   - Not necessary for a project using a custom layout, but I'm including it here for any users looking to transition from an external theme to a custom, or vice-versa
 
-### The `content/` directory in-depth
+## The content directory in-depth
 - The web is essentially a tangled collection of linked HTML documents which is impossible to navigate without search engines
 - Web sites, though, are small pieces of that web that should be intuitively organized, allowing the user to build a mental model of where to find information
 - There are several [common structural prototypes](https://webstyleguide.com/wsg3/3-information-architecture/3-site-structure.html), but hierarchies are especially common across the web and the model that Hugo largely imposes as well
@@ -129,21 +129,11 @@ content/
 │   │   │   ├── feature-1.md
 │   │   │   └── feature-2.md
 │   │   └── _index.md
-│   └── product-2/        <-- section (has _index.md file)
-│       ├── benefits/     <-- section (has _index.md file)
-│       │   ├── _index.md
-│       │   ├── benefit-1.md
-│       │   └── benefit-2.md
-│       ├── features/     <-- section (has _index.md file)
-│       │   ├── _index.md
-│       │   ├── feature-1.md
-│       │   └── feature-2.md
-│       └── _index.md
 ├── _index.md
 └── about.md
 ```
 
-#### Sections and pages
+### Pages and sections
 - As suggested by its collection of Markdown files, this `content/` directory corresponds to a website that has an about page and pages of content on articles and products
   - For example, `about.md` would contain the text used for this company's about page
 - The first major concept for understanding how Hugo creates a website is that it uses the directory structure in `content/` to generate the URLs for the pages where each level in the path of the file becomes a segment in its URL
@@ -158,7 +148,7 @@ content/
 - Hugo supports (and encourages!) this structure and has mechanisms for converting directories into pages
   - By default Hugo creates a page for any top-level directory in `content/`, so Hugo will create a page for both articles and products
   - However, for more nested directories we have to explicitly tell Hugo to do this by including an `_index.md` file directly under that directory
-  - You can see that `product-1/` and `product-2/` have these `_index.md` files, so Hugo will create pages at `www.example.org/products/product-1/` and `www.example.org/products/product-2/`, respectively
+  - You can see that `product-1/` has an hierarchical structure each with an `_index.md` file, so Hugo will create pages at `www.example.org/products/product-1/`, `www.example.org/products/product-1/benefits/`, and `www.example.org/products/product-1/features/`
   - In contrast, the `2022/` and `2023/` directories don't have these, so Hugo won't build pages at `www.example.org/articles/2022/` and `www.example.org/articles/2023`
 - However, these _index.md files are more than just for marking directories as sections
   - They can also contain content that is used for building those section pages
@@ -166,7 +156,7 @@ content/
   - For this reason, it's common for `content/` to contain an `_index.md` file that acts as the site's homepage as shown here
 - In Hugo's jargon, top-level directories or directories with an `_index.md` file are called [sections](https://gohugo.io/content-management/sections/)
 
-#### Bundles
+### Bundles
 - Interestingly, there's also a similarly named `index.md` file located under the `article-1/` directory
 - Though it looks like `index.md` is marking `article-1/` as a section (with an associated page), something slightly different is going on here
 - Sometimes it's convenient to associate additional resources with a page, for example image, video, or script files
@@ -180,11 +170,11 @@ content/
 - What's the point then of having the two types of bundles that are distinguished by files differing by a single underscore?
   - As their name suggests, leaf bundles are intended to be terminal directories in the directory tree, so there [are some minor differences](https://gohugo.io/content-management/page-bundles/#comparison) in how Hugo associates resources with them as opposed to branch bundles
   - The more important distinction, however, is Hugo treats leaf and branch bundles as having single- and list-type layouts, respectively
-  - We'll cover this in more detail in the section on the `layout/` directory, but Hugo by default associates different templates with the two layout types
+  - We'll cover this in more detail in the section on the `layout/` directory, but Hugo associates different templates with the two layout types
   - The motivation for this is that leaf bundles correspond to terminal entries in the site structure and should primarily display **single** pieces of content
   - In contrast, branch bundles and, more generally, sections link different levels of the hierarchy together and should display **lists** of content
 
-#### Content files
+### Content files
 - Finally at the bottom of our hierarchy are content files themselves
 - Hugo supports a variety of markup formats, but [Markdown](https://commonmark.org/) is the most common
 - Regardless of content format, though, all content must have [front matter](https://gohugo.io/content-management/front-matter/) at the top of the file
@@ -211,17 +201,16 @@ weight = 10
 The content goes here!
 ```
 
-### The layout directory in-depth
-- Now that we've covered the basics of the `content/` directory, let's turn to the other 
-- Foundational concept in Hugo is the relationship between the content and layout directories
-- The general idea is that every piece of content has a corresponding layout that is used to generate the HTML page
+## The layout directory in-depth
+- Now that we've covered the basics of the `content/` directory, let's turn to the other pillar of the Hugo framework, the `layout/` directory
+- I've mentioned a few times that Hugo uses templates in `layouts/` to convert the content files into HTML files, and the general idea is Hugo uses the correspondence between structure of the two directories to identify the right template for a content file
 - Taken to an extreme, it's possible to specify a template for each content file
-- However, Hugo defines [a series of fallbacks](https://gohugo.io/templates/lookup-order/) that depend on both the structure and content attributes to try to find a matching template
-  - Makes Hugo robust and flexible, but also very confusing at first
+- However, Hugo defines [a series of fallbacks](https://gohugo.io/templates/lookup-order/) that depend on both the structure and content attributes find a matching template
+  - This makes Hugo robust and flexible, but also very confusing at first since the template used to build a page is rarely explicitly stated
 - Overview of structure
   - _default, partials, sections, shortcodes
 
-#### Page kinds, types, and layouts
+### Page kinds, types, and layouts
 - https://gohugo.io/templates/section-templates/#page-kinds
 - Attributes associated with a page that determines its function and in turn how it's rendered
 - Kind has higher priority
@@ -233,7 +222,7 @@ The content goes here!
   - term
 - Types are user-defined categories?
 
-#### Single and list
+### Single and list
 - Some pages display content (singles); others display collections of those singles (lists)
 - Page kinds that are lists
   - home
@@ -243,20 +232,66 @@ The content goes here!
 - Page kinds that are singles
   - page
 
-### Templating
-- https://gohugo.io/templates/introduction/
-- An overview of how Hugo converts templates to final HTML pages
+### Templates
+- I won't go in depth on Hugo's templating language here because there are other dedicated resources that do the topic justice
+  - For example, check out the [Hugo documentation](https://gohugo.io/templates/introduction/) for an overview of the syntax and major concepts and this [series of blog posts](https://www.thenewdynamic.com/article/hugo-data/) for more examples, ranging from simple loops to complex data transformations
+- If I had to summarize the two main ideas that were most helpful to me when parsing templates, though, the first would be distinguishing the parts that are HTML and the parts that are in the templating language
+- The difference may seem obvious if you're already familiar with HTML, but when you're first starting out templates can look like nested mess of angle and curly brackets
+- Fortunately, there's a simple rule. Anything in double curly brackets `{{ }}` is template code, and everything else is HTML. The template code can "silently" execute statements which don't have a return value. For example, the following defines a string which can be referenced later.
 
-### The config file
+```go
+{{ $address := "123 Main St."}}
+```
+
+However, expressions or functions with a return value are "printed" to the resulting HTML, so this code
+
+```go
+{{ $address }}
+<br>
+The sum of 1 and 2 is {{ add 1 2 }}
+```
+
+yields the following HTML.
+
+```html
+123 Main St.
+<br>
+The sum of 1 and 2 is 3
+```
+
+My final note on identifying template code is flow control structures like if statements or loops (initiated with the `range` keyword) are composed of multiple sets of brackets and closed with `{{ end }}`, as shown by the following if block.
+
+```go
+{{ if eq (add 1 2) 3 }}
+  1 + 2 = 3 as expected!
+{{ else }}
+  1 + 2 != 3. Something is very wrong here!
+{{ end }}
+```
+
+The second and likely more confusing main idea in Hugo templates is its concept of the context, also called "the dot." The context is essentially the data that's passed to a template and is represented by a dot (`.`). This is often an object called a `Page` that encapsulates data about the current page and functions to manipulate that data. For example, the following wraps a page's title defined in its front matter in an HTML heading tag.
+
+```html
+<h2>{{ .Title }}</h2>
+```
+
+While straightforward now, this can get confusing since in Hugo many blocks can rebind the context to different objects. A common example is a loop like the following
+
+```html
+{{ range slice "foo" "bar" }}
+  <p>{{ . }}</p>
+{{ end }}
+```
+
+where the context is rebound to each element in the slice, *i.e. array, in each iteration of the loop. This is another place where Hugo takes an implicit approach, and while confusing at first, it does cut down on boilerplate code. The best way to understand this is by looking at plenty of examples. For brevity, I'll leave our discussion here, but this [blog post](https://www.regisphilibert.com/blog/2018/02/hugo-the-scope-the-context-and-the-dot/) is a good place to start.
+
+## The config file in-depth
 - Review some key parameters
 
-### Development Tricks
+## Development tricks and other resources
 - Use Chrome inspect to examine generated pages
   - Be sure to check "Disable cache"
   - Hugo also doesn't always rebuild assets automatically while serving, so sometimes necessary to stop and re-start the `hugo serve` process
 - Build website to examine outputs directly
-
-## Links
 - https://zwbetz.com/make-a-hugo-blog-from-scratch/
-- https://www.thenewdynamic.com/article/hugo-data/
 - https://www.jakewiesler.com/blog/hugo-directory-structure/

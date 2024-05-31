@@ -174,6 +174,8 @@ content/
   - The motivation for this is that leaf bundles correspond to terminal entries in the site structure and should primarily display **single** pieces of content
   - In contrast, branch bundles and, more generally, sections link different levels of the hierarchy together and should display **lists** of content
 
+{{< figure src="./site-hierarchy.svg" >}}
+
 ### Content files
 - Finally at the bottom of our hierarchy are content files themselves
 - Hugo supports a variety of markup formats, but [Markdown](https://commonmark.org/) is the most common
@@ -233,7 +235,7 @@ The content goes here!
   - page
 
 ### Templates
-- I won't go in depth on Hugo's templating language here because there are other dedicated resources that do the topic justice
+- I won't go over specific examples of templates here or in depth on Hugo's templating language here because there are other dedicated resources that do the topic justice
   - For example, check out the [Hugo documentation](https://gohugo.io/templates/introduction/) for an overview of the syntax and major concepts and this [series of blog posts](https://www.thenewdynamic.com/article/hugo-data/) for more examples, ranging from simple loops to complex data transformations
 - If I had to summarize the two main ideas that were most helpful to me when parsing templates, though, the first would be distinguishing the parts that are HTML and the parts that are in the templating language
 - The difference may seem obvious if you're already familiar with HTML, but when you're first starting out templates can look like nested mess of angle and curly brackets

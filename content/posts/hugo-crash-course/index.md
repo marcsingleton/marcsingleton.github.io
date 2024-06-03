@@ -205,34 +205,78 @@ The content goes here!
 
 ## The layout directory in-depth
 - Now that we've covered the basics of the `content/` directory, let's turn to the other pillar of the Hugo framework, the `layout/` directory
-- I've mentioned a few times that Hugo uses templates in `layouts/` to convert the content files into HTML files, and the general idea is Hugo uses the correspondence between structure of the two directories to identify the right template for a content file
+- I've mentioned a few times that Hugo uses templates in `layouts/` to convert the content files into HTML files, and the general idea is the correspondence between the two directory structures identifies the template for a content file
 - Taken to an extreme, it's possible to specify a template for each content file
 - However, Hugo defines [a series of fallbacks](https://gohugo.io/templates/lookup-order/) that depend on both the structure and content attributes find a matching template
   - This makes Hugo robust and flexible, but also very confusing at first since the template used to build a page is rarely explicitly stated
-- Overview of structure
-  - _default, partials, sections, shortcodes
+- To illustrate this more concretely, below is a possible structure of a `layout/` directory for the previous `content/` directory example
 
-### Page kinds, types, and layouts
+```
+layout/
+├── _default/
+│   └── baseof.html
+├── articles/
+│   ├── list.html
+│   └── single.html
+├── products/
+│   ├── list.html
+│   └── single.html
+├── partials/
+├── shortcodes/
+├── index.html
+└── 404.html
+```
+
+- Beginning with the most intuitive elements, this `layout/` directory contains two top-level directories `articles/` and `layouts/` that directly correspond to those in the `content/` directory
+- These in turn both contain two HTML files that serve as templates for different kinds of content
+- As mentioned before, Hugo categorizes pages as either a single or a list where singles display individual pieces of content and lists display collections of content
+  - In this case, we want all pages created from the `articles/` and `products/` directories in `content/` to use different templates, so they have separate `single.html` and `list.html` files
+  - More specifically, Hugo will use the single templates to create pages for content files or leaf bundles
+    - `article-1/` -> `articles/single.html`
+    - `benefit-2.md` -> `products/single.html`
+  - In contrast, Hugo will use the list templates to create pages for sections
+    - `articles/` -> `articles/list.html`
+    - `features/` -> `products/list.html`
+- Footnote: Although the products section contains several subsections, there's no way to specify templates with similarly nested directories in the `layout` directory, so all subsections use the template of their root section
+- Because these templates might share parts in common, like a site header and footer, `layout/` also contains a `_default/` subdirectory with a `baseof.html` file that defines a [base template](https://gohugo.io/templates/base/) for the site
+  - Thus, the single and list templates work together with the base template to create final rendered page
+- The `layout/` directory contains two additional subdirectories `partials/` and `shortcodes/` that are empty in this example but included for illustration purposes
+  - Both have similar roles in storing templates for smaller, re-usable elements that appear throughout a website
+  - In other words, they're essentially functions which can be called from other files
+  - However, they differ in where they're used
+  - [Partials](https://gohugo.io/templates/partials/) are used in templates to extend their capabilities or abstract the details of a more complex template component
+  - As a result, they are generally concerned with the common structural elements of a website, for example rendering "card-style" lists of content
+  - [Shortcodes](https://gohugo.io/content-management/shortcodes/), on the other hand, are used in content files themselves to extend them with additional templates without cluttering the Markdown files with the actual messy HTML code
+    - Hugo contains several embedded shortcodes for utility operations like creating a figure with a caption or displaying a YouTube video
+    - It's also possible to create custom, though, which are stored in the corresponding subdirectory in `layouts/`
+- Finally, there are two top-level templates, `404.html` and `index.html`, both with special purposes
+  - The first corresponds to the dreaded 404 error message and is displayed when the requested page is not found by the server
+  - The second is the template for the home page of the website and is used to render the `content/_index.md` file
+    - Though this file is named like other `_index.md` files marking sections, as it has a unique template to reflect its special role as the index file for the site as a whole
+
+### Kinds, types, and layouts, oh my!
+- While the previous example illustrated the basic structure of a typical `layout` directory, the details of how Hugo selects a template are obscured by several overlapping pieces pieces of jargon whose definitions are scattered throughout the documentation
+- Thus, in this section, I clarify the meaning of kinds, types, and layouts and how they interact to specify a template
+- The first of these is a page attribute called its `Kind`, which is one of the following pre-defined categories
+  - `home`
+  - `page`
+  - `section`
+  - `taxonomy`
+  - `term`
+- Footnote: There are also `RSS`, `sitemap`, `robotsTXT`, and `404` page kinds, but these are special templates with purposes outside of displaying content for humans
+- Though content pages are confusingly given the `Kind` of `page`, most of these have already been informally introduced
+- The exceptions are for `taxonomy` and `term` kinds, which are a feature in Hugo for aggregating pages according to certain criteria, like the tags in their front matter
+- Since Hugo defines a [separate lookup order](https://gohugo.io/templates/lookup-order/) for each `Kind`, it is the first determinant of a page's template
+  - It also determines whether the page is considered a single a list, as pages of `Kind` `page` are singles whereas all others are lists
+  - These distinctions don't matter in the previous example, but in the absence of more specific templates, single and list pages are ultimately derived from global `single.html` and `list.html` templates in `_default/`
 - https://gohugo.io/templates/section-templates/#page-kinds
-- Attributes associated with a page that determines its function and in turn how it's rendered
-- Kind has higher priority
-- Default kinds
-  - home
-  - page
-  - section
-  - taxonomy
-  - term
-- Types are user-defined categories?
 
-### Single and list
-- Some pages display content (singles); others display collections of those singles (lists)
-- Page kinds that are lists
-  - home
-  - section
-  - taxonomy
-  - term
-- Page kinds that are singles
-  - page
+- Next are the `type` and `layout` page attributes
+- All pages have a `type`, which defaults to the name of the root section if it's not set in the front matter
+  - For example, in the previous example `benefit-1.md` has a `type` of "products"
+- In contrast, the `layout` attribute is only determined by the front matter
+- Together these two attributes determine a page's template where the general pattern is that the `type` sets the top-level directory of the template in `layouts/` and the `layout` specifies the HTML file
+- However, the exact rules are complex, so refer to the documentation for examples and a complete listing of the lookup orders for each page `Kind`
 
 ### Templates
 - I won't go over specific examples of templates here or in depth on Hugo's templating language here because there are other dedicated resources that do the topic justice
@@ -289,6 +333,7 @@ where the context is rebound to each element in the slice, *i.e. array, in each 
 - Review some key parameters
 
 ## Development tricks and other resources
+- Pagination
 - Use Chrome inspect to examine generated pages
   - Be sure to check "Disable cache"
   - Hugo also doesn't always rebuild assets automatically while serving, so sometimes necessary to stop and re-start the `hugo serve` process

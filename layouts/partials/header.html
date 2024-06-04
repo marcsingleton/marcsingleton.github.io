@@ -4,7 +4,7 @@
         <ul>
             {{ range .Site.Menus.main.ByWeight }}
             <li>
-                {{ .Pre }}<a href="{{ .URL }}" title="{{ .Title }}">{{ .Name }}</a>{{ .Post }}
+                <a href="{{ .PageRef }}">{{ .Name }}</a>
             </li>
             {{ end }}
         </ul>

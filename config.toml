@@ -9,29 +9,23 @@ enableInlineShortcodes = true
   dark = "off"
   highlight = true
 
-[menu]
-  [[menu.main]]
-    identifier = "About"
+[menus]
+  [[menus.main]]
     name = "About"
-    title = "About"
-    url = "/about"
+    pageRef = "/about/"
     weight = 10
 
-  [[menu.main]]
-    identifier = "Posts"
+  [[menus.main]]
     name = "Posts"
-    title = "Posts"
-    url = "/posts/"
+    pageRef = "/posts/"
     weight = 20
 
-  [[menu.main]]
-    identifier = "Resources"
+  [[menus.main]]
     name = "Resources"
-    title = "Resources"
-    url = "/resources/"
+    pageRef = "/resources/"
     weight = 30
 
-[Taxonomies]
+[taxonomies]
   tag = "tags"
 
 [permalinks]

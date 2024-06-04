@@ -279,7 +279,8 @@ layout/
 - However, the exact rules are complex, so refer to the documentation for examples and a complete listing of the lookup orders for each page `Kind`
 
 ### Templates
-- I won't go over specific examples of templates here or in depth on Hugo's templating language here because there are other dedicated resources that do the topic justice
+- Now that we've covered how Hugo chooses a template for file, let's briefly turn to the templates themselves
+- However, I won't go over specific examples of templates here or in depth on Hugo's templating language here because there are other dedicated resources that do the topic justice
   - For example, check out the [Hugo documentation](https://gohugo.io/templates/introduction/) for an overview of the syntax and major concepts and this [series of blog posts](https://www.thenewdynamic.com/article/hugo-data/) for more examples, ranging from simple loops to complex data transformations
 - If I had to summarize the two main ideas that were most helpful to me when parsing templates, though, the first would be distinguishing the parts that are HTML and the parts that are in the templating language
 - The difference may seem obvious if you're already familiar with HTML, but when you're first starting out templates can look like nested mess of angle and curly brackets
@@ -330,7 +331,39 @@ While straightforward now, this can get confusing since in Hugo many blocks can 
 where the context is rebound to each element in the slice, *i.e. array, in each iteration of the loop. This is another place where Hugo takes an implicit approach, and while confusing at first, it does cut down on boilerplate code. The best way to understand this is by looking at plenty of examples. For brevity, I'll leave our discussion here, but this [blog post](https://www.regisphilibert.com/blog/2018/02/hugo-the-scope-the-context-and-the-dot/) is a good place to start.
 
 ## The config file in-depth
-- Review some key parameters
+- The final element introduced in the directory structure overview that we haven't touched on yet is the config file, `hugo.toml`
+- Footnote: Though in this simple example, the configuration settings are in a single file, more complex projects may split them into multiple files in a [configuration directory](https://gohugo.io/getting-started/configuration/#configuration-directory)
+- This name is a more recent convention, so other projects may have a `config.toml` or a variant in one of the other supported formats like JSON and YAML
+- Unsurprisingly, this file contains configuration settings for building and displaying a site
+- Its structure is hierarchical where the top-level contains the most global settings as well as a set of keys that divide more specific ones into categories
+- The complete root [settings](https://gohugo.io/getting-started/configuration/#all-configuration-settings) and [keys](https://gohugo.io/getting-started/configuration/#configuration-directory) are extensive, but I'll briefly review an example to give a sense of each
+
+```toml
+baseURL = 'https://example.org/'
+languageCode = 'en-us'
+title = 'ABC Widgets, Inc.'
+
+[params]
+  subtitle = 'The Best Widgets on Earth'
+  [params.contact]
+    email = 'info@example.org'
+    phone = '+1 202-555-1212'
+
+[menus]
+  [[menu.main]]
+    name = "Articles"
+    url = "/articles/"
+    weight = 10
+
+  [[menu.main]]
+    name = "Products"
+    url = "/products/"
+    weight = 20
+```
+
+This configuration file contains three root settings and two root keys with additional settings under each. The root settings define generic site-wide parameters, in this case the base URL, language, and title. Hugo allows using only its pre-defined root settings, so additional settings that are specific to a site are stored under the `params` key. Finally, the `menu` key contains entries that are used to construct navigation menus.
+
+Even though the config file contains the configuration data, none of it will appear in the site unless it's used in a template. These can be accessed with the global `site` function or as a property of the current context `.Site`. Confusingly, the built-in configuration settings are accessed via methods written in camel case, so the `title` parameter is found at `site.Title` or `.Site.Title`. These small naming differences abound in Hugo, so check the [documentation](https://gohugo.io/methods/site/)`Site` object if you encounter any issues. However, this convention does not apply to any custom parameters defined under the `param` root key, so the `params.subtitle` setting is found at `site.Params.subtitle`. Easy, right?
 
 ## Development tricks and other resources
 - Pagination

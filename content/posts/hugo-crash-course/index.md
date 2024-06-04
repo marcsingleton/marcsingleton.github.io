@@ -365,11 +365,21 @@ This configuration file contains three root settings and two root keys with addi
 
 Even though the config file contains the configuration data, none of it will appear in the site unless it's used in a template. These can be accessed with the global `site` function or as a property of the current context `.Site`. Confusingly, the built-in configuration settings are accessed via methods written in camel case, so the `title` parameter is found at `site.Title` or `.Site.Title`. These small naming differences abound in Hugo, so check the [documentation](https://gohugo.io/methods/site/)`Site` object if you encounter any issues. However, this convention does not apply to any custom parameters defined under the `param` root key, so the `params.subtitle` setting is found at `site.Params.subtitle`. Easy, right?
 
-## Development tricks and other resources
-- Pagination
-- Use Chrome inspect to examine generated pages
-  - Be sure to check "Disable cache"
-  - Hugo also doesn't always rebuild assets automatically while serving, so sometimes necessary to stop and re-start the `hugo serve` process
-- Build website to examine outputs directly
-- https://zwbetz.com/make-a-hugo-blog-from-scratch/
-- https://www.jakewiesler.com/blog/hugo-directory-structure/
+## Conclusion and additional tips
+- Having covered the main pieces that make up a minimal Hugo project, this brings us to the end of this post
+- However, Hugo is a powerful framework for web development with an extensive set of features, so we've only scratched the surface of what it can do
+- Hopefully, you'll now be better equipped to wade into the documentation yourself to begin exploring Hugo on your own
+- Though in this post I focused on high-level concepts, I highly recommend this [post](https://zwbetz.com/make-a-hugo-blog-from-scratch/) from Zachary Betz if you're now looking for a detailed walkthrough of building a site from scratch with Hugo
+- While our posts cover similar topics, they do it from different perspectives, so they complement each other well
+  
+- My final tips for embarking on a web development journey is to make ample use of Hugo's speed to view changes on the fly
+- Use `hugo serve` to host your site locally and open the returned URL in your browser
+- Hugo will automatically re-build the site when it detects changes; however, it might be necessary to force the browser to request the site rather than load it from the cache
+- In Chrome, this is done by opening the page's context menu (typically with a right click), selecting the "Inspect" option, opening the Network tab in the resulting menu, and checking the "Disable cache" box
+- Footnote: Hugo also doesn't always automatically rebuild assets like images, however, so it's sometimes necessary to stop and re-start the `hugo serve` process
+- A browser's developer menu also provides a wealth of other information, including inspections of the raw HTML for a page as well as tools for interacting with and modifying page elements
+- They're essentially like a debuggers for web development, so be sure to take advantage of them and save yourself the frustration of the guess and check approach
+- Finally, it's also possible to build the website and inspect the outputs directly with the `hugo` command
+- I sometimes find it's easier to look at the files themselves to understand how exactly Hugo arranges the various parts of a project in the final site
+- That said, between the previous posts, these tips, and the other resources linked throughout, you're in great shape to make your own site
+- Good luck!

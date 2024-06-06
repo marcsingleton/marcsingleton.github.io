@@ -2,9 +2,9 @@
 <html lang="{{ .Site.Language.Lang }}">
     {{ partial "head.html" . }}
     <body>
-        <div id="grid-body">
+        <div class="grid-body">
             {{ partial "header.html" . }}
-            <main id="content">
+            <main class="body-site">
             {{ block "main" . }}
             {{ end }}
             </main>

@@ -1,7 +1,7 @@
 {{ define "main" }}
-<div id="grid-post">
-    <article id="post">
-        <header id="post-site">
+<div class="grid-post">
+    <article class="post">
+        <header class="header-content">
             <h1>{{ .Title }}</h1>
             <div>
             {{ if isset .Params "date" }}
@@ -16,7 +16,7 @@
         {{ .Content }}
     </article>
     {{ if .Param "showTableOfContents" }}
-    <aside id="table-of-contents">
+    <aside class="table-of-contents">
     On this page
     {{ .TableOfContents }}
     </aside>

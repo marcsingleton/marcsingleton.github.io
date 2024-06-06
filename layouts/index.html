@@ -1,10 +1,10 @@
 {{ define "main" }}
-<header id="post-site-home">
+<header class="header-home">
     {{ $portrait := resources.Get "images/portrait.jpg"}}
     <img src="{{ $portrait.RelPermalink }}" width="175" height="175"></img>
     <h1> Marc Singleton </h1>
     <h2> Computational Biologist </h2>
-    <div id="links-home">
+    <div class="header-home__links">
         <!--Use inline SVG to style with CSS-->
         <a href="https://github.com/marcsingleton">{{ readFile "assets/icons/github.svg" | safeHTML }}</a>
         <a href="https://orcid.org/0000-0002-6407-3298">{{ readFile "assets/icons/orcid.svg" | safeHTML }}</a>
@@ -12,12 +12,12 @@
         <a href="https://www.linkedin.com/in/marc-singleton-9024a2132/">{{ readFile "assets/icons/linkedin.svg" | safeHTML }}</a>
     </div>
 </header>
-<section id="content-home">  
+<section class="content-home">  
     {{ .Content }}
 </section>
-<section id="recent-posts-home">
+<section class="recent-posts-home">
     <h3>{{ "Recent Posts" }}</h3>
-    <ul id="posts">
+    <ul class="list-posts">
         {{ range first 3 (where site.RegularPages "Type" "in" site.Params.MainSections) }}
             {{ .Render "li-date" }}
         {{ end }}

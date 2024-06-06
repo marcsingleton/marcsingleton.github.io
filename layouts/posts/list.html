@@ -1,8 +1,8 @@
 {{ define "main" }}
-<header id="post-site">
+<header class="header-content">
     <h1>{{ .Title }}</h1>
 </header>
-<ul id="posts">
+<ul class="list-posts">
 {{ range where site.RegularPages "Type" "in" site.Params.mainSections }}
     {{ .Render "li-date" }}
 {{ end }}

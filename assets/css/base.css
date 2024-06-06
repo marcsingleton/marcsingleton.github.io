@@ -34,61 +34,61 @@ body {
 
 /* ## GRID PROPERTIES */
 /* ### BODY GRID */
-#grid-body {
+.grid-body {
     display: grid;
     grid-template-rows: auto 1fr auto;
     grid-template-columns: auto var(--content-width) auto;
   }
 
-header#site {
+.header-site {
     grid-row: 1;
     grid-column: 2 / 3;
     padding: 40px var(--margin-padding);
 }
 
-footer#site {
+.footer-site{
     grid-row: 3;
     grid-column: 2;
     padding: 10px var(--margin-padding);
 }
 
-main#content {
+.body-site {
     grid-row: 2;
     grid-column: 2;
     padding: 0px var(--margin-padding);
 }
 
 /* ### POST GRID */
-#grid-post {
+.grid-post {
     display: flex;
 }
 
-article#post {
+.post {
     width: 75%;
 }
 
-aside#table-of-contents {
+.table-of-contents {
     width: 25%;
 }
 
 /* ## HEADER PROPERTIES */
-header#site {
+.header-site {
     line-height: 2rem;
 }
 
-header#site a {
+.header-site a {
     color: var(--heading-dark);
     text-decoration: none;
     transition: 0.5s;
 }
 
-header#site a:hover {
+.header-site a:hover {
     color: var(--link-hover);
     text-decoration: none;
     transition: 0.25s;
 }
 
-header#site h2 {
+.header-site h2 {
     margin: 0;
     padding: 0;
     display: inline;
@@ -98,27 +98,26 @@ header#site h2 {
     text-transform: none;
 }
 
-header#site nav {
+.header-site__nav {
     float: right;
 }
 
-header#site nav ul {
+.header-site__nav ul {
     margin: 0;
     padding: 0;
     list-style-type: none;
     font-size: 18px;
     font-size: 1.8rem;
     font-weight: 600;
-    text-transform: none;
 }
 
-header#site nav ul li {
+.header-site__nav li {
     margin: 0 7.5px;
     display: inline;
 }
 
 /* ## FOOTER PROPERTIES */
-footer#site {
+.footer-site {
     font-size: 12.5px;
     font-size: 1.25rem;
     font-weight: 400;
@@ -126,21 +125,21 @@ footer#site {
     }
 
 /* ## GENERAL CONTENT PROPERTIES */
-main#content a {
+.body-site a {
     color: var(--link);
     text-decoration: none;
 }
 
-main#content a:hover {
+.body-site a:hover {
     text-decoration: underline;
 }
 
-main#content abbr {
+.body-site abbr {
     cursor: help;
     text-underline-offset: 2.5px;
 }
 
-main#content blockquote {
+.body-site blockquote {
     margin-top: 10px;
     margin-bottom: 10px;
     margin-left: 50px;
@@ -149,39 +148,39 @@ main#content blockquote {
     font-style: italic;
 }
 
-main#content figure {
+.body-site figure {
     margin: 0;
 }
 
-main#content .footnotes {
+.body-site .footnotes {
     font-size: 0.9em;
 }
 
-main#content h1,
-main#content h2,
-main#content h3,
-main#content h4,
-main#content h5,
-main#content h6 {
+.body-site h1,
+.body-site h2,
+.body-site h3,
+.body-site h4,
+.body-site h5,
+.body-site h6 {
     margin-bottom: 0;
     line-height: 1;
     scroll-margin-top: var(--scroll-margin-top);
     color: var(--heading-dark)
 }
 
-main#content hr {
+.body-site hr {
     height: 1px;
     border: 0;
     background: var(--text-light);
 }
 
-main#content p {
+.body-site p {
     margin: 10px 0;
     line-height: 1.75;
     color: var(--text-dark);
 }
 
-main#content cite > sup {
+.body-site cite > sup {
     scroll-margin-top: var(--scroll-margin-top);
 }
 
@@ -189,41 +188,41 @@ main#content cite > sup {
 max-width prevents SVGs from expanding flexbox
 user-select prevents selection of text in SVG 
 */
-main#content figure > * {
+.body-site figure > * {
     display: block;
     margin: auto;
     max-width: 100%;
     user-select: none;
 }
 
-main#content header#post-site h1 {
+.header-content h1 {
     display: block;
     font-size: 25px;
     font-size: 2.5rem;
 }
 
-main#content header#post-site > div {
+.header-content > div {
     display: block;
     margin: 5px 0;
     font-size: 0.9em;
     color: var(--text-medium);
 }
 
-main#content table {
+.body-site table {
     width: 100%;
     border-collapse: separate;
 }
 
-main#content table,
-main#content th,
-main#content td {
+.body-site table,
+.body-site th,
+.body-site td {
     border: 1px solid;
     border-collapse: collapse;
 
 }
 
 /* ## TABLE OF CONTENTS PROPERTIES */
-aside#table-of-contents {
+.table-of-contents {
     top: 25px;
     position: sticky;
     align-self: start;
@@ -234,28 +233,28 @@ aside#table-of-contents {
     border-left: 1px solid var(--text-light);
 }
 
-aside#table-of-contents ul {
+.table-of-contents ul {
     margin: 0;
     padding: 0 10px;
     list-style-type: none;
     font-size: 12.5px;
 }
 
-aside#table-of-contents ul > li:before {
+.table-of-contents ul > li:before {
     content: "- ";
   }
 
 /* ## HOME PAGE PROPERTIES */
-main#content section#content-home {
+.content-home{
     margin: 35px 10vw;
     text-align: center;
 }
 
-main#content header#post-site-home {
+.header-home {
     text-align: center;
 }
 
-main#content header#post-site-home h2 {
+.header-home h2 {
     margin: 5px 0;
     font-size: 20px;
     font-size: 2rem;
@@ -263,11 +262,11 @@ main#content header#post-site-home h2 {
     color: var(--text-medium);
 }
 
-main#content header#post-site-home img {
+.header-home img {
     border-radius: 50%;
 }
 
-main#content header#post-site-home div#links-home svg {
+.header-home__links svg {
     width: 25px;
     height: 25px;
     margin: 10px;
@@ -275,14 +274,14 @@ main#content header#post-site-home div#links-home svg {
     transition: 0.25s;
 }
 
-main#content header#post-site-home div#links-home svg:hover {
+.header-home__links svg:hover {
     transform: scale(1.5);
     fill: var(--link-hover);
     transition: 0.25s;
 }
 
 /* ## POST LIST STYLES */
-main#content ul#posts {
+.list-posts {
     margin-top: 10px;
     padding: 0;
     list-style-type: none;
@@ -290,40 +289,40 @@ main#content ul#posts {
     font-size: 1.5rem;
 }
 
-main#content ul#posts li {
+.list-posts li {
     margin: 5px 0;
     padding: 0;
 }
 
-main#content ul#posts small {
+.list-posts small {
     margin-left: 10px;
     font-size: 0.8em;
     color: var(--text-medium);
 }
 
-main#content ul#posts li a {
+.list-posts li a {
     color: var(--link);
     text-decoration: none;
 }
 
-main#content ul#posts li a:hover {
+.list-posts li a:hover {
     color: var(--link-hover);
 }
 
-main#content ul#posts li a:hover small {
+.list-posts li a:hover small {
     color: inherit;
 }
 
 /* ## CODING PROPERTIES */
 /* Bounding box of highlight (space around coding rectangle) */
-main#content .highlight {
+.highlight {
     margin-top: 5px;
     border-radius: 5px;
     overflow: hidden;
 }
 
 /* Box of highlight (coding rectangle) */
-main#content .chroma {
+.chroma {
     margin: 0;
     overflow-x: auto;
     scrollbar-color: #7f7f7f #272822;
@@ -331,22 +330,22 @@ main#content .chroma {
 }
 
 /* Box of highlight with line numbers */
-main#content div.highlight > div.chroma {
+div.highlight > div.chroma {
     padding: 5px 5px 5px 5px;
 }
 
 /* Box of highlight without line numbers */
-main#content div.highlight > pre.chroma {
+div.highlight > pre.chroma {
     padding: 5px 15px;
 }
 
-main#content code {
+code {
     font-family: Consolas, monospace;
     font-size: 12.5px;
     font-size: 1.25rem;
 }
 
-main#content p > code {
+p > code {
     background-color: var(--text-light);
     border-radius: 2.5px;
     padding: 2.5px;
@@ -355,26 +354,26 @@ main#content p > code {
 /* ## REMOVING TABLE OF CONTENTS */
 /* (see content-width variable for size + buffer) */
 @media only screen and (max-width: 992px) {
-    #grid-body {
+    .grid-body {
         grid-template-columns: 0 100% 0;
       }
 
-    article#post {
+    .post {
         width: 100%;
     }
 
-    aside#table-of-contents {
+    .table-of-contents {
         display: none;
     }
 }
 
 /* ## SMALL SCREEN */
 @media only screen and (max-width: 768px) {
-    header#site {
+    .header-site {
         padding: 15px var(--margin-padding);
     }
 
-    header#site nav ul li {
+    .header-site__nav ul li {
         display: block;
     }
 }

@@ -209,6 +209,19 @@ main#content header#post-site > div {
     color: var(--text-medium);
 }
 
+main#content table {
+    width: 100%;
+    border-collapse: separate;
+}
+
+main#content table,
+main#content th,
+main#content td {
+    border: 1px solid;
+    border-collapse: collapse;
+
+}
+
 /* ## TABLE OF CONTENTS PROPERTIES */
 aside#table-of-contents {
     top: 25px;

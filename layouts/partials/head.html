@@ -1,9 +1,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {{ with .Site.Params.description }}
-    <meta name="description" content="{{ . }}">
-    {{ end }}
+    <meta name="description" content="{{ site.Params.description }}">
     
     <!--RSS feed-->
     {{ with .OutputFormats.Get "rss" }}
@@ -27,5 +25,5 @@
     {{ printf `<link rel="stylesheet" href="%s">` $css.RelPermalink | safeHTML }}
     
     <link rel="canonical" href="{{ .Permalink }}" />
-    <title>{{ .Title }} | {{ .Site.Title }}</title>
+    <title>{{ .Title }} | {{ site.Title }}</title>
 </head>

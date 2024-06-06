@@ -1,8 +1,8 @@
 <header id="site">
-    <h2><a href="{{ .Site.BaseURL }}">{{ .Site.Title }}</a></h2>
+    <h2><a href="{{ site.BaseURL }}">{{ site.Title }}</a></h2>
     <nav>
         <ul>
-            {{ range .Site.Menus.main.ByWeight }}
+            {{ range site.Menus.main.ByWeight }}
             <li>
                 <a href="{{ .PageRef }}">{{ .Name }}</a>
             </li>

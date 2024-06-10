@@ -9,7 +9,7 @@ draft = true
 - The key to any complex data analysis project (or any big project really) is breaking it into smaller pieces
 - Nowadays cleaning and analyzing a complex data set typically involves chaining together a heterogeneous mix of existing command-line tools and custom scripts written in Python or R
 - It's manageable to do this manually for small projects, but once there are more than a handful of scripts, it becomes more difficult
-- Since the dependencies between different steps form a directed acyclic graph, keeping the outputs of an analysis up-to-date requires maintaining a mental model of an entire network
+- Since the dependencies between different steps form a [directed acyclic graph](https://marcsingleton.github.io/posts/project-structure-in-data-science/#data-analysis-is-a-dag), keeping the outputs of an analysis up-to-date requires maintaining a mental model of an entire network
   - Needless to say, these cognitive resources are better spent on higher level tasks like the design and interpretation of analyses
 - It's even worse when some steps have different computing requirements in terms of hardware and software
   - For example, though data analysis is often process of *reduction* where after a certain point most analyses can run easily on a local machine, often there are a few computationally intensive steps that require distributed computing resources
@@ -18,7 +18,7 @@ draft = true
 
 ## Nextflow vs Snakemake
 - Orchestrating complex data analysis workflows is a common problem across many fields, so there are unsurprisingly numerous workflow management systems and even two competing standards ([CWL](https://www.commonwl.org/) and [WDL](https://openwdl.org/)) for describing workflows in a platform agnostic manner
-- However, the two giants in scientific computing are Nextflow and Snakemake
+- However, the most popular choices in scientific computing are Nextflow and Snakemake
 - Like all workflow managers, they solve same problem of organizing and executing data processing workflows, but they do so from different perspectives
   - Roughly, Nextflow is process-oriented whereas Snakemake is file-oriented, and this difference has many implications for how the two systems describe the relationship between steps in a workflow
 - Both have their strengths and weaknesses, and I personally see a place for both in a data scientist's toolbox
@@ -37,39 +37,53 @@ draft = true
     - Instead this is likely more of a philosophical consideration than anything else
 
 ### Process model
-- To my knowledge, the documentation for neither tool has an explicit explanation of their underlying models
+- While both tools thoroughly document their commands, to my knowledge neither has an explicit explanation of their underlying models
 - This can make it difficult to write workflows using programs with complex behavior and outputs without some trial and error
 - So, before diving into our toy example, let's take a moment to understand how Nextflow and Snakemake conceptualize organizing and executing workflows
 
 #### Nextflow
-- Of the two, Nextflow likely has the more intuitive process model
-- Processes and channels
-  - Imagine as black boxes with wires going in and coming out
+- Of the two, Nextflow likely has the more intuitive workflow model
+- The basic building blocks of a Nextflow workflow are processes and channels
+- Processes are operations that accept input channels and transform them into output channels
+  - I like to imagine channels as black boxes with wires going in and coming out
+    - (Diagram of processes)
   - The wires are channels which are consumed and produced by a process
-  - Other processes can't see what's happening in the box--they only know about channels
+  - Workflows are defined in Nextflow by explicitly declaring the output channel of process as an input channel of another
+    - As channels are the only interfaces by which processes communicate, one process can't see what's happening in the black box of another--they only know about channels
     - We as the human designers can, but our abstraction of the workflow is independent of the messy details of what happens in the actual execution of a process
-  - Processes are connected by declaring the input of one channel as the output of another
+    - (Diagram of processes with channels linked together)
   
-- In terms of the actual process execution, Nextflow creates isolated working directories
-- Any outputs produced by a process are saved relative to this working directory
-  - Unless, that is, absolute paths are used
-  - I can think of some valid reasons to use an absolute path in data analysis pipeline but not many
-- Outputs are explicitly published with a publish directive
-  - Nextflow links the files in these public directories to the actual ones in the hidden working directories
+- In terms of the actual execution, Nextflow executes its processes in isolated working directories
+- Any outputs produced by a process are saved relative to this working directory unless absolute paths are used
+  - I can think of some valid reasons to use an absolute path in data analysis pipeline but not many, so I recommend generally avoiding them
 - Any outputs intended for human users or use in downstream processes must be explicitly declared
-- It's not necessary to configure output directories for script because Nextflow automatically tidies up, so feel free to embrace your inner messy child
+  - This effectively distinguishes the wires emerging from our black box processes from its implementation details
+  - For example, in a process we may call an external tool from the command line
+  - This tool is "messy" and doesn't clean up temporary files it creates during execution
+  - However, we didn't write this tool, so we have no control over its implementation
+  - Nextflow's explicit declaration of outputs, though, allows it to identify and track which files are part of the chain of execution and which are side effects
+- Furthermore, the working directories containing outputs are hidden and to use a software engineering analogy, not considered a part of a pipeline's "public API" unless they are explicitly tagged with an "publish directive"
+  - Nextflow links the files in these public directories to the actual ones in the hidden working directories
+- As a result, it's not necessary to configure output directories for script because Nextflow automatically tidies up
+  - This makes writing pipelines that use command line tools more concise since it does away with that boilerplate code, so feel free to embrace your inner messy child
 
 #### Snakemake
-- Snakemake is a more intuitive model of execution where all commands are run from the directory of the Snakefile by default
-- As result, have to manage outputs more explicitly by setting output paths
-- Snakemake recommends every rule directs its outputs to a different directory to prevent name collisions and speed the resolution of the DAG
-  - The pipeline is stored implicitly by file names, so Snakemake has to use its pattern matching rules to build the DAG on the fly
-  - Superficially a little more overhead for Snakemake
-    - Can sidestep any argument parsing in Python by accessing arguments through the snakemake object and running the command with a script guard
-    - I avoid this approach because it makes the underlying scripts less portable
-    - Python has an argument parsing module in its standard library which makes adding basic command-line arguments a breeze
-- The treatment of output directories is actually the source of one of the biggest "gotchas" I encountered when getting started with Snakemake
-  - Output directories made automatically unless the directory itself is explicitly an output, as marked with a directory() flag
+- In contrast, Snakemake's workflow model is centered around the relationships between files which are encoded by rules
+- Like Nextflow's processes, these rules declare input and output files and define the operations relating them
+- However, Snakemake diverges from Nextflow in that rules are never linked together in an explicit workflow
+- Snakemake instead infers the chain of operations that compose a workflow from the names of the input and output files in each rule
+  - While the inputs to rules can be literal file names like `input_01.tsv`, Snakemake's flexibility and power lies in its pattern matching features
+  - There are several ways of writing patterns, but a common way of generalizing the previous example is by writing rules in the form `input_{sample_id}.tsv`
+  - Snakemake interprets `{sample_id}` as a wildcard, allowing it match files like `input_01.tsv` and `input_A.tsv`
+- As result, in Snakemake outputs are managed more explicitly
+  - Snakemake recommends every rule directs its outputs to a different directory to prevent name collisions and speed the resolution of the workflow
+- Footnote: This approach is inspired from its namesake, Make, a classic Unix program used for automating and streamlining compiling source code into executable files
+  - It's still widely used today, though, as a tool dating from the early days of Unix, its syntax tends towards compactness over readability
+
+- In contrast to Nextflow, however, in Snakemake's model of execution all commands are run from the directory of its workflow definition file by default
+  - This is likely more intuitive for most users since it's how processes run in most shells
+- However, there is a "gotcha" in the treatment output directories which was one of the more frustrating aspects of first learning Snakemake
+  - Output directories are made automatically unless the directory itself is explicitly an output, as marked with a directory() flag
   - This can cause errors unless your code has the right logic to account for the existence (or lack therefore) of the directories in its expected output paths
 
 ## A toy workflow
@@ -84,3 +98,17 @@ draft = true
 
 ### Snakemake
 - Snakemake example
+- It is possible to sidestep any argument parsing in Python scripts by accessing arguments through the snakemake object and running the command with a script guard
+  - I avoid this approach, though, because it makes the underlying scripts less portable
+  - Furthermore, Python has an argument parsing module in its standard library which makes adding basic command-line arguments a breeze
+
+## Conclusion
+- I've seen some users contrast Nextflow's and Snakemake's models as "forward" and "backward," but two fit squarely into existing programming paradigms, respectively
+  - In Nextflow, the designer has to explicitly define the relationship between processes and their order of execution by connecting their channels
+  - This kind of step-by-step description of the operations used to compute a result is called imperative programming
+  - In contrast, in Snakemake the user asks the program to compute a result, here a file output, and the program determines the operations needed to achieve that
+  - This is called declarative programming
+  - In practice, many programming languages and problem-solving strategies incorporate elements from both paradigms, so learning to recognize the common patterns across different domains is one of the most valuable skills a programmer can develop
+- More specific to this tutorial, I believe both tools have their use cases
+  - Nextflow for production-ready pipelines
+  - Snakemake for prototyping and development

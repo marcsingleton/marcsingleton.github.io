@@ -180,15 +180,21 @@ body {
     scroll-margin-top: var(--scroll-margin-top);
 }
 
-/*
-max-width prevents SVGs from expanding flexbox
-user-select prevents selection of text in SVG 
-*/
-.body-site figure > * {
-    display: block;
-    margin: auto;
-    max-width: 100%;
+/* user-select prevents selection of text in SVG */
+.body-site figure {
+    margin: 10px 0px;
+    text-align: center;
     user-select: none;
+}
+
+/* max-width prevents SVGs from expanding flexbox */
+.body-site figure > * {
+    max-width: 100%;
+}
+
+.body-site figcaption {
+    font-size: 0.9em;
+    font-style: italic;
 }
 
 .header-content h1 {

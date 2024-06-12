@@ -232,12 +232,16 @@ body {
     font-size: 1.5rem;
     border-left: 1px solid var(--text-light);
 }
+/* base font size of nav */
+.table-of-contents nav {
+    font-size: 1.5rem;
+}
 
 .table-of-contents ul {
     margin: 0;
     padding: 0 10px;
     list-style-type: none;
-    font-size: 1.25rem;
+    font-size: 0.9em;
 }
 
 .table-of-contents ul > li:before {

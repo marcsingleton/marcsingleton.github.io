@@ -2,7 +2,7 @@
 author = "Marc Singleton"
 title = "Workflow Managers in Data Science: Nextflow and Snakemake"
 showTableOfContents = true
-draft = true
+draft = false
 +++
 
 ## Introduction: What are workflow managers?
@@ -92,6 +92,40 @@ draft = true
 - First, though, let's keep an eye on the big picture and talk about our workflow's purpose, inputs, and outputs
 - Let's say ...
   - Like all toy examples, this is contrived but all the more useful for illustration purposes
+
+- OUTLINE OF PIPELINE
+- Make pipeline using builtin Python text processing and statistics functions
+- Have some (small) collection of text files that can be categorized by a type
+  - Children
+    - Alice's Adventures in Wonderland
+    - Wizard of Oz
+    - Velveteen Rabbit
+    - Peter Pan
+  - Shakespeare
+    - Romeo & Juliet
+    - MacBeth
+    - Hamlet
+  - SciFi
+    - Dr Jekyll and Mr Hyde
+    - War of the Worlds
+    - The Time Machine
+    - Frankenstein
+    - Dracula
+  - Austen
+    - P&P
+    - Persuasion
+    - Emma
+  - Dickens?
+  - Twain?
+- Do some preprocessing
+- Process each to count words and basic stats
+  - Number of words (length)
+  - Number of unique words
+  - Counts of each word
+- Aggregate all and by genre and calculate same stats
+- Calculate pairwise comparisons of similarity
+  - Using word vectors?
+- Report on similarity within and between genres
 
 ### Nextflow
 - Nextflow example

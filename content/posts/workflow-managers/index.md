@@ -45,9 +45,18 @@ draft = false
 - Of the two, Nextflow likely has the more intuitive workflow model
 - The basic building blocks of a Nextflow workflow are processes and channels
 - Processes are operations that accept input channels and transform them into output channels
-  - I like to imagine channels as black boxes with wires going in and coming out
+  - I like to imagine channels as black boxes with pipes going in and coming out
     - (Diagram of processes)
-  - The wires are channels which are consumed and produced by a process
+  - The pipes are channels which are consumed and produced by a process
+    - Channels carry messages from one process to another
+    - Think of them like pneumatic tubes
+    - Unlike pneumatic tubes channels can be duplicated by connecting them to multiple processes or manipulated in more complex ways
+      - See channel operators
+    - The pneumatic tube metaphor is helpful though because channels do emit messages in discrete chunks
+      - This matters when a process is handling multiple channels because process will match messages from incoming channels
+        - Like Python's zip function
+        - Order is arbitrary
+        - (Image of channel with input1, input2, ... then output3, output10, ...)
   - Workflows are defined in Nextflow by explicitly declaring the output channel of process as an input channel of another
     - As channels are the only interfaces by which processes communicate, one process can't see what's happening in the black box of another--they only know about channels
     - We as the human designers can, but our abstraction of the workflow is independent of the messy details of what happens in the actual execution of a process

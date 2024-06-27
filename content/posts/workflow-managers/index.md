@@ -98,9 +98,35 @@ draft = false
 ## A toy workflow
 ### Inputs and outputs
 - Now we'll implement a toy workflow in both languages to introduce their syntax and compare how they work in practice
-- First, though, let's keep an eye on the big picture and talk about our workflow's purpose, inputs, and outputs
-- Let's say ...
   - Like all toy examples, this is contrived but all the more useful for illustration purposes
+- First, though, let's keep an eye on the big picture and talk about our workflow's purpose, inputs, and outputs
+- Let's say we have a collection of books grouped by genre, and we're interested in the distribution of word counts in each and how those distributions relate to each other, both within and between genres
+- The overall idea of our pipeline, then, is to count the words in each book, make all pairwise comparisons between these count distributions, and finally aggregate the results
+- As is typical in data science, though, we'll need to clean up the data a little beforehand
+- We'll also add a step to calculate some basic statistics from the word count distributions individually and then aggregate them into a single file
+- In total, graphically our pipeline will look something like the following
+  - (DIAGRAM OF PIPELINE)
+
+### Aside: The scatter-gather pattern
+- Although this example is a "toy" in terms of the size of the data and the computing power required in each step, it illustrates several instances of the scatter gather pattern, which is ubiquitous in pipeline design
+  - Because big data processing is often [embarrassingly parallelizable](https://en.wikipedia.org/wiki/Embarrassingly_parallel), the scatter gather pattern splits large jobs into many independent pieces and merges the results together
+  - In this case, the pairwise comparisons of the word count distribution is a perfect example of the scatter gather pattern since each comparison is independent of the others until a downstream process aggregates them together
+  - Throughout this pipeline, individual books are used as the natural unit of work, and we won't subdivide its operations below that level
+  - However, it is possible in principle to parallelize some processes even further
+  - For example, counting the distribution of words in a book can occur in parallel if the list of words is split into several chunks
+    - Each scatter subprocess uses its chunk to creates its own distribution of word counts and the gather process calculates the full distribution by simply adding the counts across each sub-distribution
+    - Footnote: This works because the fundamental units and operations in this process are words and sums, respectively, the latter of which is both commutative and associative
+    - In practice, this an over-engineered solution because once a text is split on words, or even lines, the process is essentially done
+    - However, it does illustrate the general principle that the "atom" of work in a scatter gather pattern may be smaller than an individual file
+    - A more common scenario is instead scattering and gathering on files only
+    - Though in this example, every book corresponds to a single file, that's mostly a reflection of how we received the data rather than anything inherent to the analysis
+      - We could also have, for whatever reason, received each book in multiple files split into chapters or at a maximum size
+      - In that case, the word counting process would gather across multiple files
+    - The practical implementation of scatter gather processes is therefore often highly dependent on the organization of the input data within and between files as well as the computational requirements of each "atom" of work
+      - As a result, it's impossible to make generalizations about the best way of splitting work in pipelines, and in practice these decisions will depend on a mixture of design and engineering considerations
+    - By the way, for the bioinformaticians out there, if all this seems completely unrelated to anything in the real-world, mentally swap "counting words" with "mapping reads," "books" with "samples," and "genres" with "experimental condition"
+
+### The Python implementation
 
 - OUTLINE OF PIPELINE
 - Make pipeline using builtin Python text processing and statistics functions

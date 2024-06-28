@@ -96,13 +96,13 @@ draft = false
   - This can cause errors unless your code has the right logic to account for the existence (or lack therefore) of the directories in its expected output paths
 
 ## A toy workflow
-### Inputs and outputs
+### A high-level overview
 - Now we'll implement a toy workflow in both languages to introduce their syntax and compare how they work in practice
   - Like all toy examples, this is contrived but all the more useful for illustration purposes
 - First, though, let's keep an eye on the big picture and talk about our workflow's purpose, inputs, and outputs
-- Let's say we have a collection of books grouped by genre, and we're interested in the distribution of word counts in each and how those distributions relate to each other, both within and between genres
+- Let's say we have a collection of books as text files grouped by genre, and we're interested in the distribution of word counts in each and how those distributions relate to each other, both within and between genres
 - The overall idea of our pipeline, then, is to count the words in each book, make all pairwise comparisons between these count distributions, and finally aggregate the results
-- As is typical in data science, though, we'll need to clean up the data a little beforehand
+- As is typical in data science, though, we'll need to clean up the text files a little beforehand to remove metadata that shouldn't contribute to our word counts
 - We'll also add a step to calculate some basic statistics from the word count distributions individually and then aggregate them into a single file
 - In total, graphically our pipeline will look something like the following
   - (DIAGRAM OF PIPELINE)
@@ -122,7 +122,8 @@ draft = false
     - Though in this example, every book corresponds to a single file, that's mostly a reflection of how we received the data rather than anything inherent to the analysis
       - We could also have, for whatever reason, received each book in multiple files split into chapters or at a maximum size
       - In that case, the word counting process would gather across multiple files
-    - The practical implementation of scatter gather processes is therefore often highly dependent on the organization of the input data within and between files as well as the computational requirements of each "atom" of work
+    - The practical implementation of scatter gather processes is therefore often highly dependent on the organization of the input data within and between files, how the "atoms" of work are conceptualized, and the computational requirements of those "atoms"
+      - Footnote: The computational requirements of an atom of work can be a key factor of its definition!
       - As a result, it's impossible to make generalizations about the best way of splitting work in pipelines, and in practice these decisions will depend on a mixture of design and engineering considerations
     - By the way, for the bioinformaticians out there, if all this seems completely unrelated to anything in the real-world, mentally swap "counting words" with "mapping reads," "books" with "samples," and "genres" with "experimental condition"
 
@@ -235,12 +236,15 @@ be renamed.
 
 ### Nextflow
 - Nextflow example
+- Nextflow is more powerful of two
 
 ### Snakemake
 - Snakemake example
 - It is possible to sidestep any argument parsing in Python scripts by accessing arguments through the snakemake object and running the command with a script guard
   - I avoid this approach, though, because it makes the underlying scripts less portable
   - Furthermore, Python has an argument parsing module in its standard library which makes adding basic command-line arguments a breeze
+- Snakemake requires that all wildcards used in input must be in output
+- Difficult to write shell scripts with f strings because of behavior with double brackets
 
 ## Conclusion
 - I've seen some users contrast Nextflow's and Snakemake's models as "forward" and "backward," but two fit squarely into existing programming paradigms, respectively

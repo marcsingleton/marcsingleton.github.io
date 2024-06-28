@@ -126,7 +126,112 @@ draft = false
       - As a result, it's impossible to make generalizations about the best way of splitting work in pipelines, and in practice these decisions will depend on a mixture of design and engineering considerations
     - By the way, for the bioinformaticians out there, if all this seems completely unrelated to anything in the real-world, mentally swap "counting words" with "mapping reads," "books" with "samples," and "genres" with "experimental condition"
 
-### The Python implementation
+### Implementing the core logic in Python
+- Before diving into the specifics of Nextflow and Snakemake, we'll first implement the core components of our pipeline as Python scripts
+- The division of labor here is the Python scripts will handle all the logic of cleaning the text files, counting the words, making the pairwise comparisons, etc., and the workflow managers will handle executing those scripts on the appropriate inputs
+- Deciding the exact breakdown between the two is a bit of an art and will depend on the flexibility of the pipeline's design, but in general scripts take care of all the actual computations, and the workflow manager is only responsible for running those scripts at the appropriate time
+- Furthermore, we'll generally write our Python scripts agnostic to the genres and titles of the files they're operating on, that is, they largely won't explicitly handle this information and instead only accept input and output file paths
+  - We'll instead encode this metadata in the names of the files themselves
+  - This will introduce some complications down the line for both Nextflow and Snakemake, but it will also simulate how metadata is handled in practice, especially when working with tools or formats that can't encode it in the file itself
+
+#### Exploring the data
+- However, before we can even begin to think about writing code, we first need to understand what the data are and what they look like
+- The goal of this pipeline is to calculate various statistics derived from the counts of words in books, so I've selected 13 books in the public domain, downloaded their plain text files from [Project Gutenberg](https://www.gutenberg.org/), and grouped them into three "genres" under the following directory hierarchy:
+
+```
+data/
+├── childrens/
+│   ├── alices-adventures-in-wonderland.txt
+│   ├── peter-pan.txt
+│   ├── the-jungle-book.txt
+│   ├── the-wonderful-wizard-of-oz.txt
+│   ├── through-the-looking-glass.txt
+│   └── winnie-the-pooh.txt
+├── scifi/
+│   ├── frankenstein.txt
+│   ├── the-strange-case-of-dr-jekyll-and-mr-hyde.txt
+│   ├── the-time-machine.txt
+│   └── the-war-of-the-worlds.txt
+└── shakespeare/
+    ├── hamlet.txt
+    ├── macbeth.txt
+    └── romeo-and-juliet.txt
+```
+
+- It's always a good idea to take a look at the beginning, middle, and end of the raw data as sanity check, so let's do that now
+- For example, the beginning of `romeo-and-juliet.txt` is
+
+```{linenos=true, linenostart=1}
+The Project Gutenberg eBook of Romeo and Juliet
+    
+This ebook is for the use of anyone anywhere in the United States and
+most other parts of the world at no cost and with almost no restrictions
+whatsoever. You may copy it, give it away or re-use it under the terms
+of the Project Gutenberg License included with this ebook or online
+at www.gutenberg.org. If you are not located in the United States,
+you will have to check the laws of the country where you are located
+before using this eBook.
+
+Title: Romeo and Juliet
+
+Author: William Shakespeare
+
+Release date: November 1, 1998 [eBook #1513]
+                Most recently updated: June 27, 2023
+
+Language: English
+
+Credits: the PG Shakespeare Team, a team of about twenty Project Gutenberg volunteers
+
+
+*** START OF THE PROJECT GUTENBERG EBOOK ROMEO AND JULIET ***
+
+
+
+
+THE TRAGEDY OF ROMEO AND JULIET
+
+by William Shakespeare
+```
+
+- Clearly, this file has a header declaring it's a Project Gutenberg eBook along with licensing information and some other metadata
+- Likewise, it also has a footer, which begins at line 5299
+
+```{linenos=true, linenostart=5284}
+PRINCE.
+A glooming peace this morning with it brings;
+The sun for sorrow will not show his head.
+Go hence, to have more talk of these sad things.
+Some shall be pardon’d, and some punished,
+For never was a story of more woe
+Than this of Juliet and her Romeo.
+
+ [_Exeunt._]
+
+
+
+
+
+
+*** END OF THE PROJECT GUTENBERG EBOOK ROMEO AND JULIET ***
+
+
+    
+
+Updated editions will replace the previous one—the old editions will
+be renamed.
+```
+
+- Though not all files contain headers, and even fewer contain footers, but when they do, the pipeline must account for them
+- If it doesn't, at best the pipeline will crash because something unexpected happened
+- However, the worst-case scenario is the pipeline won't notice and will continue chugging along, happily returning incorrect results
+- That's why it's essential to at a minimum spot check a few input files at the beginning and end
+  - This is where it's also helpful to have some domain knowledge
+  - For example, being remotely acquainted with Shakespeare (and literature in generally) made it obvious the text at the end was part of a license
+- It's usually not practical to check every input manually though, so a better general (long-term? overall?) strategy is to program defensively
+- Incorporate checks to verify any assumptions made about the data during its processing and throw errors liberally!
+  - If the data is as expected, the code should still run without any issues
+  - But if something unexpected happens, the user should know!
 
 - OUTLINE OF PIPELINE
 - Make pipeline using builtin Python text processing and statistics functions

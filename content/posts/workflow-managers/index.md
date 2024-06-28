@@ -137,7 +137,7 @@ draft = false
 ### Exploring the data
 - However, before we can even begin to think about writing code, we first need to understand what the data are and what they look like
 - The goal of this pipeline is to calculate various statistics derived from the counts of words in books, so I've selected 13 books in the public domain, downloaded their plain text files from [Project Gutenberg](https://www.gutenberg.org/), and grouped them into three "genres" under the following directory hierarchy:
-- Footnote: Take these groupings with a grain of salt, especially since Shakespeare is an author
+- Footnote: Take these groupings with a grain of salt, especially since Shakespeare is an author 
 
 ```
 data/
@@ -159,6 +159,9 @@ data/
     └── romeo-and-juliet.txt
 ```
 
+- By the way, these files and all the code we'll write throughout this tutorial are available in the this archive and this GitHub repository, so be sure to download it and follow along!
+  - The limits of good taste do limit the amount of code I'm willing to show in one block, but the structure of the scripts and project as a whole will make much more sense when viewed together
+  
 - It's always a good idea to take a look at the beginning, middle, and end of the raw data as sanity check, so let's do that now
 - For example, the beginning of `romeo-and-juliet.txt` is
 
@@ -314,9 +317,73 @@ with open(args.output_path, 'w') as file:
     file.writelines(lines)
 ```
 
-- The idea here is pretty simple
-- We read the input file line by line and only return the lines after the line marking the start of the text and stopping after the line marking its end
-- This is written as a generator, so as to not needlessly store the complete text in memory before writing to disk, but it would work just the same if `get_text_lines` return a list of lines
+- The idea here is simple
+  - We read the input file line by line and only return the lines after the line marking the start of the text and stopping after the line marking its end
+  - This is written as a generator, so as to not needlessly store the complete text in memory before writing to disk, but it would work just the same if `get_text_lines` return a list of lines
+- The final script is saved as `code/remove_pg.py` in the workflow repository
+
+### Counting words
+- The next step of the pipeline is to count the words in each cleaned file
+- The idea here is also simple
+  - We process the files line by line, first splitting words on whitespace and then processing those words to standardize them
+  - Counts of the processed words are stored in a `Counter` object, available from the standard library, and ultimately written to file in count then alphabetical order
+
+```python
+from collections import Counter
+
+count = Counter()
+with open(args.input_path) as file:
+    for line in file:
+        words = [process_word(word) for word in process_line(line)]
+        words = [word for word in words if word]  # Remove empty words
+        count.update(words)
+    
+with open(args.output_path, 'w') as file:
+    file.write('word\tcount\n')
+    for word, count in sorted(count.items(), key=lambda x: (x[1], x[0]), reverse=True):
+        file.write(f'{word}\t{count}\n')
+```
+
+- Unsurprisingly, the most finicky part of this script is extracting words from each line since there are gotchas to watch out for
+- The first of these is splitting the words
+  - Though most words are separated by whitespace, some authors also use em dashes or double hyphens, so these are also included in the regular expression that defines word delimiters
+- This splitting, however, does not remove punctuation marks at the start or end of words
+  - The builtin `strip` method of strings and `punctuation` constant from the `string` module fortunately take care of this easily
+  - The latter doesn't include curly quotes by default, which are separate characters, so we have to include them manually
+  - Finally, we convert all words to lowercase since for our purposes a word is the same regardless of its capitalization
+
+```python
+import re
+from string import punctuation
+
+
+def process_line(line):
+    words = re.split('[\s]+|—|--', line)  # Whitespace, em dash, and double hyphens
+    return words
+
+
+def process_word(word):
+    word = word.strip(punctuation).lower()
+    return word
+
+
+punctuation = punctuation + '‘’“”'  # Add curly quotes
+```
+
+- An interesting side effect of stripping punctuation marks is that it can sometimes result in empty words
+  - For example, *Winnie the Pooh* contains lines of spaced asterisks like '*        *        *        *        *' to mark sections within the text
+  - Because the splitting on whitespace yields words that are "naked" asterisks, stripping them will create empty strings
+  - As a result, in the first code block, the list of words derived from each line are filtered for empty strings
+- Note, this code was the result of several rounds of iteration, and it was only by carefully examining the results that I identified the edge cases in the line and word processing steps
+  - This is a general feature of data analysis, particularly in pipeline prototyping
+    - It's difficult to know all the idiosyncrasies of a data set in advance, so it's important to perform sanity checks and exploratory analyses on intermediate results to ensure their validity
+- This script is saved under `coding/count_words.py`
+
+### Calculating statistics from word counts
+
+### Pairwise comparisons of counts
+
+### Grouping
 
 ## Linking the pieces with Nextflow
 - Nextflow example

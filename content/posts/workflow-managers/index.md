@@ -249,6 +249,52 @@ be renamed.
 - As final note, if we were really following every tenet of the Unix philosophy, we would write our scripts to handle data streams rather than files where possible
   - While this design would be more efficient from a storage and memory perspective, we'll save the intermediates to disk for simplicity and ease of validating the results
 
+- As our workflow managers will effectively run these scripts from a command line, they'll need code to handle accepting arguments for the input and output paths as well as creating any directories for the output if necessary
+- Footnote: Snakemake (and Nextflow?) do automatically create directories for their outputs, but to make our code as portable as possible, we won't depend on that behavior
+- Since this is boilerplate that won't change much, if at all, between the scripts in this pipeline, I'll introduce it once here, so afterwards we can focus on the business logic of each script
+- All our scripts will have a structure something like the following
+
+```python
+import os
+from argparse import ArgumentParser
+
+# Any other imports here
+
+# Function definitions here
+
+# Constants defined here
+
+if __name__ == '__main__':
+    # Argument definitions and parsing
+    parser = ArgumentParser()
+    parser.add_argument('input_path')
+    parser.add_argument('output_path')
+    args = parser.parse_args()
+
+    # Perform data manipulations here
+
+    # Extract output directory from output path and create if necessary
+    output_dir = os.path.dirname(args.output_path)
+    if output_dir and not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    # Write outputs to file here
+```
+
+- In our actual scripts, we'll of course replace the placeholder comments with any necessary code, and the argument definitions may differ, but they'll all follow this overall format
+
+- The first thing of note is the argument parsing block, which uses Python's builtin argument parsing module, `argparse`
+  - It supports an extensive set of features, but fortunately its basic usage is simple
+  - Positional arguments are defined by name with `add_argument` calls to an instance of an `ArgumentParser` object
+  - These arguments are then read into an object (called `args` here) using the `parse_args` method where they are available as attributes
+- The second non-placeholder block then extracts the path of the output directory and creates it if necessary
+  - If the output path is just a file name, `output_dir` will be an empty string, so the if statements checks for that possibility first
+- Finally, all code that isn't imports, function definitions, or constants is wrapped in an `if __name__ == '__main__':` statement
+  - This isn't strictly necessary, but it's a common idiom in Python scripts
+  - There's plenty of discussion diving deep into the purpose of this statement on the internet, but the basic idea is to only allow the code to execute when it's run as a script and not when it's imported as a module
+    - Would anyone ever try to import this script as a module and then be surprised when it crashes their program because tries to parse input arguments and execute other code
+    - Not likely to be honest, but it's good practice to include it anyway since it's only a single line
+
 ### Nextflow
 - Nextflow example
 - Nextflow is more powerful of two

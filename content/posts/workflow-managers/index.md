@@ -95,8 +95,7 @@ draft = false
   - Output directories are made automatically unless the directory itself is explicitly an output, as marked with a directory() flag
   - This can cause errors unless your code has the right logic to account for the existence (or lack therefore) of the directories in its expected output paths
 
-## A toy workflow
-### A high-level overview
+## A high-level overview of a toy workflow
 - Now we'll implement a toy workflow in both languages to introduce their syntax and compare how they work in practice
   - Like all toy examples, this is contrived but all the more useful for illustration purposes
 - First, though, let's keep an eye on the big picture and talk about our workflow's purpose, inputs, and outputs
@@ -127,7 +126,7 @@ draft = false
       - As a result, it's impossible to make generalizations about the best way of splitting work in pipelines, and in practice these decisions will depend on a mixture of design and engineering considerations
     - By the way, for the bioinformaticians out there, if all this seems completely unrelated to anything in the real-world, mentally swap "counting words" with "mapping reads," "books" with "samples," and "genres" with "experimental condition"
 
-### Implementing the core logic in Python
+## Implementing the business logic in Python
 - Before diving into the specifics of Nextflow and Snakemake, we'll first implement the core components of our pipeline as Python scripts
 - The division of labor here is the Python scripts will handle all the logic of cleaning the text files, counting the words, making the pairwise comparisons, etc., and the workflow managers will handle executing those scripts on the appropriate inputs
 - Deciding the exact breakdown between the two is a bit of an art and will depend on the flexibility of the pipeline's design, but in general scripts take care of all the actual computations, and the workflow manager is only responsible for running those scripts at the right time
@@ -135,7 +134,7 @@ draft = false
   - We'll instead encode this metadata in the names of the files themselves
   - This will introduce some complications down the line for both Nextflow and Snakemake, but it will also simulate how metadata is handled in practice, especially when working with tools or formats that can't encode it in the file itself
 
-#### Exploring the data
+### Exploring the data
 - However, before we can even begin to think about writing code, we first need to understand what the data are and what they look like
 - The goal of this pipeline is to calculate various statistics derived from the counts of words in books, so I've selected 13 books in the public domain, downloaded their plain text files from [Project Gutenberg](https://www.gutenberg.org/), and grouped them into three "genres" under the following directory hierarchy:
 - Footnote: Take these groupings with a grain of salt, especially since Shakespeare is an author
@@ -234,7 +233,7 @@ be renamed.
 - Incorporate checks to verify any assumptions made about the data during its processing and throw errors liberally!
   - If the data has the expected structure, the code should still run without any issues, but if not, the user should know!
 
-#### Cleaning the data
+### Cleaning the data
 - Now we're ready to start writing some code
 - Our first task is a script that removes the header and footer from an input file and saves the result back to disk
 - The pipeline will then feed these cleaned files into a subsequent script that counts the words
@@ -319,11 +318,11 @@ with open(args.output_path, 'w') as file:
 - We read the input file line by line and only return the lines after the line marking the start of the text and stopping after the line marking its end
 - This is written as a generator, so as to not needlessly store the complete text in memory before writing to disk, but it would work just the same if `get_text_lines` return a list of lines
 
-### Nextflow
+## Linking the pieces with Nextflow
 - Nextflow example
 - Nextflow is more powerful of two
 
-### Snakemake
+## Linking the pieces with Snakemake
 - Snakemake example
 - It is possible to sidestep any argument parsing in Python scripts by accessing arguments through the snakemake object and running the command with a script guard
   - I avoid this approach, though, because it makes the underlying scripts less portable

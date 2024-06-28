@@ -130,7 +130,7 @@ draft = false
 ### Implementing the core logic in Python
 - Before diving into the specifics of Nextflow and Snakemake, we'll first implement the core components of our pipeline as Python scripts
 - The division of labor here is the Python scripts will handle all the logic of cleaning the text files, counting the words, making the pairwise comparisons, etc., and the workflow managers will handle executing those scripts on the appropriate inputs
-- Deciding the exact breakdown between the two is a bit of an art and will depend on the flexibility of the pipeline's design, but in general scripts take care of all the actual computations, and the workflow manager is only responsible for running those scripts at the appropriate time
+- Deciding the exact breakdown between the two is a bit of an art and will depend on the flexibility of the pipeline's design, but in general scripts take care of all the actual computations, and the workflow manager is only responsible for running those scripts at the right time
 - Furthermore, we'll generally write our Python scripts agnostic to the genres and titles of the files they're operating on, that is, they largely won't explicitly handle this information and instead only accept input and output file paths
   - We'll instead encode this metadata in the names of the files themselves
   - This will introduce some complications down the line for both Nextflow and Snakemake, but it will also simulate how metadata is handled in practice, especially when working with tools or formats that can't encode it in the file itself
@@ -138,6 +138,7 @@ draft = false
 #### Exploring the data
 - However, before we can even begin to think about writing code, we first need to understand what the data are and what they look like
 - The goal of this pipeline is to calculate various statistics derived from the counts of words in books, so I've selected 13 books in the public domain, downloaded their plain text files from [Project Gutenberg](https://www.gutenberg.org/), and grouped them into three "genres" under the following directory hierarchy:
+- Footnote: Take these groupings with a grain of salt, especially since Shakespeare is an author
 
 ```
 data/
@@ -196,7 +197,7 @@ by William Shakespeare
 ```
 
 - Clearly, this file has a header declaring it's a Project Gutenberg eBook along with licensing information and some other metadata
-- Likewise, it also has a footer, which begins at line 5299
+- Likewise, it also has a footer, which begins at line 5299 and continues for another few hundred lines
 
 ```{linenos=true, linenostart=5284}
 PRINCE.
@@ -231,8 +232,22 @@ be renamed.
   - For example, being remotely acquainted with Shakespeare (and literature in generally) made it obvious the text at the end was part of a license
 - It's usually not practical to check every input manually though, so a better general (long-term? overall?) strategy is to program defensively
 - Incorporate checks to verify any assumptions made about the data during its processing and throw errors liberally!
-  - If the data is as expected, the code should still run without any issues
-  - But if something unexpected happens, the user should know!
+  - If the data has the expected structure, the code should still run without any issues, but if not, the user should know!
+
+#### Cleaning the data
+- Now we're ready to start writing some code
+- Our first task is a script that removes the header and footer from an input file and saves the result back to disk
+- The pipeline will then feed these cleaned files into a subsequent script that counts the words
+- Strictly speaking, we could combine these two steps into a single script since it's simple to only count the words after the header and before the footer when processing a file line by line
+- However, we won't do that here for two reasons
+  - The first is pedagogical
+    - Since the primary purpose of this post is to illustrate how to implement a pipeline in Nextflow and Snakemake, we'll keep the individual steps simple to focus our attention more on workflow managers express the relationship between steps and less on their actual computations
+  - The second is philosophical
+    - In computing, particularly in the Unix ecosystem, there's an idea that programs should do one thing and do it well since this encourages developers to write clear and reusable code
+    - For example, though our data has a uniform structure with the same header and footer in each file, we may in the future want to adapt the pipeline to handle different formats
+    - By separating the two steps, we ensure we would only have to change the pre-processing code to support a new format, which makes the pipeline both easier to modify and maintain
+- As final note, if we were really following every tenet of the Unix philosophy, we would write our scripts to handle data streams rather than files where possible
+  - While this design would be more efficient from a storage and memory perspective, we'll save the intermediates to disk for simplicity and ease of validating the results
 
 ### Nextflow
 - Nextflow example

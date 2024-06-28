@@ -295,6 +295,30 @@ if __name__ == '__main__':
     - Would anyone ever try to import this script as a module and then be surprised when it crashes their program because tries to parse input arguments and execute other code
     - Not likely to be honest, but it's good practice to include it anyway since it's only a single line
 
+- With the boilerplate out of the way, let's write the code to remove the header and footer and store the result in a file
+
+```python
+def get_text_lines(path):
+    with open(path) as file:
+        in_text = False
+        for line in file:
+            if line.startswith('*** START OF THE PROJECT GUTENBERG EBOOK'):
+                in_text = True
+                continue  # Skip current line so it's not yielded
+            if line.startswith('*** END OF THE PROJECT GUTENBERG EBOOK'):
+                return
+            if in_text:
+                yield line
+
+with open(args.output_path, 'w') as file:
+    lines = get_text_lines(args.input_path)
+    file.writelines(lines)
+```
+
+- The idea here is pretty simple
+- We read the input file line by line and only return the lines after the line marking the start of the text and stopping after the line marking its end
+- This is written as a generator, so as to not needlessly store the complete text in memory before writing to disk, but it would work just the same if `get_text_lines` return a list of lines
+
 ### Nextflow
 - Nextflow example
 - Nextflow is more powerful of two

@@ -236,7 +236,7 @@ be renamed.
 - Incorporate checks to verify any assumptions made about the data during its processing and throw errors liberally!
   - If the data has the expected structure, the code should still run without any issues, but if not, the user should know!
 
-### Cleaning the data
+### Cleaning the data: Scope
 - Now we're ready to start writing some code
 - Our first task is a script that removes the header and footer from an input file and saves the result back to disk
 - The pipeline will then feed these cleaned files into a subsequent script that counts the words
@@ -251,6 +251,7 @@ be renamed.
 - As final note, if we were really following every tenet of the Unix philosophy, we would write our scripts to handle data streams rather than files where possible
   - While this design would be more efficient from a storage and memory perspective, we'll save the intermediates to disk for simplicity and ease of validating the results
 
+### Aside: Boilerplate for command line scripts
 - As our workflow managers will effectively run these scripts from a command line, they'll need code to handle accepting arguments for the input and output paths as well as creating any directories for the output if necessary
 - Footnote: Snakemake (and Nextflow?) do automatically create directories for their outputs, but to make our code as portable as possible, we won't depend on that behavior
 - Since this is boilerplate that won't change much, if at all, between the scripts in this pipeline, I'll introduce it once here, so afterwards we can focus on the business logic of each script
@@ -297,6 +298,7 @@ if __name__ == '__main__':
     - Would anyone ever try to import this script as a module and then be surprised when it crashes their program because tries to parse input arguments and execute other code
     - Not likely to be honest, but it's good practice to include it anyway since it's only a single line
 
+### Cleaning the date: Implementation
 - With the boilerplate out of the way, let's write the code to remove the header and footer and store the result in a file
 
 ```python
@@ -344,9 +346,9 @@ with open(args.output_path, 'w') as file:
         file.write(f'{word}\t{count}\n')
 ```
 
-- Unsurprisingly, the most finicky part of this script is extracting words from each line since there are gotchas to watch out for
-- The first of these is splitting the words
-  - Though most words are separated by whitespace, some authors also use em dashes or double hyphens, so these are also included in the regular expression that defines word delimiters
+- Unsurprisingly, the most finicky part of this script is extracting words from each line since there are a few gotchas
+- The first of these is in splitting the words
+  - Though most words are separated by whitespace, some authors in our texts also use em dashes or double hyphens, so these are also included in the regular expression that defines word delimiters
 - This splitting, however, does not remove punctuation marks at the start or end of words
   - The builtin `strip` method of strings and `punctuation` constant from the `string` module fortunately take care of this easily
   - The latter doesn't include curly quotes by default, which are separate characters, so we have to include them manually
@@ -371,7 +373,7 @@ punctuation = punctuation + '‘’“”'  # Add curly quotes
 ```
 
 - An interesting side effect of stripping punctuation marks is that it can sometimes result in empty words
-  - For example, *Winnie the Pooh* contains lines of spaced asterisks like '*        *        *        *        *' to mark sections within the text
+  - For example, *Winnie the Pooh* contains lines of spaced asterisks to mark sections within the text
   - Because the splitting on whitespace yields words that are "naked" asterisks, stripping them will create empty strings
   - As a result, in the first code block, the list of words derived from each line are filtered for empty strings
 - Note, this code was the result of several rounds of iteration, and it was only by carefully examining the results that I identified the edge cases in the line and word processing steps
@@ -428,7 +430,7 @@ with open(args.output_path, 'w') as file:
 
 ### Pairwise comparisons of counts
 
-### Grouping
+### Aggregating the results
 
 ## Linking the pieces with Nextflow
 - Nextflow example

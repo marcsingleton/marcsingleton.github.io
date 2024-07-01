@@ -418,17 +418,74 @@ with open(args.output_path, 'w') as file:
 ```
 
 - Since the data is stored as table, pandas provides an efficient interface for manipulating the count distributions
-- As a result, most of these are fairly self-explanatory or easily understood from their definitions
-- However, `vocab_size_L90` is likely new for anyone unfamiliar with genome assembly
-  - It's inspired by a similar statistic for measuring the contiguity of an assembly and is defined as the number of words that account for 90% of the total number when ordered by frequency
+- As a result, most of these are fairly self-explanatory or easily understood from their definitions except `vocab_size_L90` and possibly `entropy`
+- The former is inspired by a similar statistic for measuring the contiguity of a genome assembly and is defined as the number of words that account for 90% of the total number when ordered by frequency
   - It effectively counts the number of unique words excluding the 10% most uncommon
-- Additionally, entropy is measure of a distribution's "randomness" and is calculated using a function from SciPy's `stats` module
+- Entropy, on the other hand, is measure of a distribution's "randomness" and is calculated using a function from SciPy's `stats` module
 - Finally, notice that the book's title and genre is not stored directly alongside the calculated statistics
   - We'll instead encode this information in the output file names
   - This decision will make our lives a bit more complicated when it comes to aggregating the statistics from each book into a single file in the workflow managers
   - However, this is a common constraint for many tools and file formats, so while somewhat artificially imposed here, it will illustrate the strengths and weaknesses of Nextflow and Snakemake when it comes to handling this issue
 
 ### Pairwise comparisons of counts
+- We've at last reached the main event: calculating the similarity between pairs of count distributions
+- To do this, we'll use the Jensen-Shannon (JSD) divergence, which, like entropy, is a measure from information theory
+- For those familiar with the field, it's based on the Kullback-Leibler (KL) divergence
+- To quickly review, the KL divergence between two probability distributions \(P\) and \(Q\) over a sample space \(X\) is defined as
+
+$$
+D_{KL}(P||Q) = \sum_{x \in X} P(x) \log \frac{P(x)}{Q(x)}
+$$
+
+- Mathematically, this expression isn't symmetric with respect to \(P\) and \(Q\), so in general \(D_{KL}(P||Q) \ne D_{KL}(Q||P)\)
+- Since \(D_{KL}(P||Q) = 0\) when \(P = Q\) and \(P\) appears outside the logarithm, the KL divergence is usually interpreted as \(Q\)'s distance from \(P\)
+- This asymmetry, while useful in many applications of information theory, is more of a nuisance for us since we're mostly interested in the similarity between pairs of count distributions without having to explicitly privilege one as the reference
+- Fortunately, this issue is solved by the JSD divergence, which is defined as
+
+$$
+JSD(P||Q) = \frac{1}{2} D_{KL}(P||M) + \frac{1}{2} D_{KL}(P||M)
+$$
+
+where \( M = \frac{1}{2}(P+Q) \) is a pointwise mean of \(P\) and \(Q\)
+
+- We'll implement parsing the count tables and calculating the JSD between them directly in Python as
+
+```python
+from math import log
+
+
+def read_counts(input_path):
+    counts = {}
+    with open(input_path) as file:
+        file.readline()
+        for line in file:
+            fields = line.rstrip('\n').split('\t')
+            word, count = fields[0], int(fields[1])
+            counts[word] = count
+    return counts
+
+
+counts1 = read_counts(args.input_path_1)
+counts2 = read_counts(args.input_path_2)
+
+vocab = set(counts1) | set(counts2)
+n1 = sum(counts1.values())
+n2 = sum(counts2.values())
+
+JSD = 0
+for word in vocab:
+    p1 = counts1.get(word, 0) / n1
+    p2 = counts2.get(word, 0) / n2
+    m = 0.5 * (p1 + p2)
+    JSD += p1 * log(p1 / m)  # p1 as reference
+    JSD += p2 * log(p2 / m)  # p2 as reference
+JSD /= 2
+
+print(JSD, end='')
+```
+
+- Though we could in principle write the output JSD to an intermediate file, that adds up to a lot of disk IO for saving a single value over every single pair of books
+- Like with the summary statistics before, we'll instead impose an arbitrary restriction on ourselves by printing the results to standard output and later see how both workflow managers handle it
 
 ### Aggregating the results
 

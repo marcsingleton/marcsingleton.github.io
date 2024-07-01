@@ -380,6 +380,51 @@ punctuation = punctuation + '‘’“”'  # Add curly quotes
 - This script is saved under `coding/count_words.py`
 
 ### Calculating statistics from word counts
+- Before continuing to the main goal of comparing these word count distributions within and between genres, let's take a brief detour to calculate some summary statistics from each distribution individually
+- This will not only give us an interesting look into the text of each book, but it's also an important part of the iterative approach to pipeline design mentioned previously
+- The full script, `coding/basic_stats.py`, calculates eleven statistics, but for brevity I'll only show six below
+
+```python
+import pandas as pd
+import scipy.stats as stats
+
+df = pd.read_table(args.input_path)
+df['word_len'] = df['word'].apply(len)
+
+vocab_size = len(df)
+vocab_size_GT1 = (df['count'] > 1).sum()
+vocab_size_L90 = ((df['count'] / df['count'].sum()).cumsum() <= 0.9).sum() + 1  # Analogous to genome assembly statistic L50
+longest_word = df.sort_values(['word_len', 'word'],
+                              ascending=[False, True],
+                              ignore_index=True).at[0, 'word']
+most_common_word = df.at[0, 'word']
+entropy = stats.entropy(df['count'])
+
+output = [
+    ("vocab_size", vocab_size),
+    ("vocab_size_GT1", vocab_size_GT1),
+    ("vocab_size_L90", vocab_size_L90),
+    ("longest_word", longest_word),
+    ("most_common_word", most_common_word),
+    ("entropy", entropy),
+    ]
+
+with open(args.output_path, 'w') as file:
+    header = '\t'.join([record[0] for record in output]) + '\n'
+    values = '\t'.join([str(record[1]) for record in output]) + '\n'
+    file.write(header + values)
+```
+
+- Since the data is stored as table, pandas provides an efficient interface for manipulating the count distributions
+- As a result, most of these are fairly self-explanatory or easily understood from their definitions
+- However, `vocab_size_L90` is likely new for anyone unfamiliar with genome assembly
+  - It's inspired by a similar statistic for measuring the contiguity of an assembly and is defined as the number of words that account for 90% of the total number when ordered by frequency
+  - It effectively counts the number of unique words excluding the 10% most uncommon
+- Additionally, entropy is measure of a distribution's "randomness" and is calculated using a function from SciPy's `stats` module
+- Finally, notice that the book's title and genre is not stored directly alongside the calculated statistics
+  - We'll instead encode this information in the output file names
+  - This decision will make our lives a bit more complicated when it comes to aggregating the statistics from each book into a single file in the workflow managers
+  - However, this is a common constraint for many tools and file formats, so while somewhat artificially imposed here, it will illustrate the strengths and weaknesses of Nextflow and Snakemake when it comes to handling this issue
 
 ### Pairwise comparisons of counts
 

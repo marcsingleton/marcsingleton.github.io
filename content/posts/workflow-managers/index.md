@@ -29,7 +29,7 @@ showTableOfContents = true
 
 ### Documentation
 - Fortunately, both Nextflow and Snakemake are actively developed and well-documented with robust communities around them
-- However, I have to give the edge to Nextflow for its more robust set of examples and tutorials that introduce concepts slowly and its generally higher level of polish
+- However, Nextflow is the clear winner for its many examples and tutorials that introduce concepts slowly and their generally higher level of polish
 - Snakemake has two examples, but most of its documentation is in the form of its extensive reference, which can is an intimidating place to start
 - To be fair, the two tools are not working on a level playing field because Snakemake is an academic project where Nextflow is backed by a for-profit company, Seqera
   - So, while it's important to cite both, it's especially so for Snakemake
@@ -94,7 +94,7 @@ showTableOfContents = true
 - In contrast to Nextflow, however, in Snakemake's model of execution all commands are run from the directory of its workflow definition file by default
   - This is likely more intuitive for most users since it's how processes run in most shells
 - However, there is a "gotcha" in the treatment output directories which was one of the more frustrating aspects of first learning Snakemake
-  - Output directories are made automatically unless the directory itself is explicitly an output, as marked with a directory() flag
+  - Output directories are made automatically unless the directory itself is explicitly an output, as marked with a `directory()` flag
   - This can cause errors unless your code has the right logic to account for the existence (or lack therefore) of the directories in its expected output paths
 
 ## A high-level overview of a toy workflow
@@ -102,6 +102,7 @@ showTableOfContents = true
   - Like all toy examples, this is contrived but all the more useful for illustration purposes
 - First, though, let's keep an eye on the big picture and talk about our workflow's purpose, inputs, and outputs
 - Let's say we have a collection of books as text files grouped by genre, and we're interested in the distribution of word counts in each and how those distributions relate to each other, both within and between genres
+  - We might even have a hypothesis that books in the same genre use more similar sets of words than books in different genres, and this analysis is our way of testing it
 - The overall idea of our pipeline, then, is to count the words in each book, make all pairwise comparisons between these count distributions, and finally aggregate the results
 - As is typical in data science, though, we'll need to clean up the text files a little beforehand to remove metadata that shouldn't contribute to our word counts
 - We'll also add a step to calculate some basic statistics from the word count distributions individually and then aggregate them into a single file

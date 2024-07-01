@@ -8,6 +8,7 @@ enableInlineShortcodes = true
   copyright = "Copyright © 2024 Marc Singleton"
   dark = "off"
   highlight = true
+  math = false
 
 [menus]
   [[menus.main]]
@@ -33,6 +34,12 @@ enableInlineShortcodes = true
 
 [markup.goldmark.renderer]
   unsafe = true  # Allow HTML in Markdown
+
+[markup.goldmark.extensions.passthrough]
+  enable = true
+  [markup.goldmark.extensions.passthrough.delimiters]
+    block = [['\[', '\]'], ['$$', '$$']]
+    inline = [['\(', '\)']]
 
 [markup.highlight]
   codeFences = true

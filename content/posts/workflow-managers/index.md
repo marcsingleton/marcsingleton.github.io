@@ -5,6 +5,7 @@ date = "2024-07-01"
 summary = "A tutorial on designing a data analysis pipeline and automating it with Nextflow and Snakemake."
 tags = ["pipeline", "snakemake", "nextflow", "python", "bash", "tutorial"]
 showTableOfContents = true
+math = true
 +++
 
 ## Introduction: What are workflow managers?

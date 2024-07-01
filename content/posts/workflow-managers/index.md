@@ -488,6 +488,46 @@ print(JSD, end='')
 - Like with the summary statistics before, we'll instead impose an arbitrary restriction on ourselves by printing the results to standard output and later see how both workflow managers handle it
 
 ### Aggregating the results
+- In the last step of our pipeline, we'll take the output from the JSD calculations and comparing them within and between genres to test whether books in the same genre use more similar sets of words than books between genres
+- We'll do this using pandas to group and aggregate the results accordingly
+- This will, however, require a small leap of the imagination since in the previous script only prints a naked JSD to standard output
+- Let's assume for the moment, though, that using the workflow managers we've somehow recorded these results in a table saved to disk
+- Each pairwise comparison is a row in this table with fields for the JSD as well as the title and genre for each book in the pair
+  - The fields for the titles and genres are designated as `title1`, `genre1`, `title2`, and `genre2` depending on which book is arbitrary designated as the first or second when the pairs are generated in our pipeline
+  - While this kind of order instability is somewhat atypical for tabular data, we can handle it gracefully by grouping on an additional field that is `True` if the genres are the same and `False` otherwise as shown below
+
+```python
+from textwrap import dedent
+
+import pandas as pd
+from scipy.stats import mannwhitneyu
+
+df = pd.read_table(args.input_path)
+
+df['intra'] = df['genre1'] == df['genre2']
+intra = df.loc[df['intra'] & (df['title1'] != df['title2']), 'jsd']
+inter = df.loc[~df['intra'], 'jsd']
+result = mannwhitneyu(intra, inter)
+
+output = dedent(f"""\
+inter_mean: {inter.mean()}
+inter_median: {inter.median()}
+inter_var: {inter.var()}
+
+intra_mean: {intra.mean()}
+intra_median: {intra.median()}
+intra_var: {intra.var()}
+
+mannwhitneyu_statistic: {result.statistic}
+mannwhitneyu_pvalue: {result.pvalue}
+""")
+
+with open(args.output_path, 'w') as file:
+    file.write(output)
+```
+
+- Besides this trick, the script is a straightforward application of pandas' builtin aggregation methods
+- The only other calculation of note is the Mann-Whitney *U* test, a standard non-parametric test for the equality of central tendency of two distributions, which is supplied by the SciPy `stats` module.
 
 ## Linking the pieces with Nextflow
 - Nextflow example

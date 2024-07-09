@@ -534,8 +534,55 @@ with open(args.output_path, 'w') as file:
 - The only other calculation of note is the Mann-Whitney *U* test, a standard non-parametric test for the equality of central tendency of two distributions, which is supplied by the SciPy `stats` module.
 
 ## Linking the pieces with Nextflow
-- Nextflow example
-- Nextflow is more powerful of two
+### Basic Nextflow syntax
+- At this point we've written the core pieces of our workflow, so now we're finally ready to use our first workflow manager, Nextflow, to automate executing these scripts on the right inputs in the right order
+- Before implementing writing any code specific for our analysis, let's look at some prototypes of Nextflow objects
+- As discussed in the [overview on each manager's process model](#process-model), the building blocks of a Nextflow workflow are processes and channels where processes represent operations on streams of data carried by channels
+- In Nextflow syntax, this is formally written as
+
+```java
+process process_name_1 {
+  input:
+  input_type_1 input_name_1
+  input_type_2 input_name_2
+  ...
+
+  output:
+  output_type_1 output_name_1
+  output_type_2 output_name_2
+  ...
+  
+
+  script:
+  """
+  command_1
+  command_2
+  ...
+  """
+
+}
+```
+
+- This structure is hopefully largely self-explanatory
+  - Processes declare their inputs, a script that operates on those inputs, and the expected outputs of that script
+  - The details of how these pieces interact in practice will be clear when we see an example without any placeholders
+  - A potentially unintuitive component are the input and output types
+  - These will also become clear shortly, but for now they are essentially like type declarations which will influence how Nextflow interprets and manipulates those variables
+- Another way of looking at process is as functions, where the inputs and output are still placeholders for some literal values
+- Accordingly, processes are linked together through another structure called a workflow:
+
+```java
+workflow {
+  p0_results = process_name_0()
+  p1_results = process_name_1(p0_results[0], p0_results[1])
+}
+```
+
+- Here `process_name_0` is some hypothetical process that can generate two output channels from scratch, and treating everything like functions and variables, we can capture the output of the called `process_name_0` as a variable `p0_results` and feed it directly into `process_name_1`
+  - Though we store the outputs of `process_name_0` in a single variable, it's more of a tuple of two separate channels, so we have to access them individually by index to match the call signature of `process_name_1`
+  - Footnote: Nextflow offers a few different syntax for passing channels between processes. For example, while here we selected the different channels by index, it's also possible to access them by name with the `emit` keyword. Additionally, it's not strictly necessary to assign the outputs to variable since they are also available via the `out` attribute of a process, *e.g.* `process_name_0.out`. Finally, Nextflow permits [Unix-style pipes](https://www.nextflow.io/docs/latest/workflow.html#special-operators) to compose processes with single input and output channels.
+
+### Defining the processes
 
 ## Linking the pieces with Snakemake
 - Snakemake example

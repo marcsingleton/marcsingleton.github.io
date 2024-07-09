@@ -372,6 +372,11 @@ div.highlight > pre.chroma {
     padding: 5px 15px;
 }
 
+/* Undo formatting for general tables (removes left border) */
+.body-site table tr td.lntd:first-child {
+    border-left: none;
+}
+
 code {
     font-family: Consolas, monospace;
     font-size: 1.25rem;

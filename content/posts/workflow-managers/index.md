@@ -259,7 +259,7 @@ be renamed.
 
 ### Aside: Boilerplate for command line scripts
 - As our workflow managers will effectively run these scripts from a command line, they'll need code to handle accepting arguments for the input and output paths as well as creating any directories for the output if necessary
-- Footnote: Snakemake (and Nextflow?) do automatically create directories for their outputs, but to make our code as portable as possible, we won't depend on that behavior
+- Footnote: Snakemake (and Nextflow?) automatically create directories for their outputs, but to make our code as portable as possible, we won't depend on that behavior
 - Since this is boilerplate that won't change much, if at all, between the scripts in this pipeline, I'll introduce it once here, so afterwards we can focus on the business logic of each script
 - All our scripts will have a structure something like the following
 
@@ -378,7 +378,7 @@ def process_word(word):
 punctuation = punctuation + '‘’“”'  # Add curly quotes
 ```
 
-- An interesting side effect of stripping punctuation marks is that it can sometimes result in empty words
+- A side effect of stripping punctuation marks is that it can sometimes result in empty words
   - For example, *Winnie the Pooh* contains lines of spaced asterisks to mark sections within the text
   - Because the splitting on whitespace yields words that are "naked" asterisks, stripping them will create empty strings
   - As a result, in the first code block, the list of words derived from each line are filtered for empty strings
@@ -532,7 +532,7 @@ with open(args.output_path, 'w') as file:
     file.write(output)
 ```
 
-- Besides this trick, the script is a straightforward application of pandas' builtin aggregation methods
+- Besides this trick, the script is a straightforward application of pandas' built-in aggregation methods
 - The only other calculation of note is the Mann-Whitney *U* test, a standard non-parametric test for the equality of central tendency of two distributions, which is supplied by the SciPy `stats` module.
 
 ## Linking the pieces with Nextflow
@@ -554,18 +554,16 @@ process process_name_1 {
   output_type_2 output_name_2
   ...
   
-
   script:
   """
   command_1
   command_2
   ...
   """
-
 }
 ```
 
-- This structure is hopefully largely self-explanatory
+- This structure is largely self-explanatory
   - Processes declare their inputs, a script that operates on those inputs, and the expected outputs of that script
   - The details of how these pieces interact in practice will be clear when we see an example without any placeholders
   - A potentially unintuitive component are the input and output types
@@ -602,5 +600,5 @@ workflow {
   - This is called declarative programming
   - In practice, many programming languages and problem-solving strategies incorporate elements from both paradigms, so learning to recognize the common patterns across different domains is one of the most valuable skills a programmer can develop
 - More specific to this tutorial, I believe both tools have their use cases
-  - Nextflow for production-ready pipelines
+  - Nextflow more powerful of the two and for production-ready pipelines
   - Snakemake for prototyping and development

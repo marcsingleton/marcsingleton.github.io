@@ -131,7 +131,7 @@ math = true
     - By the way, for the bioinformaticians out there, if all this seems completely unrelated to anything in the real-world, mentally swap "counting words" with "mapping reads," "books" with "samples," and "genres" with "experimental condition"
 
 ## Implementing the business logic in Python
-- Before diving into the specifics of Nextflow and Snakemake, we'll first implement the core components of our pipeline as Python scripts
+- Before diving into the specifics of Nextflow and Snakemake, we'll first write the core components of our pipeline as Python scripts
 - The division of labor here is the Python scripts will handle all the logic of cleaning the text files, counting the words, making the pairwise comparisons, etc., and the workflow managers will handle executing those scripts on the appropriate inputs
 - Deciding the exact breakdown between the two is a bit of an art and will depend on the flexibility of the pipeline's design, but in general scripts take care of all the actual computations, and the workflow manager is only responsible for running those scripts at the right time
 - Furthermore, we'll generally write our Python scripts agnostic to the genres and titles of the files they're operating on, that is, they largely won't explicitly handle this information and instead only accept input and output file paths
@@ -140,31 +140,33 @@ math = true
 
 ### Exploring the data
 - However, before we can even begin to think about writing code, we first need to understand what the data are and what they look like
-- The goal of this pipeline is to calculate various statistics derived from the counts of words in books, so I've selected 13 books in the public domain, downloaded their plain text files from [Project Gutenberg](https://www.gutenberg.org/), and grouped them into three "genres" under the following directory hierarchy:
+- The goal of this pipeline is to calculate various statistics derived from the counts of words in books, so I've selected 13 books in the public domain, downloaded their plain text files from [Project Gutenberg](https://www.gutenberg.org/), and grouped them into three "genres" under the `data/` directory in the project's root:
 - Footnote: Take these groupings with a grain of salt, especially since Shakespeare is an author 
 
 ```
-data/
-├── childrens/
-│   ├── alices-adventures-in-wonderland.txt
-│   ├── peter-pan.txt
-│   ├── the-jungle-book.txt
-│   ├── the-wonderful-wizard-of-oz.txt
-│   ├── through-the-looking-glass.txt
-│   └── winnie-the-pooh.txt
-├── scifi/
-│   ├── frankenstein.txt
-│   ├── the-strange-case-of-dr-jekyll-and-mr-hyde.txt
-│   ├── the-time-machine.txt
-│   └── the-war-of-the-worlds.txt
-└── shakespeare/
-    ├── hamlet.txt
-    ├── macbeth.txt
-    └── romeo-and-juliet.txt
+workflow_tutorial/
+├── data/
+│   ├── childrens/
+│   │   ├── alices-adventures-in-wonderland.txt
+│   │   ├── peter-pan.txt
+│   │   ├── the-jungle-book.txt
+│   │   ├── the-wonderful-wizard-of-oz.txt
+│   │   ├── through-the-looking-glass.txt
+│   │   └── winnie-the-pooh.txt
+│   ├── scifi/
+│   │   ├── frankenstein.txt
+│   │   ├── the-strange-case-of-dr-jekyll-and-mr-hyde.txt
+│   │   ├── the-time-machine.txt
+│   │   └── the-war-of-the-worlds.txt
+│   └── shakespeare/
+│       ├── hamlet.txt
+│       ├── macbeth.txt
+│       └── romeo-and-juliet.txt
+⋮
 ```
 
-- By the way, these files and all the code we'll write throughout this tutorial are available in the this archive and this GitHub repository, so be sure to download it and follow along!
-  - The limits of good taste do limit the amount of code I'm willing to show in one block, but the structure of the scripts and project as a whole will make much more sense when viewed together
+- By the way, these files and all code we'll write throughout this tutorial are available in this GitHub [repository](https://github.com/marcsingleton/workflow_tutorial)
+  - The limits of good taste limit the amount of code I'm willing to show in one block, but the structure of the scripts and project as a whole will make much more sense when viewed together, so I highly recommend periodically referring to it while reading this post
   
 - It's always a good idea to take a look at the beginning, middle, and end of the raw data as sanity check, so let's do that now
 - For example, the beginning of `romeo-and-juliet.txt` is

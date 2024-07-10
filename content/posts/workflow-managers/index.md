@@ -38,6 +38,9 @@ math = true
   - This is a similar approach to other companies that back open source software, like [Red Hat](https://www.redhat.com/) and its operating system of the same name
   - Since a business can make a profit while "giving away" its chief product, I don't think there's a risk of Nextflow suddenly disappearing or requiring a subscription to use
     - Instead this is likely more of a philosophical consideration than anything else
+- A point in Snakemake's favor, though, is its Python-style workflow definitions will feel comfortable for the increasing number of data scientists and coders who use Python as a primary language
+- In contrast, Nextflow is based on Groovy which is turn an extension of Java
+  - While Groovy supports many of the same features as Python, there are also many small differences in syntax and naming that significantly increase the initial learning curve
 
 ### Process model
 - While both tools thoroughly document their commands, to my knowledge neither has an explicit explanation of their underlying models
@@ -634,7 +637,7 @@ process remove_pg {
     - As mentioned previously, these type qualifiers function similarly to type declarations in other programming languages, yielding different behaviors for different [input types](https://www.nextflow.io/docs/latest/process.html#inputs)
     - For example, the `path` qualifier indicates a file or folder, so Nextflow will automatically link inputs and outputs to and from their working directories as necessary
     - In contrast, the `val` qualifier is a variable whose value is available by name in the process script
-      - Here, it's applied to an object named `meta` containing title and genre metadata which we'll discuss in more detail shortly
+      - Here, it's applied to a map object named `meta` containing title and genre metadata which we'll discuss in more detail shortly
     - Finally, the `tuple` qualifier bundles values together as a single channel
       - If we didn't apply this qualifier on the outputs or inputs, the process would accept and generate two separate channels of metadata and files
       - Using our previous metaphor of channels as pneumatic tubes, we can represent this distinction graphically
@@ -643,6 +646,34 @@ process remove_pg {
     - As a final note, Nextflow takes a flexible approach to parentheses, allowing their omission in certain cases
       - Thus, in the previous process, `tuple val(meta), path(input_path)` is equivalent to `tuple(val(meta), path(input_path))`
       - This pattern is common in Nextflow, so in cases with single type qualifiers, parentheses are typically omitted
+
+### Defining a workflow
+- Processes only define rules for obtaining outputs from some inputs, so to apply the `remove_pg` process to our input data, we need to use it in a workflow
+- Notice, though, that `remove_pg` doesn't contain any references to the input data and, moreover, depends on an existing channel that emits tuples of a metadata map and a path
+- To kick-start workflows with this kind of information, Nextflow provides channel factories that can create channels from various inputs, including Unix-style glob patterns
+- For example, in the workflow snippet below, `channel.fromPath` matches all files in the `data/` directory, and the following line manipulates the channel to produce a new channel of tuples containing a file and its associated metadata
+  - The resulting `file_records` are then passed directly into the `remove_pg` which effectively acts as a function applied to each tuple in the incoming stream
+
+```java
+workflow {
+    // Find paths to data and convert into tuples with metadata
+    file_paths = channel.fromPath("$params.data_path/*/*.txt")
+    file_records = file_paths.map({tuple([title: it.baseName, genre: it.parent.baseName], it)})
+
+    // Remove header and footer
+    clean_records = remove_pg(file_records)
+}
+```
+
+- The definition of `file_records` may at first seem a little cryptic, but it's equivalent to the following construction in Python if `parent` and `basename` were functions that generated the titles and genres appropriately by extracting the path components free of extensions and trailing separators
+
+```python
+file_records = map(lambda x: tuple({'title': basename(x), 'genre': basename(parent(x))}, x), file_paths)
+```
+
+- In contrast to Python, Groovy uses a terser syntax for defining anonymous functions called [closures](https://groovy-lang.org/closures.html), providing an implicit parameter `it`
+- Additionally, [map literals](https://groovy-lang.org/groovy-dev-kit.html#Collections-Maps), equivalent to Python dictionaries, are delimited with square brackets, and string keys don't require quotes
+- However, other than these mainly cosmetic differences, the two are equivalent
 
 ## Linking the pieces with Snakemake
 - Snakemake example

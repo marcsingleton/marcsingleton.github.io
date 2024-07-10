@@ -55,7 +55,7 @@ math = true
     - Think of them like pneumatic tubes
     - Unlike pneumatic tubes channels can be duplicated by connecting them to multiple processes or manipulated in more complex ways
       - See channel operators
-    - The pneumatic tube metaphor is helpful though because channels do emit messages in discrete chunks
+    - The pneumatic tube metaphor is helpful though because channels emit messages in discrete chunks
       - This matters when a process is handling multiple channels because process will match messages from incoming channels
         - Like Python's zip function
         - Order is arbitrary
@@ -300,7 +300,7 @@ if __name__ == '__main__':
   - If the output path is just a file name, `output_dir` will be an empty string, so the if statements checks for that possibility first
 - Finally, all code that isn't imports, function definitions, or constants is wrapped in an `if __name__ == '__main__':` statement
   - This isn't strictly necessary, but it's a common idiom in Python scripts
-  - There's plenty of discussion diving deep into the purpose of this statement on the internet, but the basic idea is to only allow the code to execute when it's run as a script and not when it's imported as a module
+  - There are many resources diving deep into the purpose of this statement on the internet, but the basic idea is to only allow the code to execute when it's run as a script and not when it's imported as a module
     - Would anyone ever try to import this script as a module and then be surprised when it crashes their program because tries to parse input arguments and execute other code
     - Not likely to be honest, but it's good practice to include it anyway since it's only a single line
 
@@ -566,7 +566,7 @@ process process_name_1 {
 - This structure is largely self-explanatory
   - Processes declare their inputs, a script that operates on those inputs, and the expected outputs of that script
   - The details of how these pieces interact in practice will be clear when we see an example without any placeholders
-  - A potentially unintuitive component are the input and output types
+  - A potentially unintuitive component are the input and output type qualifiers that precede their names
   - These will also become clear shortly, but for now they are essentially like type declarations which will influence how Nextflow interprets and manipulates those variables
 - Another way of looking at process is as functions, where the inputs and output are still placeholders for some literal values
 - Accordingly, processes are linked together through another structure called a workflow:
@@ -582,7 +582,67 @@ workflow {
   - Though we store the outputs of `process_name_0` in a single variable, it's more of a tuple of two separate channels, so we have to access them individually by index to match the call signature of `process_name_1`
   - Footnote: Nextflow offers a few different syntax for passing channels between processes. For example, while here we selected the different channels by index, it's also possible to access them by name with the `emit` keyword. Additionally, it's not strictly necessary to assign the outputs to variable since they are also available via the `out` attribute of a process, *e.g.* `process_name_0.out`. Finally, Nextflow permits [Unix-style pipes](https://www.nextflow.io/docs/latest/workflow.html#special-operators) to compose processes with single input and output channels.
 
-### Defining the processes
+### Defining a process
+- We'll now implement a process and workflow for the first step of our pipeline
+- As in any well-organized script we'll start with a docstring at the top that describes its purpose as well as some constants we'll use throughout, which are conventionally stored as attributes under the `params` object
+  - Footnote: Any attribute of the `param` object is implicitly a configuration setting, meaning Nextflow can set its value from multiple locations in a [predetermined order](https://www.nextflow.io/docs/latest/config.html)
+
+```java
+// Nextflow pipeline for book text analysis
+
+// Paths
+params.output_path = "$projectDir/results_nf/"
+params.data_path = "$projectDir/data/"
+params.code_path = "$projectDir/code/"
+params.env_path = "$projectDir/env.yml"
+```
+
+- These constants are the paths to various directories in our workflow, so if we ever want to change the location of the outputs, for example, we only need to change it in one place
+  - In Nextflow, strings can be stored with either double or single quotes, but the former allows interpolation of the `projectDir` variable marked with the dollar sign
+  - (`projectDir` is a convenience variable which is available in every Nextflow runtime environment that corresponds to the directory of the main script)
+
+- With the constants out of the way, let's define our first Nextflow process, which will run the `remove_pg.py` script on an input file to remove the Project Gutenberg header and footer
+
+```java
+process remove_pg {
+    publishDir "$params.output_path/"
+
+    input:
+    tuple val(meta), path(input_path)
+    
+    output:
+    tuple val(meta), path("${meta.genre}/${meta.title}_clean.txt")
+    
+    script:
+    """
+    python $params.code_path/remove_pg.py $input_path ${meta.genre}/${meta.title}_clean.txt
+    """
+}
+```
+
+- Like many Nextflow processes, this example is largely a direct substitution from the previous template
+  - The input block defines the input variables which are then interpolated into a string that is executed on the command line, using brackets where necessary to delimit any ambiguous names
+  - (Triple quotes indicate a possibly multiline string)
+  - The expected outputs, including the name of the cleaned output file specified as an argument to the script, are declared in the output block
+- Two details deserve further explanation, however
+  - First is the `publishDir` directive
+    - Recall that in Nextflow every process is executed in an isolated working directory (named with a unique hash stored under the `work/` directory created when Nextflow runs a workflow)
+    - While it's possible, to scour the `work/` directory for these outputs, `publishDir` exposes outputs in a public directory for human use
+    - More specifically, Nextflow links any declared output files under the publication folder, directory structure and all, so scripts are free to write their outputs "in-place"
+    - This mechanism effectively creates a distinction between a workflow's public interface and its implementation, allowing developers to hide any intermediate files which aren't relevant to its human end users
+  - The second detail is the type qualifiers
+    - As mentioned previously, these type qualifiers function similarly to type declarations in other programming languages, yielding different behaviors for different [input types](https://www.nextflow.io/docs/latest/process.html#inputs)
+    - For example, the `path` qualifier indicates a file or folder, so Nextflow will automatically link inputs and outputs to and from their working directories as necessary
+    - In contrast, the `val` qualifier is a variable whose value is available by name in the process script
+      - Here, it's applied to an object named `meta` containing title and genre metadata which we'll discuss in more detail shortly
+    - Finally, the `tuple` qualifier bundles values together as a single channel
+      - If we didn't apply this qualifier on the outputs or inputs, the process would accept and generate two separate channels of metadata and files
+      - Using our previous metaphor of channels as pneumatic tubes, we can represent this distinction graphically
+      - (INSERT FIGURE)
+      - Because Nextflow matches messages from incoming channels similar to Python's `zip` function but doesn't guarantee their order, the `tuple` qualifier is necessary to ensure the metadata data are correctly paired with their corresponding files
+    - As a final note, Nextflow takes a flexible approach to parentheses, allowing their omission in certain cases
+      - Thus, in the previous process, `tuple val(meta), path(input_path)` is equivalent to `tuple(val(meta), path(input_path))`
+      - This pattern is common in Nextflow, so in cases with single type qualifiers, parentheses are typically omitted
 
 ## Linking the pieces with Snakemake
 - Snakemake example

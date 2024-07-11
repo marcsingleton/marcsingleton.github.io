@@ -658,22 +658,27 @@ process remove_pg {
 workflow {
     // Find paths to data and convert into tuples with metadata
     file_paths = channel.fromPath("$params.data_path/*/*.txt")
-    file_records = file_paths.map({tuple([title: it.baseName, genre: it.parent.baseName], it)})
+    file_records = file_paths.map({
+        tuple([title: it.baseName,genre: it.parent.baseName], it)
+        })
 
     // Remove header and footer
     clean_records = remove_pg(file_records)
 }
 ```
 
-- The definition of `file_records` may at first seem a little cryptic, but it's equivalent to the following construction in Python if `parent` and `basename` were functions that generated the titles and genres appropriately by extracting the path components free of extensions and trailing separators
+- The definition of `file_records` may at first seem a little cryptic, but it corresponds to the following construction in Python if `parent` and `basename` were functions that generated the titles and genres appropriately by extracting the path components free of extensions and trailing separators
 
 ```python
-file_records = map(lambda x: tuple({'title': basename(x), 'genre': basename(parent(x))}, x), file_paths)
+file_records = map(
+    lambda x: tuple({'title': basename(x),'genre': basename(parent(x))}, x),
+    file_paths
+    )
 ```
 
 - In contrast to Python, Groovy uses a terser syntax for defining anonymous functions called [closures](https://groovy-lang.org/closures.html), providing an implicit parameter `it`
-- Additionally, [map literals](https://groovy-lang.org/groovy-dev-kit.html#Collections-Maps), equivalent to Python dictionaries, are delimited with square brackets, and string keys don't require quotes
-- However, other than these mainly cosmetic differences, the two are equivalent
+- Additionally, [map literals](https://groovy-lang.org/groovy-dev-kit.html#Collections-Maps), Groovy's version of Python dictionaries, are delimited with square brackets, and string keys don't require quotes
+- However, other than these cosmetic differences, the two are equivalent
 
 ## Linking the pieces with Snakemake
 - Snakemake example

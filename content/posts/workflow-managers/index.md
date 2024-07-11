@@ -750,6 +750,48 @@ yielding the following output (again truncated for brevity):
 | ⋮ | ⋮ | ⋮ | ⋮ | ⋮ | ⋮ |
 | shakespeare | romeo-and-juliet | 3762 | serving-creature’s | and | 6.432 |
 
+### Calculating and aggregating pairwise similarities
+- The next difficulty comes when calculating and aggregating the pairwise similarities between books
+- The main conceptual leap is in generating the pairs in the first place, but this is also the easiest because Nextflow has a channel operator `combine` that produces all combinations of items between two source channels
+- Thus, we can simply combine `count_records` with itself to create a channel of pairs
+- However, because this is a self combination, it will generate *permutations*, meaning the resulting channel will include both (`hamlet.txt`, `peter-pan.txt`) and (`peter-pan.txt`, `hamlet.txt`) as distinct pairs, for example
+- Because our similarity metric, the JSD, is symmetric, this is an unnecessary recalculation, so we'll remove the duplicates with the `unique` operator called on a closure that generates a unique key for each pair by sorting their titles alphabetically
+
+```java
+count_pairs = count_records
+    .combine(count_records)
+    .map({
+        meta1 = it[0].collectEntries((key, value) -> [key + '1', value])
+        meta2 = it[2].collectEntries((key, value) -> [key + '2', value])
+        meta = meta1 + meta2
+        tuple(meta, it[1], it[3]) // Last line of a closure is its return value
+        })
+    .unique({[it[0].title1, it[0].title2].sort()})
+```
+
+- Before, though, we apply the `map` operator to combine the metadata from each item in the pair for readability purposes
+- This is largely an exercise in manipulating maps (the data structure, not the function) in Groovy, so I'll link directly to the documentation for the [`collectEntries`](https://docs.groovy-lang.org/latest/html/groovy-jdk/java/lang/Iterable.html#collectEntries()) method
+
+- We'll next call the `jsd_divergence` process on the pairs of count distributions, aggregate them into a single file, and finally compare the JSD between genres with `group_jsd_stats`
+
+```
+jsd_records = jsd_divergence(count_pairs)
+jsd_merged = jsd_records
+    .map({
+        record = it[0].clone()  // Copy meta object to not modify
+        record['jsd'] = it[1]
+        keys = ['genre1', 'title1', 'genre2', 'title2', 'jsd']
+        header = keys.join('\t') + '\n'
+        values = keys.collect({record[it]}).join('\t') + '\n'
+        header + values
+        })
+    .collectFile(name: "$params.output_path/jsd_divergence.tsv",
+                  keepHeader: true, skip: 1, sort: true)
+group_jsd_records = group_jsd_stats(jsd_merged)
+```
+
+- The aggregation step here follows a pattern similar to the one discussed in the previous section, so I won't discuss it further besides linking to the documentation for the [`join`](https://docs.groovy-lang.org/latest/html/groovy-jdk/java/lang/Iterable.html#join(java.lang.String)) and [`collect`](https://docs.groovy-lang.org/latest/html/groovy-jdk/java/lang/Iterable.html#collect(groovy.lang.Closure)) methods
+
 ## Linking the pieces with Snakemake
 - Snakemake example
 - It is possible to sidestep any argument parsing in Python scripts by accessing arguments through the snakemake object and running the command with a script guard

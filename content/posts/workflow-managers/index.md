@@ -803,7 +803,34 @@ group_jsd_records = group_jsd_stats(jsd_merged)
 - Accordingly, we need to write a rule ourselves to store the output in files
   - Fortunately, Snakemake allows us to mark these files as temporary, so it will automatically remove them when the workflow completes
 
-## Conclusion
+## Discussion
+### Are the genres really any different?
+- Though the question about whether the word distributions of books in the same genre are more similar than those between genres was mostly an excuse to write a pipeline, I feel that after all this, it would be a letdown to not take a look at the final results
+- The relevant output is produced by `group_jsd_stats.py` and stored in `grouped_jsd.txt` by both pipelines:
+
+```
+inter_mean: 0.2178663166067625
+inter_median: 0.221169948428903
+inter_var: 0.0010582306153500438
+
+intra_mean: 0.15474885919172832
+intra_median: 0.15262520771867927
+intra_var: 0.000475221996664538
+
+mannwhitneyu_statistic: 46.0
+mannwhitneyu_pvalue: 7.418770284720211e-11
+```
+
+- The inter-group and intra-group JSD means are 0.218 and 0.155, respectively
+- Furthermore, this difference is highly significant, with a *p*-value of 7.42 x 10<sup>-11</sup>
+- Since JSD is a measure of distance, we can say with a high degree of confidence that in this data set, books in the same genre have more similar word count distributions than books between genres
+- Of course, our conclusions are fairly limited since our data set contains only 13 texts whose groupings are at least a little suspect
+- Additionally, this analysis doesn't tell us if a particular genre was more responsible for this result than the others
+  - For example, it's possible that we observe a significant increase in intra-genre similarity only because the "shakespeare" genre only contains books written by a single author
+  - This wouldn't mean our analysis is wrong *per se*, but it is in some senses a less interesting result
+- These questions, however, are beyond the scope of this scope of this post, though they would make a great project for an applied statistics course 😉
+
+### Is one tool better than the other?
 - I've seen some users contrast Nextflow's and Snakemake's models as "forward" and "backward," but two fit squarely into existing programming paradigms, respectively
   - In Nextflow, the designer has to explicitly define the relationship between processes and their order of execution by connecting their channels
   - This kind of step-by-step description of the operations used to compute a result is called imperative programming

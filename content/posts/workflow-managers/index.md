@@ -9,10 +9,10 @@ math = true
 +++
 
 ## Introduction: What are workflow managers?
-- The key to any complex data analysis project (or any big project really) is breaking it into smaller pieces
-- Nowadays cleaning and analyzing a complex data set typically involves chaining together a heterogeneous mix of existing command-line tools and custom scripts written in Python or R
+- The key to any complex data analysis task (or any big project really) is breaking it into smaller pieces
+- Nowadays cleaning and analyzing a data set typically involves chaining together a heterogeneous mix of existing command-line tools and custom scripts written in Python or R
 - It's manageable to do this manually for small projects, but once there are more than a handful of scripts, it becomes more difficult
-- Since the dependencies between different steps form a [directed acyclic graph](https://marcsingleton.github.io/posts/project-structure-in-data-science/#data-analysis-is-a-dag), keeping the outputs of an analysis up-to-date requires maintaining a mental model of an entire network
+- Since the dependencies between different steps form a [directed acyclic graph](https://marcsingleton.github.io/posts/project-structure-in-data-science/#data-analysis-is-a-dag), keeping the outputs of an analysis up-to-date requires keeping a mental model of this entire network of relationships and their last-modified times
   - Needless to say, these cognitive resources are better spent on higher level tasks like the design and interpretation of analyses
 - It's even worse when some steps have different computing requirements in terms of hardware and software
   - For example, though data analysis is often process of *reduction* where after a certain point most analyses can run easily on a local machine, often there are a few computationally intensive steps that require distributed computing resources
@@ -168,7 +168,7 @@ workflow_tutorial/
 ⋮
 ```
 
-- By the way, these files and all code we'll write throughout this tutorial are available in this GitHub [repository](https://github.com/marcsingleton/workflow_tutorial)
+- By the way, these files and all code we'll write throughout this tutorial are available in this GitHub [repo](https://github.com/marcsingleton/workflow_tutorial)
   - The limits of good taste limit the amount of code I'm willing to show in one block, but the structure of the scripts and project as a whole will make much more sense when viewed together, so I highly recommend periodically referring to it while reading this post
   
 - It's always a good idea to take a look at the beginning, middle, and end of the raw data as sanity check, so let's do that now
@@ -680,6 +680,76 @@ file_records = map(
 - Additionally, [map literals](https://groovy-lang.org/groovy-dev-kit.html#Collections-Maps), Groovy's version of Python dictionaries, are delimited with square brackets, and string keys don't require quotes
 - However, other than these cosmetic differences, the two are equivalent
 
+### Aggregating the count statistics
+- The remaining implementation largely follows a similar pattern where each script has a corresponding process which is then applied to the proper channel in the workflow definition
+- For brevity, I'll leave those details for the full definition hosted on this post's associated GitHub [repo](https://github.com/marcsingleton/workflow_tutorial/blob/main/workflow.nf)
+- There are, however, two tricky parts that require some finesse
+- The first of these is when the individual word count statistics are gathered into a single file
+- Alone, the `basic_stats` process (which runs `basic_stats.py`) produces a TSV of statistics derived from the word count distribution of each book that looks something like the following, using `romeo-and-juliet.txt` as an example again
+
+| vocab_size | longest_word | most_common_word | entropy |
+| --- | --- | --- | --- |
+| 3762 | serving-creature’s | and | 6.432 |
+
+- (For brevity, only a subset of the full output is shown here)
+- Looking at 13 TSVs individually is pretty tedious, so we'd would like to essentially stack them on top of each other
+- Nextflow fortunately has a method for manipulating channels (an [operator](https://www.nextflow.io/docs/latest/operator.html) in Nextflow jargon) to do exactly this called `collectFile`
+- Accordingly, we can expand our workflow definition to calculate and aggregate these statistics with the following lines
+
+```java
+// Count words and calculate basic stats of counts
+count_records = count_words(clean_records)
+basic_records = basic_stats(count_records)
+    .collectFile({it[1].text}
+                 name: "$params.output_path/basic_stats.tsv",
+                 keepHeader: true, skip: 1)
+```
+
+- The closure selects the text from each file in the incoming tuples (a convenience offered by Nextflow for inputs marked with `path` qualifiers), and the options `keepHeader` and `skip` work together to keep the header of the first file while skipping the first line of the remaining files
+- Additionally, Groovy is more flexible in allowing method calls over line breaks than Python, so chained methods are commonly started on new lines
+
+- There is a small problem though -- the individual TSVs don't have columns for the title and genre of their books, so when they're combined, we have no way of knowing which lines came from which files
+- To solve this, we'll introduce an intermediate process that does a little surgery on our files
+- Nextflow's ability to capture terminal output in a channel and the standard Unix utility `paste` make this a simple one-liner
+
+```java
+process paste_ids {
+    input:
+    tuple val(meta), path(input_path)
+
+    output:
+    stdout
+
+    script:
+    """
+    echo -n 'genre\ttitle\n${meta.genre}\t${meta.title}\n' | paste - ${input_path}
+    """
+}
+```
+
+- For anyone unfamiliar with these commands or their options, `echo -n` prints the argument to output without a newline character since we've already included it
+- `paste` concatenates tabular data from multiple files, handling the line endings appropriately
+  - Here `-` is common Unix convention indicating the first argument refers to the `stdin` from the pipe operator rather than a file name
+
+- We'll now modify the workflow to incorporate this new process and the `sort` option on `collectFile` to order the lines by genre
+
+```java
+// Count words and calculate basic stats of counts
+count_records = count_words(clean_records)
+basic_records = basic_stats(count_records)
+basic_merged = paste_ids(basic_records)
+    .collectFile(name: "$params.output_path/basic_stats.tsv",
+                  keepHeader: true, skip: 1, sort: true)
+```
+
+yielding the following output (again truncated for brevity):
+
+|genre| title | vocab_size | longest_word | most_common_word | entropy |
+| --- | --- | --- | --- | --- | --- |
+| childrens | alices-adventures-in-wonderland | 2671 | bread-and-butter | the | 6.023 |
+| ⋮ | ⋮ | ⋮ | ⋮ | ⋮ | ⋮ |
+| shakespeare | romeo-and-juliet | 3762 | serving-creature’s | and | 6.432 |
+
 ## Linking the pieces with Snakemake
 - Snakemake example
 - It is possible to sidestep any argument parsing in Python scripts by accessing arguments through the snakemake object and running the command with a script guard
@@ -687,6 +757,9 @@ file_records = map(
   - Furthermore, Python has an argument parsing module in its standard library which makes adding basic command-line arguments a breeze
 - Snakemake requires that all wildcards used in input must be in output
 - Difficult to write shell scripts with f strings because of behavior with double brackets
+- Because Snakemake is fundamentally file-based, it doesn't offer as many conveniences for capturing and manipulating terminal output
+- Accordingly, we need to write a rule ourselves to store the output in files
+  - Fortunately, Snakemake allows us to mark these files as temporary, so it will automatically remove them when the workflow completes
 
 ## Conclusion
 - I've seen some users contrast Nextflow's and Snakemake's models as "forward" and "backward," but two fit squarely into existing programming paradigms, respectively

@@ -793,6 +793,103 @@ group_jsd_records = group_jsd_stats(jsd_merged)
 - The aggregation step here follows a pattern similar to the one discussed in the previous section, so I won't discuss it further besides linking to the documentation for the [`join`](https://docs.groovy-lang.org/latest/html/groovy-jdk/java/lang/Iterable.html#join(java.lang.String)) and [`collect`](https://docs.groovy-lang.org/latest/html/groovy-jdk/java/lang/Iterable.html#collect(groovy.lang.Closure)) methods
 
 ## Linking the pieces with Snakemake
+### Basic Snakemake syntax
+- Having seen the Nextflow implementation of our pipeline, let's see how Snakemake expresses the same relationships between the inputs and outputs of our analysis steps
+- Before getting into specifics, however, we'll quickly review Snakemake's workflow model and introduce its syntax
+- In contrast to Nextflow, which builds workflows from processes, Snakemake is based on files and the rules that create those files
+- For example, the hypothetical process we used in for the Nextflow syntax introduction would be written as
+
+```python
+rule rule_name_1
+    input:
+        'input_path_1',
+        'input_path_2',
+        ...
+  
+    output:
+        'output_path_1',
+        'output_path_2',
+        ...
+    
+    shell:
+        '''
+        command_1
+        command_2
+        ...
+        '''
+```
+
+in Snakemake
+
+- Snakemake rules are analogous to Nextflow's processes both in terms of function and structure, so there are many similarities between the two
+- There are also some key differences, however
+- First, both inputs and outputs are strings for names of files (or patterns with wildcards to match names of files)
+  - In contrast, for Nextflow processes, inputs are more like argument names of functions, though outputs marked with `path` qualifiers are similar
+- I should also note that Snakemake's syntax is derived from Python, so the indentation level is a necessary part of a properly formed rule
+  - Another common gotcha is different inputs and outputs are separated by commas
+- The second difference is Snakemake does not have a distinct workflow object
+  - Whereas in Nextflow, processes are templates for generating outputs that must be applied to inputs in a workflow, in Snakemake rules can encompass general patterns as well as specific files
+  - In fact, a workflow file needs at least one rule whose inputs and outputs don't have any wildcards, as this allows Snakemake to transform an abstract collection of rules into a concrete chain of operations
+  - This difference will be clearer when we implement our pipeline, though, so let's jump right in
+
+### Defining rules
+- As in Nextflow, we'll include a docstring and some path constants at the top
+
+```python
+"""Snakemake pipeline for book text analysis."""
+
+# Paths
+output_path = 'results_smk'
+data_path = 'data'
+code_path = 'code'
+env_path = 'env.yml'
+```
+
+- Footnote?: Unlike Nextflow, the constants aren't stored under a `params` object, and we can't directly modify them from the command line
+  - Snakemake does offer a similar feature for parameters stored in a [configuration file](https://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html), however
+
+- Let's now write a rule for running `remove_pg.py` on an input file
+
+```python
+rule remove_pg:
+    input:
+        f'{data_path}/{{genre}}/{{title}}.txt'
+    output:
+        f'{output_path}/{{genre}}/{{title}}_clean.txt'
+    shell:
+        f'''
+        python {code_path}/remove_pg.py {{input}} {{output}}
+        '''
+```
+
+- In Snakemake, placeholders in file names and shell commands are delimited with single sets of curly brackets
+- However, in this example the file names are given as [f-strings](https://docs.python.org/3/tutorial/inputoutput.html#formatted-string-literals), so we can substitute the constants we defined earlier
+- To distinguish these cases, we double the braces for the placeholders
+  - The difference between the two can be confusing at first, but it's helpful to think of Snakemake as processing a workflow file in two passes
+  - In the first, it substitutes the value of all expressions in single brackets in f-strings
+  - In the second, any remaining names delimited by single brackets in normal strings and double brackets in f-strings are treated as placeholders for resolving the rules into a chain of concrete operations
+  - (Another nuance is the shell block does not permit direct use of the wildcard names defined in the input block; they are instead accessed as attributes of the `wildcards` object, *e.g.* `wildcards.genre`)
+
+- The rule for the second script in the pipeline, `count_word.py`, is written similarly, though we can avoid duplicating the pattern for the output of `remove_pg` by directly referencing it via the `rules` object
+
+```python
+rule count_words:
+    input:
+        rules.remove_pg.output
+    output:
+        f'{output_path}/{{genre}}/{{title}}_counts.tsv'
+    shell:
+        f'''
+        python {code_path}/count_words.py {{input}} {{output}}
+        '''
+```
+
+- In this case, `remove_pg` creates a single file, so we can use the `output` attribute without further specification
+- If a specific output is needed from multiple options, they can be selected by index or [as an attribute](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#the-expand-function) by assigning names
+
+### Aggregating count statistics
+
+### Calculating and aggregating pairwise similarities
 - Snakemake example
 - It is possible to sidestep any argument parsing in Python scripts by accessing arguments through the snakemake object and running the command with a script guard
   - I avoid this approach, though, because it makes the underlying scripts less portable

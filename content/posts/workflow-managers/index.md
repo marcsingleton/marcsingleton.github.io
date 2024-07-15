@@ -42,7 +42,7 @@ math = true
 - In contrast, Nextflow is based on Groovy which is turn an extension of Java
   - While Groovy supports many of the same features as Python, there are also many small differences in syntax and naming that significantly increase the initial learning curve
 
-### Process model
+### Workflow model
 - While both tools thoroughly document their commands, to my knowledge neither has an explicit explanation of their underlying models
 - This can make it difficult to write workflows using programs with complex behavior and outputs without some trial and error
 - So, before diving into our toy example, let's take a moment to understand how Nextflow and Snakemake conceptualize organizing and executing workflows
@@ -682,7 +682,7 @@ file_records = map(
 
 ### Aggregating the count statistics
 - The remaining implementation largely follows a similar pattern where each script has a corresponding process which is then applied to the proper channel in the workflow definition
-- For brevity, I'll leave those details for the full definition hosted on this post's associated GitHub [repo](https://github.com/marcsingleton/workflow_tutorial/blob/main/workflow.nf)
+- For brevity, I'll leave those details for the full workflow file hosted on this post's associated GitHub [repo](https://github.com/marcsingleton/workflow_tutorial/blob/main/workflow.nf)
 - There are, however, two tricky parts that require some finesse
 - The first of these is when the individual word count statistics are gathered into a single file
 - Alone, the `basic_stats` process (which runs `basic_stats.py`) produces a TSV of statistics derived from the word count distribution of each book that looks something like the following, using `romeo-and-juliet.txt` as an example again
@@ -774,7 +774,7 @@ count_pairs = count_records
 
 - We'll next call the `jsd_divergence` process on the pairs of count distributions, aggregate them into a single file, and finally compare the JSD between genres with `group_jsd_stats`
 
-```
+```java
 jsd_records = jsd_divergence(count_pairs)
 jsd_merged = jsd_records
     .map({
@@ -790,7 +790,8 @@ jsd_merged = jsd_records
 group_jsd_records = group_jsd_stats(jsd_merged)
 ```
 
-- The aggregation step here follows a pattern similar to the one discussed in the previous section, so I won't discuss it further besides linking to the documentation for the [`join`](https://docs.groovy-lang.org/latest/html/groovy-jdk/java/lang/Iterable.html#join(java.lang.String)) and [`collect`](https://docs.groovy-lang.org/latest/html/groovy-jdk/java/lang/Iterable.html#collect(groovy.lang.Closure)) methods
+- The aggregation step here uses constructions similar to the previous two code blocks, so I won't discuss it further besides linking to the documentation for the [`join`](https://docs.groovy-lang.org/latest/html/groovy-jdk/java/lang/Iterable.html#join(java.lang.String)) and [`collect`](https://docs.groovy-lang.org/latest/html/groovy-jdk/java/lang/Iterable.html#collect(groovy.lang.Closure)) methods
+- Fortunately, these are the last steps of our workflow, so we should be able to run it from start to finish now, so download the repo and try for yourself!
 
 ## Linking the pieces with Snakemake
 ### Basic Snakemake syntax
@@ -867,7 +868,7 @@ rule remove_pg:
 - To distinguish these cases, we double the braces for the placeholders
   - The difference between the two can be confusing at first, but it's helpful to think of Snakemake as processing a workflow file in two passes
   - In the first, it substitutes the value of all expressions in single brackets in f-strings
-  - In the second, any remaining names delimited by single brackets in normal strings and double brackets in f-strings are treated as placeholders for resolving the rules into a chain of concrete operations
+  - In the second, any remaining names delimited by single brackets in normal strings and double brackets in f-strings are iteratively matched against any needed inputs and outputs until all wildcards are resolved into a concrete chain of operations
   - (Another nuance is the shell block does not permit direct use of the wildcard names defined in the input block; they are instead accessed as attributes of the `wildcards` object, *e.g.* `wildcards.genre`)
 
 - The rule for the second script in the pipeline, `count_word.py`, is written similarly, though we can avoid duplicating the pattern for the output of `remove_pg` by directly referencing it via the `rules` object
@@ -888,10 +889,65 @@ rule count_words:
 - If a specific output is needed from multiple options, they can be selected by index or [as an attribute](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#the-expand-function) by assigning names
 
 ### Aggregating count statistics
+- Many of the remaining rule definitions follow a similar pattern, so I'll again link to the [full workflow file](https://github.com/marcsingleton/workflow_tutorial/blob/main/workflow.smk) on GitHub instead of covering them in detail here
+- As in Nextflow, though, aggregating the count statistics requires some additional tricks we haven't covered yet since in Snakemake these kinds of "gather" steps are typically where wildcards are replaced with concrete names
+- First, though, we need to tell Snakemake where to find the data and how to extract the metadata from the file paths
+- Fortunately, Snakemake has a built-in function `glob_wildcards` that does exactly this
+
+```python
+# Collect metadata
+GENRES, TITLES = glob_wildcards(f'{data_path}/{{genre}}/{{title}}.txt')
+META = list(zip(GENRES, TITLES))
+```
+
+- We've also gone ahead and zipped together the `GENRE` and `TITLE` lists into combined metadata tuples since this will make generating pairwise combinations easier
+- These lines together perform a similar function to the first two commands in the Nextflow workflow
+  - However, as Snakemake doesn't have an explicit workflow definition, we'll instead write these lines immediately under the path constants at the top of the workflow file since they effectively act as a different set of constants within the workflow
+- Now we can write the rule that aggregates the count statistics into a single file 
+
+```python
+rule merge_basic_stats:
+    input:
+        expand(rules.basic_stats.output, zip, genre=GENRES, title=TITLES)
+    output:
+        f'{output_path}/basic_stats.tsv'
+    shell:
+        '''
+        read -a files <<< "{input}"
+        echo -n "genre\ttitle\t" > "{output}"
+        head -n 1 ${{files[0]}} >> "{output}"
+        for file in "${{files[@]}}"
+        do
+            base=$(basename $file)
+            title=${{base%%_*}}
+            genre=$(basename $(dirname $file))
+            echo -n "$genre\t$title\t"
+            tail -n +2 $file
+        done | sort >> "{output}"
+        '''
+```
+
+- We'll tackle the input block first
+- `expand` is another Snakemake convenience function that fills in wildcards using lists of values provided by matching keyword arguments
+  - For example, `rules.basic_stats.output` is the string `'f'results_smk/{genre}/{title}_stats.tsv'`, so Snakemake will use the `GENRE` and `TITLE` lists to generate the path to the count statistics for every book
+  - (By default, `expand` yields every combination of the provided wildcard values, but we can specify matched inputs by providing `zip` as the second argument)
+
+- Now let's take a look at the shell block
+- In contrast to its counterpart in Nextflow, this script for merging the TSVs is considerably more involved
+- Because Snakemake only models the relationship between files, it lacks features for directly manipulating metadata and file contents
+- Instead, we must extract this information from the file paths themselves using a variety of bash scripting tricks
+  - Most of the commands use familiar idioms like redirection and command substitution, but some involve less common syntax
+  - For example, the first line reads the input into an array variable using a [here string](https://tldp.org/LDP/abs/html/x17837.html)
+    - Because the `read` command splits its input using whitespace, this single line forces the pipeline to disallow spaces in its input file names
+    - This is generally good practice anyway, but it does illustrate how using bash for data manipulation can introduce unexpected constraints
+  - Another example of advanced syntax is the line `title=${{base%%_*}}`, which uses a bash feature for [trimming substrings from variables](https://tldp.org/LDP/abs/html/string-manipulation.html) to extract the title from the input file
 
 ### Calculating and aggregating pairwise similarities
-- Snakemake example
-- It is possible to sidestep any argument parsing in Python scripts by accessing arguments through the snakemake object and running the command with a script guard
+- At this point, it should be clear that `expand` is only a convenience function that generates 91 different file paths as a one-liner
+  - Using `expand` doesn't create any special links between rules
+  - The computational graph is only inferred via Snakemake's pattern matching rules after all f-strings and other function calls in the input and output blocks are resolved
+  - Snakemake doesn't even require consistent names for the wildcards between rules, as this example illustrates, though it does recommend that each rule saves its output files into a unique directory to accelerate the resolution of rule dependencies
+- It is possible to sidestep any argument parsing in Python scripts by accessing arguments through the `snakemake` object and running the command with a script guard
   - I avoid this approach, though, because it makes the underlying scripts less portable
   - Furthermore, Python has an argument parsing module in its standard library which makes adding basic command-line arguments a breeze
 - Snakemake requires that all wildcards used in input must be in output
@@ -934,6 +990,10 @@ mannwhitneyu_pvalue: 7.418770284720211e-11
   - In contrast, in Snakemake the user asks the program to compute a result, here a file output, and the program determines the operations needed to achieve that
   - This is called declarative programming
   - In practice, many programming languages and problem-solving strategies incorporate elements from both paradigms, so learning to recognize the common patterns across different domains is one of the most valuable skills a programmer can develop
-- More specific to this tutorial, I believe both tools have their use cases
+- More specific to real-world applications, I believe both tools have their use cases
   - Nextflow more powerful of the two and for production-ready pipelines
+    - Processes and channels are a more flexible model for organizing computations
+      - Not everything is necessarily a file, so Nextflow leverages concept of streams
+    - Includes many utilities for easily accessing and manipulating file contents, particularly in formats commonly used in bioinformatics
+    - More difficult to prototype and work iteratively because ?
   - Snakemake for prototyping and development

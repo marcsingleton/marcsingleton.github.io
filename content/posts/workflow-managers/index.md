@@ -49,49 +49,34 @@ In contrast, Snakemake's workflow model is centered around the relationships bet
 Snakemake also differs from Nextflow in that all commands are run from the directory of its workflow definition file by default. This is likely more intuitive for most users since it's how processes run in most shells. However, there is a "gotcha" in its treatment of output directories which was one of the more frustrating aspects of first learning Snakemake. Output directories are made automatically unless the directory itself is explicitly an output, as marked with a `directory()` flag. This can cause errors unless the script has the right logic to account for the existence (or lack therefore) of the directories in its expected output paths.
 
 ## A high-level overview of a toy workflow
-- Now we'll implement a toy workflow in both languages to introduce their syntax and compare how they work in practice
-  - Like all toy examples, this is contrived but all the more useful for illustration purposes
-- First, though, let's keep an eye on the big picture and talk about our workflow's purpose, inputs, and outputs
-- Let's say we have a collection of books as text files grouped by genre, and we're interested in the distribution of word counts in each and how those distributions relate to each other, both within and between genres
-  - We might even have a hypothesis that books in the same genre use more similar sets of words than books in different genres, and this analysis is our way of testing it
-- The overall idea of our pipeline, then, is to count the words in each book, make all pairwise comparisons between these count distributions, and finally aggregate the results
-- As is typical in data science, though, we'll need to clean up the text files a little beforehand to remove metadata that shouldn't contribute to our word counts
-- We'll also add a step to calculate some basic statistics from the word count distributions individually and then aggregate them into a single file
-- In total, graphically our pipeline will look something like the following
-  - (DIAGRAM OF PIPELINE)
+We'll now implement a toy workflow in both languages to introduce their syntax and compare how they work in practice. Like all toy examples, it'll have some contrived design choices that will be useful for illustration purposes. First, though, let's keep an eye on the big picture and introduce our workflow's purpose, inputs, and outputs. Let's say we have a collection of books as text files grouped by genre, and we're interested in the distribution of word counts in each and how those distributions relate to each other, both within and between genres. We might even have a hypothesis that books in the same genre use more similar sets of words than books in different genres, and this analysis is our way of testing it.
+
+The overall idea of our pipeline, then, is to count the words in each book, make all pairwise comparisons between these count distributions, and finally aggregate the results. As is typical in data science, though, we'll need to clean up the text files a little beforehand to remove metadata that shouldn't contribute to our word counts. We'll also add a step to calculate some basic statistics from the word count distributions individually and then aggregate them into a single file. In total, graphically our pipeline will look something like the following:
+
+(DIAGRAM OF PIPELINE)
 
 ### Aside: The scatter-gather pattern
-- Although this example is a "toy" in terms of the size of the data and the computing power required in each step, it illustrates several instances of the scatter gather pattern, which is ubiquitous in pipeline design
-  - Because big data processing is often [embarrassingly parallelizable](https://en.wikipedia.org/wiki/Embarrassingly_parallel), the scatter gather pattern splits large jobs into many independent pieces and merges the results together
-  - In this case, the pairwise comparisons of the word count distribution is a perfect example of the scatter gather pattern since each comparison is independent of the others until a downstream process aggregates them together
-  - Throughout this pipeline, individual books are used as the natural unit of work, and we won't subdivide its operations below that level
-  - However, it is possible in principle to parallelize some processes even further
-  - For example, counting the distribution of words in a book can occur in parallel if the list of words is split into several chunks
-    - Each scatter subprocess uses its chunk to creates its own distribution of word counts and the gather process calculates the full distribution by simply adding the counts across each sub-distribution
-    - Footnote: This works because the fundamental units and operations in this process are words and sums, respectively, the latter of which is both commutative and associative
-    - In practice, this an over-engineered solution because once a text is split on words, or even lines, the process is essentially done
-    - However, it does illustrate the general principle that the "atom" of work in a scatter gather pattern may be smaller than an individual file
-    - A more common scenario is instead scattering and gathering on files only
-    - Though in this example, every book corresponds to a single file, that's mostly a reflection of how we received the data rather than anything inherent to the analysis
-      - We could also have, for whatever reason, received each book in multiple files split into chapters or at a maximum size
-      - In that case, the word counting process would gather across multiple files
-    - The practical implementation of scatter gather processes is therefore often highly dependent on the organization of the input data within and between files, how the "atoms" of work are conceptualized, and the computational requirements of those "atoms"
-      - Footnote: The computational requirements of an atom of work can be a key factor of its definition!
-      - As a result, it's impossible to make generalizations about the best way of splitting work in pipelines, and in practice these decisions will depend on a mixture of design and engineering considerations
-    - By the way, for the bioinformaticians out there, if all this seems completely unrelated to anything in the real-world, mentally swap "counting words" with "mapping reads," "books" with "samples," and "genres" with "experimental condition"
+Although this example is a "toy" in terms of the size of the data and the computing power required in each step, it illustrates several instances of the scatter gather pattern, which is ubiquitous in pipeline design. Because big data processing is often [embarrassingly parallelizable](https://en.wikipedia.org/wiki/Embarrassingly_parallel), the scatter gather pattern splits large jobs into many independent pieces and merges the results together. Here, the pairwise comparisons of the word count distribution is a classic example of the scatter gather pattern since each comparison is independent of the others until a downstream process aggregates them together. Throughout this pipeline, individual books are used as the natural unit of work, and we won't subdivide its operations below that level.
+
+It is possible in principle to parallelize some processes even further, however. For example, counting the distribution of words in a book can occur in parallel if the list of words is split into several chunks. Each scatter subprocess uses its chunk to creates its own distribution of word counts and the gather process calculates the full distribution by simply adding the counts across each sub-distribution.[^2] In practice, this an over-engineered solution because once a text is split on words, or even lines, the process is essentially done. It does illustrate, though, that the "atom" of work in a scatter gather pattern may be smaller than an individual file.
+
+[^2]: This works because the fundamental units and operations in this process are words and sums, respectively, the latter of which is both commutative and associative.
+
+A more common scenario is instead scattering and gathering on files only. While in this example, every book corresponds to a single file, that's mostly a reflection of how we received the data rather than anything inherent to the analysis. We could also have, for whatever reason, received each book in multiple files split into chapters or at a maximum size. In that case, the word counting process would gather across multiple files. The practical implementation of scatter gather processes is therefore often highly dependent on the organization of the input data within and between files, how the "atoms" of work are conceptualized, and the computational requirements of those "atoms".[^3] As a result, it's impossible to make generalizations about the best way of splitting work in pipelines, and in practice these decisions will depend on a mixture of design and engineering considerations.
+
+[^3]: The computational requirements of an atom of work can even be a key factor of its definition!
+
+By the way, for the bioinformaticians out there, if all this seems completely unrelated to anything in the real-world, mentally swap "counting words" with "mapping reads," "books" with "samples," and "genres" with "experimental condition."
 
 ## Implementing the business logic in Python
-- Before diving into the specifics of Nextflow and Snakemake, we'll first write the core components of our pipeline as Python scripts
-- The division of labor here is the Python scripts will handle all the logic of cleaning the text files, counting the words, making the pairwise comparisons, etc., and the workflow managers will handle executing those scripts on the appropriate inputs
-- Deciding the exact breakdown between the two is a bit of an art and will depend on the flexibility of the pipeline's design, but in general scripts take care of all the actual computations, and the workflow manager is only responsible for running those scripts at the right time
-- Furthermore, we'll generally write our Python scripts agnostic to the genres and titles of the files they're operating on, that is, they largely won't explicitly handle this information and instead only accept input and output file paths
-  - We'll instead encode this metadata in the names of the files themselves
-  - This will introduce some complications down the line for both Nextflow and Snakemake, but it will also simulate how metadata is handled in practice, especially when working with tools or formats that can't encode it in the file itself
+Before diving into the specifics of Nextflow and Snakemake, we'll first write the core components of our pipeline as Python scripts. The division of labor here is the Python scripts will handle all the logic of cleaning the text files, counting the words, making the pairwise comparisons, *etc.*, and the workflow managers will handle executing those scripts on the appropriate inputs. Deciding the exact breakdown between the two is a bit of an art and will depend on the flexibility of the pipeline's design, but in general scripts take care of all the actual computations, and the workflow manager is only responsible for running those scripts at the right time.
+
+Furthermore, we'll generally write our Python scripts agnostic to the genres and titles of the files they're operating on, that is, they largely won't explicitly handle this information and instead only accept input and output file paths. We'll instead encode this metadata in the names of the files themselves. This will introduce some complications down the line for both Nextflow and Snakemake, but it will also simulate how metadata is handled in practice, especially when working with tools or formats that can't encode it in the file itself.
 
 ### Exploring the data
-- However, before we can even begin to think about writing code, we first need to understand what the data are and what they look like
-- The goal of this pipeline is to calculate various statistics derived from the counts of words in books, so I've selected 13 books in the public domain, downloaded their plain text files from [Project Gutenberg](https://www.gutenberg.org/), and grouped them into three "genres" under the `data/` directory in the project's root:
-- Footnote: Take these groupings with a grain of salt, especially since Shakespeare is an author 
+However, before we can even begin to think about writing code, we first need to understand what the data are and what they look like. The goal of this pipeline is to calculate various statistics derived from the counts of words in books, so I've selected 13 books in the public domain, downloaded their plain text files from [Project Gutenberg](https://www.gutenberg.org/), and grouped them into three "genres"[^4] under the `data/` directory in the project's root:
+
+[^4]: Take these groupings with a grain of salt, especially since Shakespeare is an author.
 
 ```
 workflow_tutorial/
@@ -115,11 +100,9 @@ workflow_tutorial/
 ⋮
 ```
 
-- By the way, these files and all code we'll write throughout this tutorial are available in this GitHub [repo](https://github.com/marcsingleton/workflow_tutorial)
-  - The limits of good taste limit the amount of code I'm willing to show in one block, but the structure of the scripts and project as a whole will make much more sense when viewed together, so I highly recommend periodically referring to it while reading this post
-  
-- It's always a good idea to take a look at the beginning, middle, and end of the raw data as sanity check, so let's do that now
-- For example, the beginning of `romeo-and-juliet.txt` is
+By the way, these files and all code we'll write throughout this tutorial are available in this GitHub [repo](https://github.com/marcsingleton/workflow_tutorial). Good taste limits the amount of code I'm willing to show in one block, but the structure of the scripts and project as a whole will make much more sense when viewed together, so I highly recommend periodically referring to it while reading this post.
+
+It's always a good idea to take a look at the beginning, middle, and end of the raw data as sanity check, so let's do that now. For example, the beginning of `romeo-and-juliet.txt` is:
 
 ```{linenos=true, linenostart=1}
 The Project Gutenberg eBook of Romeo and Juliet
@@ -154,8 +137,7 @@ THE TRAGEDY OF ROMEO AND JULIET
 by William Shakespeare
 ```
 
-- Clearly, this file has a header declaring it's a Project Gutenberg eBook along with licensing information and some other metadata
-- Likewise, it also has a footer, which begins at line 5299 and continues for another few hundred lines
+Clearly, this file has a header declaring it's a Project Gutenberg eBook along with licensing information and some other metadata. Likewise, it also has a footer, which begins at line 5299 and continues for another few hundred lines.
 
 ```{linenos=true, linenostart=5284}
 PRINCE.
@@ -182,15 +164,7 @@ Updated editions will replace the previous one—the old editions will
 be renamed.
 ```
 
-- Though not all files contain headers, and even fewer contain footers, but when they do, the pipeline must account for them
-- If it doesn't, at best the pipeline will crash because something unexpected happened
-- However, the worst-case scenario is the pipeline won't notice and will continue chugging along, happily returning incorrect results
-- That's why it's essential to at a minimum spot check a few input files at the beginning and end
-  - This is where it's also helpful to have some domain knowledge
-  - For example, being remotely acquainted with Shakespeare (and literature in generally) made it obvious the text at the end was part of a license
-- It's usually not practical to check every input manually though, so a better general (long-term? overall?) strategy is to program defensively
-- Incorporate checks to verify any assumptions made about the data during its processing and throw errors liberally!
-  - If the data has the expected structure, the code should still run without any issues, but if not, the user should know!
+Though, in general, not all files contain headers, and even fewer contain footers, but when they do, the pipeline must account for them. If it doesn't, at best the pipeline will crash because something unexpected happened. However, at worst the pipeline won't notice and will continue chugging along, happily returning incorrect results. That's why it's essential to at a minimum spot check a few input files at the beginning and end. This is where it's also helpful to have some domain knowledge. For example, being remotely acquainted with Shakespeare (and literature in general) made it obvious the text at the end was part of a license. It's usually not practical to check every input manually though, so a better overall strategy is to program defensively Incorporate checks to verify any assumptions made about the data during its processing and throw errors liberally! If the data has the expected structure, the code should still run without any issues, but if not, the user should know!
 
 ### Cleaning the data: Scope
 - Now we're ready to start writing some code

@@ -1,6 +1,6 @@
 +++
 author = "Marc Singleton"
-title = "Workflow Managers in Data Science: Nextflow and Snakemake"
+title = "Workflow Managers in Data Science: Nextflow and Snakemake (draft)"
 date = "2024-07-01"
 summary = "A tutorial on designing a data analysis pipeline and automating it with Nextflow and Snakemake."
 tags = ["pipeline", "snakemake", "nextflow", "python", "bash", "tutorial"]
@@ -167,26 +167,14 @@ be renamed.
 Though, in general, not all files contain headers, and even fewer contain footers, but when they do, the pipeline must account for them. If it doesn't, at best the pipeline will crash because something unexpected happened. However, at worst the pipeline won't notice and will continue chugging along, happily returning incorrect results. That's why it's essential to at a minimum spot check a few input files at the beginning and end. This is where it's also helpful to have some domain knowledge. For example, being remotely acquainted with Shakespeare (and literature in general) made it obvious the text at the end was part of a license. It's usually not practical to check every input manually though, so a better overall strategy is to program defensively Incorporate checks to verify any assumptions made about the data during its processing and throw errors liberally! If the data has the expected structure, the code should still run without any issues, but if not, the user should know!
 
 ### Cleaning the data: Scope
-- Now we're ready to start writing some code
-- Our first task is a script that removes the header and footer from an input file and saves the result back to disk
-- The pipeline will then feed these cleaned files into a subsequent script that counts the words
-- Strictly speaking, we could combine these two steps into a single script since it's simple to only count the words after the header and before the footer when processing a file line by line
-- However, we won't do that here for two reasons
-  - The first is pedagogical
-    - Since the primary purpose of this post is to illustrate how to implement a pipeline in Nextflow and Snakemake, we'll keep the individual steps simple to focus our attention more on workflow managers express the relationship between steps and less on their actual computations
-  - The second is philosophical
-    - In computing, particularly in the Unix ecosystem, there's an idea that programs should do one thing and do it well since this encourages developers to write clear and reusable code
-    - For example, though our data has a uniform structure with the same header and footer in each file, we may in the future want to adapt the pipeline to handle different formats
-    - By separating the two steps, we ensure we would only have to change the pre-processing code to support a new format, which makes the pipeline both easier to modify and maintain
-- As final note, if we were really following every tenet of the Unix philosophy, we would write our scripts to handle data streams rather than files where possible
-  - While this design would be more efficient from a storage and memory perspective, we'll save the intermediates to disk for simplicity and ease of validating the results
+Now we're ready to start writing some code. Our first task is a script that removes the header and footer from an input file and saves the result back to disk. The pipeline will then feed these cleaned files into a subsequent script that counts the words. Strictly speaking, we could combine these two steps into a single script since it's simple to only count the words after the header and before the footer when processing a file line by line. However, we won't do that here for two reasons. The first is pedagogical. Since the primary purpose of this post is to illustrate how to implement a pipeline in Nextflow and Snakemake, we'll keep the individual steps simple to focus our attention more on workflow managers express the relationship between steps and less on their actual computations.
+
+The second is philosophical. In computing, particularly in the Unix ecosystem, there's an idea that programs should do one thing and do it well since this encourages developers to write clear and reusable code. For example, though our data has a uniform structure with the same header and footer in each file, we may in the future want to adapt the pipeline to handle different formats. By separating the two steps, we ensure we would only have to change the pre-processing code to support a new format, which makes the pipeline both easier to modify and maintain. As final note, if we were really following every tenet of the Unix philosophy, we would write our scripts to handle data streams rather than files where possible. While this design would be more efficient from a storage and memory perspective, we'll save the intermediates to disk for simplicity and ease of validating the results.
 
 ### Aside: Boilerplate for command line scripts
-- As our workflow managers will effectively run these scripts from a command line, they'll need code to handle accepting arguments for the input and output paths as well as creating any directories for the output if necessary
-- Footnote: Snakemake (and Nextflow?) automatically create directories for their outputs, but to make our code as portable as possible, we won't depend on that behavior
-- Footnote: Scripts run with Snakemake can sidestep any argument parsing in Python scripts by accessing arguments through the `snakemake` object and running the command with a [script guard](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#python). I avoid this approach, though, because it makes the underlying scripts less portable
-- Since this is boilerplate that won't change much, if at all, between the scripts in this pipeline, I'll introduce it once here, so afterwards we can focus on the business logic of each script
-- All our scripts will have a structure something like the following
+As our workflow managers will effectively run these scripts from a command line, they'll need code to handle accepting arguments for the input and output paths as well as creating any directories for the output if necessary.[^5] Since this is boilerplate that won't change much, if at all, between the scripts in this pipeline, I'll introduce it once here, so afterwards we can focus on the business logic of each script. In our actual scripts, we'll of course replace the placeholder comments with any necessary code, and the argument definitions may differ, but they'll all follow this same overall format:
+
+[^5]: Scripts run with Snakemake can sidestep any argument parsing in Python scripts by accessing arguments through the `snakemake` object and running the command with a [script guard](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#python). I avoid this approach, though, because it makes the underlying scripts less portable. Additionally, Snakemake automatically creates directories for its outputs, but we won't depend on that behavior for the same reason.
 
 ```python
 import os
@@ -215,22 +203,12 @@ if __name__ == '__main__':
     # Write outputs to file here
 ```
 
-- In our actual scripts, we'll of course replace the placeholder comments with any necessary code, and the argument definitions may differ, but they'll all follow this overall format
+The first thing of note is the argument parsing block, which uses Python's builtin argument parsing module, `argparse`. It supports an extensive set of features, but fortunately its basic usage is simple. Positional arguments are defined by name with `add_argument` calls to an instance of an `ArgumentParser` object. These arguments are then read into an object (called `args` here) using the `parse_args` method where they are available as attributes. The second non-placeholder block then extracts the path of the output directory and creates it if necessary. If the output path is just a file name, `output_dir` will be an empty string, so the if statements checks for that possibility first.
 
-- The first thing of note is the argument parsing block, which uses Python's builtin argument parsing module, `argparse`
-  - It supports an extensive set of features, but fortunately its basic usage is simple
-  - Positional arguments are defined by name with `add_argument` calls to an instance of an `ArgumentParser` object
-  - These arguments are then read into an object (called `args` here) using the `parse_args` method where they are available as attributes
-- The second non-placeholder block then extracts the path of the output directory and creates it if necessary
-  - If the output path is just a file name, `output_dir` will be an empty string, so the if statements checks for that possibility first
-- Finally, all code that isn't imports, function definitions, or constants is wrapped in an `if __name__ == '__main__':` statement
-  - This isn't strictly necessary, but it's a common idiom in Python scripts
-  - There are many resources diving deep into the purpose of this statement on the internet, but the basic idea is to only allow the code to execute when it's run as a script and not when it's imported as a module
-    - Would anyone ever try to import this script as a module and then be surprised when it crashes their program because tries to parse input arguments and execute other code
-    - Not likely to be honest, but it's good practice to include it anyway since it's only a single line
+Finally, all code that isn't imports, function definitions, or constants is wrapped in an `if __name__ == '__main__':` statement. This isn't strictly necessary, but it's a common idiom in Python scripts. There are many resources diving deep into the purpose of this statement on the internet, but the basic idea is to only allow the code to execute when it's run as a script and not when it's imported as a module. Would anyone ever try to import this script as a module and then be surprised when it crashes their program because tries to parse input arguments and execute other code? Not likely to be honest, but it's good practice to include it anyway since it's only a single line.
 
 ### Cleaning the date: Implementation
-- With the boilerplate out of the way, let's write the code to remove the header and footer and store the result in a file
+With the boilerplate out of the way, let's write the code to remove the header and footer and store the result in a file:
 
 ```python
 def get_text_lines(path):
@@ -250,16 +228,10 @@ with open(args.output_path, 'w') as file:
     file.writelines(lines)
 ```
 
-- The idea here is simple
-  - We read the input file line by line and only return the lines after the line marking the start of the text and stopping after the line marking its end
-  - This is written as a generator, so as to not needlessly store the complete text in memory before writing to disk, but it would work just the same if `get_text_lines` return a list of lines
-- The final script is saved as `code/remove_pg.py` in the workflow repository
+The idea here is simple. We read the input file line by line and only return the lines after the line marking the start of the text and stopping after the line marking its end. This is written as a generator, so as to not needlessly store the complete text in memory before writing to disk, but it would work just the same if `get_text_lines` return a list of lines. The final script is saved as `code/remove_pg.py` in the workflow repository.
 
 ### Counting words
-- The next step of the pipeline is to count the words in each cleaned file
-- The idea here is also simple
-  - We process the files line by line, first splitting words on whitespace and then processing those words to standardize them
-  - Counts of the processed words are stored in a `Counter` object, available from the standard library, and ultimately written to file in count then alphabetical order
+The next step of the pipeline is to count the words in each cleaned file. The idea here is also simple. We process the files line by line, first splitting words on whitespace and then processing those words to standardize them. Counts of the processed words are stored in a `Counter` object, available from the `collections` module of the standard library, and ultimately are written to file in count then alphabetical order.
 
 ```python
 from collections import Counter
@@ -277,13 +249,7 @@ with open(args.output_path, 'w') as file:
         file.write(f'{word}\t{count}\n')
 ```
 
-- Unsurprisingly, the most finicky part of this script is extracting words from each line since there are a few gotchas
-- The first of these is in splitting the words
-  - Though most words are separated by whitespace, some authors in our texts also use em dashes or double hyphens, so these are also included in the regular expression that defines word delimiters
-- This splitting, however, does not remove punctuation marks at the start or end of words
-  - The builtin `strip` method of strings and `punctuation` constant from the `string` module fortunately take care of this easily
-  - The latter doesn't include curly quotes by default, which are separate characters, so we have to include them manually
-  - Finally, we convert all words to lowercase since for our purposes a word is the same regardless of its capitalization
+Unsurprisingly, the most finicky part of this script is extracting words from each line since there are a few gotchas. The first of these is in splitting the words. Though most words are separated by whitespace, some authors in our texts also use em dashes or double hyphens, so these are also included in the regular expression that defines word delimiters. This splitting, however, does not remove punctuation marks at the start or end of words. The builtin `strip` method of strings and `punctuation` constant from the `string` module fortunately take care of this easily. The latter doesn't include curly quotes by default, which are separate characters, so we have to include them manually. Finally, we convert all words to lowercase since for our purposes a word is the same regardless of its capitalization.
 
 ```python
 import re
@@ -303,19 +269,12 @@ def process_word(word):
 punctuation = punctuation + '‘’“”'  # Add curly quotes
 ```
 
-- A side effect of stripping punctuation marks is that it can sometimes result in empty words
-  - For example, *Winnie the Pooh* contains lines of spaced asterisks to mark sections within the text
-  - Because the splitting on whitespace yields words that are "naked" asterisks, stripping them will create empty strings
-  - As a result, in the first code block, the list of words derived from each line are filtered for empty strings
-- Note, this code was the result of several rounds of iteration, and it was only by carefully examining the results that I identified the edge cases in the line and word processing steps
-  - This is a general feature of data analysis, particularly in pipeline prototyping
-    - It's difficult to know all the idiosyncrasies of a data set in advance, so it's important to perform sanity checks and exploratory analyses on intermediate results to ensure their validity
-- This script is saved under `coding/count_words.py`
+A side effect of stripping punctuation marks is that it can sometimes result in empty words. For example, *Winnie the Pooh* contains lines of spaced asterisks to mark sections within the text. Because the splitting on whitespace yields words that are "naked" asterisks, stripping them will create empty strings. As a result, in the first code block, the list of words derived from each line are filtered for empty strings.
+
+The above code was the result of several rounds of iteration, and it was only by carefully examining the results that I identified the edge cases in the line and word processing steps. This is a general feature of data analysis, particularly in pipeline prototyping. It's difficult to know all the idiosyncrasies of a data set in advance, so it's important to perform sanity checks and exploratory analyses on intermediate results to ensure their validity. This script is saved under `coding/count_words.py`.
 
 ### Calculating statistics from word counts
-- Before continuing to the main goal of comparing these word count distributions within and between genres, let's take a brief detour to calculate some summary statistics from each distribution individually
-- This will not only give us an interesting look into the text of each book, but it's also an important part of the iterative approach to pipeline design mentioned previously
-- The full script, `coding/basic_stats.py`, calculates eleven statistics, but for brevity I'll only show six below
+Before continuing to the main goal of comparing these word count distributions within and between genres, let's take a brief detour to calculate some summary statistics from each distribution individually. This will not only give us an interesting look into the text of each book, but it's also an important part of the iterative approach to pipeline design mentioned previously. The full script, `coding/basic_stats.py`, calculates eleven statistics, but for brevity I'll only show six below:
 
 ```python
 import pandas as pd
@@ -348,38 +307,26 @@ with open(args.output_path, 'w') as file:
     file.write(header + values)
 ```
 
-- Since the data is stored as table, pandas provides an efficient interface for manipulating the count distributions
-- As a result, most of these are fairly self-explanatory or easily understood from their definitions except `vocab_size_L90` and possibly `entropy`
-- The former is inspired by a similar statistic for measuring the contiguity of a genome assembly and is defined as the number of words that account for 90% of the total number when ordered by frequency
-  - It effectively counts the number of unique words excluding the 10% most uncommon
-- Entropy, on the other hand, is measure of a distribution's "randomness" and is calculated using a function from SciPy's `stats` module
-- Finally, notice that the book's title and genre is not stored directly alongside the calculated statistics
-  - We'll instead encode this information in the output file names
-  - This decision will make our lives a bit more complicated when it comes to aggregating the statistics from each book into a single file in the workflow managers
-  - However, this is a common constraint for many tools and file formats, so while somewhat artificially imposed here, it will illustrate the strengths and weaknesses of Nextflow and Snakemake when it comes to handling this issue
+Since the data is stored as table, pandas provides an efficient interface for manipulating the count distributions. As a result, most of these are fairly self-explanatory or easily understood from their definitions except `vocab_size_L90` and possibly `entropy`. The former is inspired by a similar statistic for measuring the contiguity of a genome assembly and is defined as the number of words that account for 90% of the total number when ordered by frequency. It effectively counts the number of unique words excluding the 10% most uncommon. Entropy, on the other hand, is measure of a distribution's "randomness" and is calculated using a function from SciPy's `stats` module.
+
+Finally, notice that the book's title and genre is not stored directly alongside the calculated statistics. We'll instead encode this information in the output file names. This decision will make our lives a bit more complicated when it comes to aggregating the statistics from each book into a single file in the workflow managers. However, this is a common constraint for many tools and file formats, so while somewhat artificially imposed here, it will illustrate the strengths and weaknesses of Nextflow and Snakemake when it comes to handling this issue.
 
 ### Pairwise comparisons of counts
-- We've at last reached the main event: calculating the similarity between pairs of count distributions
-- To do this, we'll use the Jensen-Shannon (JSD) divergence, which, like entropy, is a measure from information theory
-- For those familiar with the field, it's based on the Kullback-Leibler (KL) divergence
-- To quickly review, the KL divergence between two probability distributions \(P\) and \(Q\) over a sample space \(X\) is defined as
+We've at last reached the main event: calculating the similarity between pairs of count distributions. To do this, we'll use the Jensen-Shannon (JSD) divergence, which, like entropy, is a measure from information theory. For those familiar with the field, it's based on the Kullback-Leibler (KL) divergence. To quickly review, the KL divergence between two probability distributions \(P\) and \(Q\) over a sample space \(X\) is defined as
 
 $$
 D_{KL}(P||Q) = \sum_{x \in X} P(x) \log \frac{P(x)}{Q(x)}
 $$
 
-- Mathematically, this expression isn't symmetric with respect to \(P\) and \(Q\), so in general \(D_{KL}(P||Q) \ne D_{KL}(Q||P)\)
-- Since \(D_{KL}(P||Q) = 0\) when \(P = Q\) and \(P\) appears outside the logarithm, the KL divergence is usually interpreted as \(Q\)'s distance from \(P\)
-- This asymmetry, while useful in many applications of information theory, is more of a nuisance for us since we're mostly interested in the similarity between pairs of count distributions without having to explicitly privilege one as the reference
-- Fortunately, this issue is solved by the JSD divergence, which is defined as
+Mathematically, this expression isn't symmetric with respect to \(P\) and \(Q\), so in general \(D_{KL}(P||Q) \ne D_{KL}(Q||P)\). Since \(D_{KL}(P||Q) = 0\) when \(P = Q\) and \(P\) appears outside the logarithm, the KL divergence is usually interpreted as \(Q\)'s distance from \(P\). This asymmetry, while useful in many applications of information theory, is more of a nuisance for us since we're mostly interested in the similarity between pairs of count distributions without having to explicitly privilege one as the reference. Fortunately, this issue is solved by the JSD divergence, which is defined as
 
 $$
 JSD(P||Q) = \frac{1}{2} D_{KL}(P||M) + \frac{1}{2} D_{KL}(P||M)
 $$
 
-where \( M = \frac{1}{2}(P+Q) \) is a pointwise mean of \(P\) and \(Q\)
+where \( M = \frac{1}{2}(P+Q) \) is a pointwise mean of \(P\) and \(Q\).
 
-- We'll implement parsing the count tables and calculating the JSD between them directly in Python as
+We'll implement parsing the count tables and calculating the JSD between them directly in Python as
 
 ```python
 from math import log
@@ -415,17 +362,10 @@ JSD /= 2
 print(JSD, end='')
 ```
 
-- Though we could in principle write the output JSD to an intermediate file, that adds up to a lot of disk IO for saving a single value over every single pair of books
-- Like with the summary statistics before, we'll instead impose an arbitrary restriction on ourselves by printing the results to standard output and later see how both workflow managers handle it
+Though we could in principle write the output JSD to an intermediate file, that adds up to a lot of disk IO for saving a single value over every single pair of books. Like with the summary statistics before, we'll instead impose an arbitrary restriction on ourselves by printing the results to standard output and later see how both workflow managers handle it.
 
 ### Aggregating the results
-- In the last step of our pipeline, we'll take the output from the JSD calculations and comparing them within and between genres to test whether books in the same genre use more similar sets of words than books between genres
-- We'll do this using pandas to group and aggregate the results accordingly
-- This will, however, require a small leap of the imagination since in the previous script only prints a naked JSD to standard output
-- Let's assume for the moment, though, that using the workflow managers we've somehow recorded these results in a table saved to disk
-- Each pairwise comparison is a row in this table with fields for the JSD as well as the title and genre for each book in the pair
-  - The fields for the titles and genres are designated as `title1`, `genre1`, `title2`, and `genre2` depending on which book is arbitrary designated as the first or second when the pairs are generated in our pipeline
-  - While this kind of order instability is somewhat atypical for tabular data, we can handle it gracefully by grouping on an additional field that is `True` if the genres are the same and `False` otherwise as shown below
+In the last step of our pipeline, we'll take the output from the JSD calculations and comparing them within and between genres to test whether books in the same genre use more similar sets of words than books between genres. We'll do this using pandas to group and aggregate the results accordingly. This will, however, require a small leap of the imagination since in the previous script only prints a naked JSD to standard output. Let's assume for the moment, though, that using the workflow managers we've somehow recorded these results in a table saved to disk. Each pairwise comparison is a row in this table with fields for the JSD as well as the title and genre for each book in the pair. The fields for the titles and genres are designated as `title1`, `genre1`, `title2`, and `genre2` depending on which book is arbitrary designated as the first or second when the pairs are generated in our pipeline. While this kind of order instability is somewhat atypical for tabular data, we can handle it gracefully by grouping on an additional field that is `True` if the genres are the same and `False` otherwise as shown below
 
 ```python
 from textwrap import dedent
@@ -457,8 +397,7 @@ with open(args.output_path, 'w') as file:
     file.write(output)
 ```
 
-- Besides this trick, the script is a straightforward application of pandas' built-in aggregation methods
-- The only other calculation of note is the Mann-Whitney *U* test, a standard non-parametric test for the equality of central tendency of two distributions, which is supplied by the SciPy `stats` module.
+Besides this trick, the script is a straightforward application of pandas' built-in aggregation methods. The only other calculation of note is the Mann-Whitney *U* test, a standard non-parametric test for the equality of central tendency of two distributions, which is supplied by the SciPy `stats` module.
 
 ## Linking the pieces with Nextflow
 ### Basic Nextflow syntax

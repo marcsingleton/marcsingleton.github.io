@@ -1068,16 +1068,21 @@ mannwhitneyu_pvalue: 7.418770284720211e-11
 - These questions, however, are beyond the scope of this scope of this post, though they would make a great project for an applied statistics course 😉
 
 ### Is one tool better than the other?
-- I've seen some users contrast Nextflow's and Snakemake's models as "forward" and "backward," but two fit squarely into existing programming paradigms, respectively
+- Having implemented toy pipeline (but a fairly sophisticated one) using both workflow managers, we're now in a good position to judge their relative strengths and weaknesses
+- Though I know it'll disappoint anyone looking for a definitive answer, I believe both tools have their use cases
+  - Of the two, Nextflow is the more powerful and an overall better fit for productionizing pipelines
+    - Part of this advantage derives from Nextflow's fundamentally more flexible abstraction for representing and organizing computations
+    - By conceptualizing pipelines as composed of channels (streams) of data and processes that operate on those channels, Nextflow workflows can efficiently manipulate data and order operations regardless of their underlying representation or any dependence on explicit "outputs"
+      - Furthermore, Nextflow includes many utilities for easily accessing and manipulating file contents or metadata, particularly in commonly used bioinformatics formats like FASTA
+    - In contrast, in Snakemake everything is a file, so every step in a pipeline is tied to an object in the file system, which can force the use of temporary files or other *ad hoc* features to emulate stream-like behavior
+  - On the other hand, I prefer Snakemake for prototyping and development
+    - Snakemake's rules-based model facilitates rapid iteration since it's easy to extend or add branches of computation without needing to organize them into an explicit workflow
+    - This more implicit organization also allows users to selectively execute certain portions of their pipeline by targeting specific rules
+      - When I'm working on a project, I often frequently update certain branches of a pipeline in rapid succession while leaving others untouched, so this feature for avoiding unnecessarily re-running computationally intensive steps
+      - While Nextflow can resume a workflow, its caching behavior is [complex](https://www.nextflow.io/blog/2019/demystifying-nextflow-resume.html), and there's no way to target specific processes
+- Turning to a broader perspective on their workflow models, I've seen some users contrast Nextflow and Snakemake as "forward" and "backward," respectively, but two fit squarely into existing programming paradigms
   - In Nextflow, the designer has to explicitly define the relationship between processes and their order of execution by connecting their channels
   - This kind of step-by-step description of the operations used to compute a result is called imperative programming
   - In contrast, in Snakemake the user asks the program to compute a result, here a file output, and the program determines the operations needed to achieve that
   - This is called declarative programming
   - In practice, many programming languages and problem-solving strategies incorporate elements from both paradigms, so learning to recognize the common patterns across different domains is one of the most valuable skills a programmer can develop
-- More specific to real-world applications, I believe both tools have their use cases
-  - Nextflow more powerful of the two and for production-ready pipelines
-    - Processes and channels are a more flexible model for organizing computations
-      - Not everything is necessarily a file, so Nextflow leverages concept of streams
-    - Includes many utilities for easily accessing and manipulating file contents, particularly in formats commonly used in bioinformatics
-    - More difficult to prototype and work iteratively because ?
-  - Snakemake for prototyping and development

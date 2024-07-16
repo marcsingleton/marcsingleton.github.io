@@ -943,10 +943,69 @@ rule merge_basic_stats:
   - Another example of advanced syntax is the line `title=${{base%%_*}}`, which uses a bash feature for [trimming substrings from variables](https://tldp.org/LDP/abs/html/string-manipulation.html) to extract the title from the input file
 
 ### Calculating and aggregating pairwise similarities
-- At this point, it should be clear that `expand` is only a convenience function that generates 91 different file paths as a one-liner
-  - Using `expand` doesn't create any special links between rules
-  - The computational graph is only inferred via Snakemake's pattern matching rules after all f-strings and other function calls in the input and output blocks are resolved
+- Likewise, calculating and aggregating the pairwise similarities presents additional challenges
+- As before, we'll save explicitly enumerating the input files until the "gather" step, so the rule for running `jsd_divergence.py` will use wildcards
+- There's a problem though
+- `jsd_divergence.py` accepts two file paths, which in this case are produced by the same rule and have the same wildcard names (`genre` and `title`)
+- As a result, there's no way to distinguish the two when constructing the output file path
+- However, because rule inputs and outputs are strings, we can easily modify the wildcard names with built-in Python methods
+
+```python
+rule jsd_divergence:
+    input:
+       file1 = rules.count_words.output[0].replace('genre', 'genre1').replace('title', 'title1'),
+       file2 = rules.count_words.output[0].replace('genre', 'genre2').replace('title', 'title2')
+    output:
+        temp(f'{output_path}/jsd_divergence/{{genre1}}|{{title1}}|{{genre2}}|{{title2}}.temp')
+    shell:
+        f'''
+        python {code_path}/jsd_divergence.py {{input.file1}} {{input.file2}} > "{{output}}"
+        '''
+```
+
+- This rule also demonstrates a few other features of Snakemake rule syntax
+- For example, if a specific input or output is needed from multiple options, they can be selected by index or [as an attribute](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#the-expand-function) by assigning names
+- Additionally, unlike in Nextflow, in Snakemake we can't directly capture terminal output, so we need to redirect it to a temporary file
+  - Footnote: While each output file is uniquely identified by its combination of titles, making the genre information unnecessary, Snakemake requires that all wildcards in the input files of a rule are also used in its output files
+- Fortunately, Snakemake workflows can mark outputs as `temp`, which are automatically deleted after all rules that use it as input are completed
+
+- We're now ready to merge these temporary files, so as before we'll use `expand` to generate the concrete file names that will kickstart the rule resolution order
+- The unique pairwise combinations themselves are easily create with the `combinations_with_replacement` function from Python's `itertools` module, though there is some additional massaging needed to separate the wildcard values into individual lists
+
+```python
+from itertools import combinations_with_replacement
+
+META1, META2 = zip(*combinations_with_replacement(META, 2))
+GENRES1, TITLES1 = zip(*META1)
+GENRES2, TITLES2 = zip(*META2)
+rule merge_jsd_divergence:
+    input:
+        expand(rules.jsd_divergence.output, zip,
+               genre1=GENRES1, title1=TITLES1,
+               genre2=GENRES2, title2=TITLES2)
+    output:
+        f'{output_path}/jsd_divergence.tsv'
+    shell:
+        '''
+        read -a files <<< "{input}"
+        echo "genre1\ttitle1\tgenre2\ttitle2\tjsd" > "{output}"
+        for file in "${{files[@]}}"
+        do
+            base=$(basename $file)
+            meta=${{base%%.*}}
+            jsd=$(cat $file)
+            echo "$meta\t$jsd" | tr "|" "\t"
+        done | sort >> "{output}"
+        '''
+```
+
+- The shell block has a similar structure to that of `merge_basic_stats`; the only additional trick I'll note here is `echo "$meta\t$jsd" | tr "|" "\t"` constructs each record from the file names themselves, replacing the field separators with tabs
+  - (Incidentally, this also introduces coupling between this rule and `merge_jsd_divergence`, though in principle we could replace the literal instances with a workflow constant)
+
+- As a final note in this section, I should mention `expand` doesn't create any special links between rules; it's only a convenience function that generates 91 different file paths as a one-liner
+  - The computational graph is instead inferred via Snakemake's pattern matching rules after all f-strings and other function calls in the input and output blocks are resolved
   - Snakemake doesn't even require consistent names for the wildcards between rules, as this example illustrates, though it does recommend that each rule saves its output files into a unique directory to accelerate the resolution of rule dependencies
+  
 - It is possible to sidestep any argument parsing in Python scripts by accessing arguments through the `snakemake` object and running the command with a script guard
   - I avoid this approach, though, because it makes the underlying scripts less portable
   - Furthermore, Python has an argument parsing module in its standard library which makes adding basic command-line arguments a breeze

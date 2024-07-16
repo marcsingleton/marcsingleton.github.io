@@ -1007,6 +1007,39 @@ rule merge_jsd_divergence:
   - The computational graph is instead inferred via Snakemake's pattern matching rules after all f-strings and other function calls in the input and output blocks are resolved
   - Snakemake doesn't even require consistent names for the wildcards between rules, as this example illustrates, though it does recommend that each rule saves its output files into a unique directory to accelerate the resolution of rule dependencies
   
+### Targets and default rules
+- One of the strengths of Snakemake over Nextflow is that its invocation on the command line can accept a specific rule as an argument to only generate the outputs needed by or created by that rule
+- In the absence of an input rule, Snakemake will use the first rule in the workflow file as its default
+- As a result, it's common to define a "run everything" rule conventionally called `all` as the first rule
+- However, if we want to access the outputs of previous rules to avoid duplicating file names, our `all` rule will need to appear after its dependencies
+- Fortunately, we can manually designate it as the default with the `default_target` directive as shown below
+
+```python
+rule group_jsd_stats:
+    input:
+        rules.merge_jsd_divergence.output
+    output:
+        f'{output_path}/grouped_jsd.txt'
+    conda:
+        env_path
+    shell:
+        f'''
+        python {code_path}/group_jsd_stats.py {{input}} {{output}}
+        '''
+
+rule all:
+    default_target: True
+    input:
+        rules.merge_basic_stats.output,
+        rules.group_jsd_stats.output
+```
+
+- Here the `all` rule uses the output of `merge_basic_stats` and `group_jsd_stats` (as also shown in the above code block) for its inputs
+  - As these are the two "terminal" computations in our workflow, they are the minimum inputs needed to trigger Snakemake to run the complete analysis pipeline
+  - If we were to add any subsequent calculations or new branches to the pipeline, we would have to update the inputs accordingly, however
+- With this final rule, the workflow is complete, so try running it and compare the results with the Nextflow ones
+  - They should be the same!
+
 - It is possible to sidestep any argument parsing in Python scripts by accessing arguments through the `snakemake` object and running the command with a script guard
   - I avoid this approach, though, because it makes the underlying scripts less portable
   - Furthermore, Python has an argument parsing module in its standard library which makes adding basic command-line arguments a breeze

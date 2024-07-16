@@ -908,7 +908,8 @@ META = list(zip(GENRES, TITLES))
 ```python
 rule merge_basic_stats:
     input:
-        expand(rules.basic_stats.output, zip, genre=GENRES, title=TITLES)
+        expand(rules.basic_stats.output, zip,
+               genre=GENRES, title=TITLES)
     output:
         f'{output_path}/basic_stats.tsv'
     shell:

@@ -263,6 +263,7 @@ be renamed.
 ### Aside: Boilerplate for command line scripts
 - As our workflow managers will effectively run these scripts from a command line, they'll need code to handle accepting arguments for the input and output paths as well as creating any directories for the output if necessary
 - Footnote: Snakemake (and Nextflow?) automatically create directories for their outputs, but to make our code as portable as possible, we won't depend on that behavior
+- Footnote: Scripts run with Snakemake can sidestep any argument parsing in Python scripts by accessing arguments through the `snakemake` object and running the command with a [script guard](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#python). I avoid this approach, though, because it makes the underlying scripts less portable
 - Since this is boilerplate that won't change much, if at all, between the scripts in this pipeline, I'll introduce it once here, so afterwards we can focus on the business logic of each script
 - All our scripts will have a structure something like the following
 
@@ -886,7 +887,6 @@ rule count_words:
 ```
 
 - In this case, `remove_pg` creates a single file, so we can use the `output` attribute without further specification
-- If a specific output is needed from multiple options, they can be selected by index or [as an attribute](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#the-expand-function) by assigning names
 
 ### Aggregating count statistics
 - Many of the remaining rule definitions follow a similar pattern, so I'll again link to the [full workflow file](https://github.com/marcsingleton/workflow_tutorial/blob/main/workflow.smk) on GitHub instead of covering them in detail here
@@ -1039,15 +1039,6 @@ rule all:
   - If we were to add any subsequent calculations or new branches to the pipeline, we would have to update the inputs accordingly, however
 - With this final rule, the workflow is complete, so try running it and compare the results with the Nextflow ones
   - They should be the same!
-
-- It is possible to sidestep any argument parsing in Python scripts by accessing arguments through the `snakemake` object and running the command with a script guard
-  - I avoid this approach, though, because it makes the underlying scripts less portable
-  - Furthermore, Python has an argument parsing module in its standard library which makes adding basic command-line arguments a breeze
-- Snakemake requires that all wildcards used in input must be in output
-- Difficult to write shell scripts with f strings because of behavior with double brackets
-- Because Snakemake is fundamentally file-based, it doesn't offer as many conveniences for capturing and manipulating terminal output
-- Accordingly, we need to write a rule ourselves to store the output in files
-  - Fortunately, Snakemake allows us to mark these files as temporary, so it will automatically remove them when the workflow completes
 
 ## Discussion
 ### Are the genres really any different?

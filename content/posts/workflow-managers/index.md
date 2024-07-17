@@ -401,10 +401,7 @@ Besides this trick, the script is a straightforward application of pandas' built
 
 ## Linking the pieces with Nextflow
 ### Basic Nextflow syntax
-- At this point we've written the core pieces of our workflow, so now we're finally ready to use our first workflow manager, Nextflow, to automate executing these scripts on the right inputs in the right order
-- Before implementing writing any code specific for our analysis, let's look at some prototypes of Nextflow objects
-- As discussed in the [overview on each manager's process model](#process-model), the building blocks of a Nextflow workflow are processes and channels where processes represent operations on streams of data carried by channels
-- In Nextflow syntax, this is formally written as
+At this point we've written the core pieces of our workflow, so now we're finally ready to use our first workflow manager, Nextflow, to automate executing these scripts on the right inputs in the right order. Before implementing writing any code specific for our analysis, let's look at some prototypes of Nextflow objects. As discussed in the [overview on each manager's process model](#process-model), the building blocks of a Nextflow workflow are processes and channels where processes represent operations on streams of data carried by channels. In Nextflow syntax, this is formally written as
 
 ```java
 process process_name_1 {
@@ -427,13 +424,9 @@ process process_name_1 {
 }
 ```
 
-- This structure is largely self-explanatory
-  - Processes declare their inputs, a script that operates on those inputs, and the expected outputs of that script
-  - The details of how these pieces interact in practice will be clear when we see an example without any placeholders
-  - A potentially unintuitive component are the input and output type qualifiers that precede their names
-  - These will also become clear shortly, but for now they are essentially like type declarations which will influence how Nextflow interprets and manipulates those variables
-- Another way of looking at process is as functions, where the inputs and output are still placeholders for some literal values
-- Accordingly, processes are linked together through another structure called a workflow:
+This structure is largely self-explanatory. Processes declare their inputs, a script that operates on those inputs, and the expected outputs of that script. The details of how these pieces interact in practice will be clear when we see an example without any placeholders. A potentially unintuitive component are the input and output type qualifiers that precede their names. These will also become clear shortly, but for now they are essentially like type declarations which will influence how Nextflow interprets and manipulates those variables.
+
+Another way of looking at process is as functions, where the inputs and output are still placeholders for some literal values. Accordingly, processes are linked together through another structure called a workflow:
 
 ```java
 workflow {
@@ -442,14 +435,14 @@ workflow {
 }
 ```
 
-- Here `process_name_0` is some hypothetical process that can generate two output channels from scratch, and treating everything like functions and variables, we can capture the output of the called `process_name_0` as a variable `p0_results` and feed it directly into `process_name_1`
-  - Though we store the outputs of `process_name_0` in a single variable, it's more of a tuple of two separate channels, so we have to access them individually by index to match the call signature of `process_name_1`
-  - Footnote: Nextflow offers a few different syntax for passing channels between processes. For example, while here we selected the different channels by index, it's also possible to access them by name with the `emit` keyword. Additionally, it's not strictly necessary to assign the outputs to variable since they are also available via the `out` attribute of a process, *e.g.* `process_name_0.out`. Finally, Nextflow permits [Unix-style pipes](https://www.nextflow.io/docs/latest/workflow.html#special-operators) to compose processes with single input and output channels.
+Here `process_name_0` is some hypothetical process that can generate two output channels from scratch, and treating everything like functions and variables, we can capture the output of the called `process_name_0` as a variable `p0_results` and feed it directly into `process_name_1`. Though we store the outputs of `process_name_0` in a single variable, it's more of a tuple of two separate channels, so we have to access them individually by index to match the call signature of `process_name_1`.[^6]
+
+[^6]: Nextflow offers a few different syntax for passing channels between processes. For example, while here we selected the different channels by index, it's also possible to access them by name with the `emit` keyword. Additionally, it's not strictly necessary to assign the outputs to variable since they are also available via the `out` attribute of a process, *e.g.* `process_name_0.out`. Finally, Nextflow permits [Unix-style pipes](https://www.nextflow.io/docs/latest/workflow.html#special-operators) to compose processes with single input and output channels.
 
 ### Defining a process
-- We'll now implement a process and workflow for the first step of our pipeline
-- As in any well-organized script we'll start with a docstring at the top that describes its purpose as well as some constants we'll use throughout, which are conventionally stored as attributes under the `params` object
-  - Footnote: Any attribute of the `param` object is implicitly a configuration setting, meaning Nextflow can set its value from multiple locations in a [predetermined order](https://www.nextflow.io/docs/latest/config.html)
+We'll now implement a process and workflow for the first step of our pipeline. As in any well-organized script we'll start with a docstring at the top that describes its purpose as well as some constants we'll use throughout, which are conventionally stored as attributes under the `params` object.[^7]
+
+[^7]: Any attribute of the `param` object is implicitly a configuration setting, meaning Nextflow can set its value from multiple locations in a [predetermined order](https://www.nextflow.io/docs/latest/config.html).
 
 ```java
 // Nextflow pipeline for book text analysis
@@ -461,11 +454,9 @@ params.code_path = "$projectDir/code/"
 params.env_path = "$projectDir/env.yml"
 ```
 
-- These constants are the paths to various directories in our workflow, so if we ever want to change the location of the outputs, for example, we only need to change it in one place
-  - In Nextflow, strings can be stored with either double or single quotes, but the former allows interpolation of the `projectDir` variable marked with the dollar sign
-  - (`projectDir` is a convenience variable which is available in every Nextflow runtime environment that corresponds to the directory of the main script)
+These constants are the paths to various directories in our workflow, so if we ever want to change the location of the outputs, for example, we only need to change it in one place. In Nextflow, strings can be stored with either double or single quotes, but the former allows interpolation of the `projectDir` variable marked with the dollar sign. (`projectDir` is a convenience variable which is available in every Nextflow runtime environment that corresponds to the directory of the main script.)
 
-- With the constants out of the way, let's define our first Nextflow process, which will run the `remove_pg.py` script on an input file to remove the Project Gutenberg header and footer
+With the constants out of the way, let's define our first Nextflow process, which will run the `remove_pg.py` script on an input file to remove the Project Gutenberg header and footer.
 
 ```java
 process remove_pg {
@@ -484,36 +475,20 @@ process remove_pg {
 }
 ```
 
-- Like many Nextflow processes, this example is largely a direct substitution from the previous template
-  - The input block defines the input variables which are then interpolated into a string that is executed on the command line, using brackets where necessary to delimit any ambiguous names
-  - (Triple quotes indicate a possibly multiline string)
-  - The expected outputs, including the name of the cleaned output file specified as an argument to the script, are declared in the output block
-- Two details deserve further explanation, however
-  - First is the `publishDir` directive
-    - Recall that in Nextflow every process is executed in an isolated working directory (named with a unique hash stored under the `work/` directory created when Nextflow runs a workflow)
-    - While it's possible, to scour the `work/` directory for these outputs, `publishDir` exposes outputs in a public directory for human use
-    - More specifically, Nextflow links any declared output files under the publication folder, directory structure and all, so scripts are free to write their outputs "in-place"
-    - This mechanism effectively creates a distinction between a workflow's public interface and its implementation, allowing developers to hide any intermediate files which aren't relevant to its human end users
-  - The second detail is the type qualifiers
-    - As mentioned previously, these type qualifiers function similarly to type declarations in other programming languages, yielding different behaviors for different [input types](https://www.nextflow.io/docs/latest/process.html#inputs)
-    - For example, the `path` qualifier indicates a file or folder, so Nextflow will automatically link inputs and outputs to and from their working directories as necessary
-    - In contrast, the `val` qualifier is a variable whose value is available by name in the process script
-      - Here, it's applied to a map object named `meta` containing title and genre metadata which we'll discuss in more detail shortly
-    - Finally, the `tuple` qualifier bundles values together as a single channel
-      - If we didn't apply this qualifier on the outputs or inputs, the process would accept and generate two separate channels of metadata and files
-      - Using our previous metaphor of channels as pneumatic tubes, we can represent this distinction graphically
-      - (INSERT FIGURE)
-      - Because Nextflow matches messages from incoming channels similar to Python's `zip` function but doesn't guarantee their order, the `tuple` qualifier is necessary to ensure the metadata data are correctly paired with their corresponding files
-    - As a final note, Nextflow takes a flexible approach to parentheses, allowing their omission in certain cases
-      - Thus, in the previous process, `tuple val(meta), path(input_path)` is equivalent to `tuple(val(meta), path(input_path))`
-      - This pattern is common in Nextflow, so in cases with single type qualifiers, parentheses are typically omitted
+Like many Nextflow processes, this example is largely a direct substitution from the previous template. The input block defines the input variables which are then interpolated into a string that is executed on the command line, using brackets where necessary to delimit any ambiguous names The expected outputs, including the name of the cleaned output file specified as an argument to the script, are declared in the output block. Finally, the script block contains the script executed on the command line, using triple quotes to allow for a possibly multiline string.
+
+Two details deserve further explanation, however. First is the `publishDir` directive. Recall that in Nextflow every process is executed in an isolated working directory (named with a unique hash stored under the `work/` directory created when Nextflow runs a workflow). While it's possible to scour the `work/` directory for these outputs, `publishDir` exposes outputs in a public directory for human use. Specifically, Nextflow links any declared output files under the publication folder, directory structure and all, so scripts are free to write their outputs "in-place." This mechanism effectively creates a distinction between a workflow's public interface and its implementation, allowing developers to hide any intermediate files which aren't relevant to its human end users.
+
+The second detail is the type qualifiers. As mentioned previously, these type qualifiers function similarly to type declarations in other programming languages, yielding different behaviors for different [input types](https://www.nextflow.io/docs/latest/process.html#inputs). For example, the `path` qualifier indicates a file or folder, so Nextflow will automatically link inputs and outputs to and from their working directories as necessary. In contrast, the `val` qualifier is a variable whose value is available by name in the process script. Here, it's applied to a map object named `meta` containing title and genre metadata which we'll discuss in more detail shortly. Finally, the `tuple` qualifier bundles values together as a single channel. If we didn't apply this qualifier on the outputs or inputs, the process would accept and generate two separate channels of metadata and files. Using our previous metaphor of channels as pneumatic tubes, we can represent this distinction graphically:
+
+(INSERT FIGURE)
+
+Because Nextflow matches messages from incoming channels similar to Python's `zip` function but doesn't guarantee their order, the `tuple` qualifier is necessary to ensure the metadata data are correctly paired with their corresponding files.
+
+As a final note, Nextflow takes a flexible approach to parentheses, allowing their omission in certain cases. Thus, in the previous process, `tuple val(meta), path(input_path)` is equivalent to `tuple(val(meta), path(input_path))`. This pattern is common in Nextflow, so in cases with single type qualifiers parentheses are typically omitted.
 
 ### Defining a workflow
-- Processes only define rules for obtaining outputs from some inputs, so to apply the `remove_pg` process to our input data, we need to use it in a workflow
-- Notice, though, that `remove_pg` doesn't contain any references to the input data and, moreover, depends on an existing channel that emits tuples of a metadata map and a path
-- To kick-start workflows with this kind of information, Nextflow provides channel factories that can create channels from various inputs, including Unix-style glob patterns
-- For example, in the workflow snippet below, `channel.fromPath` matches all files in the `data/` directory, and the following line manipulates the channel to produce a new channel of tuples containing a file and its associated metadata
-  - The resulting `file_records` are then passed directly into the `remove_pg` which effectively acts as a function applied to each tuple in the incoming stream
+Processes only define rules for obtaining outputs from some inputs, so to apply the `remove_pg` process to our input data, we need to use it in a workflow Notice, though, that `remove_pg` doesn't contain any references to the input data and, moreover, depends on an existing channel that emits tuples of a metadata map and a path. To kickstart workflows with this kind of information, Nextflow provides channel factories that can create channels from various inputs, including Unix-style glob patterns. For example, in the workflow snippet below, `channel.fromPath` matches all files in the `data/` directory, and the following line manipulates the channel to produce a new channel of tuples containing a file and its associated metadata. The resulting `file_records` are then passed directly into the `remove_pg` which effectively acts as a function applied to each tuple in the incoming stream.
 
 ```java
 workflow {
@@ -528,7 +503,7 @@ workflow {
 }
 ```
 
-- The definition of `file_records` may at first seem a little cryptic, but it corresponds to the following construction in Python if `parent` and `basename` were functions that generated the titles and genres appropriately by extracting the path components free of extensions and trailing separators
+The definition of `file_records` may at first seem a little cryptic, but it corresponds to the following construction in Python if `parent` and `basename` were functions that generated the titles and genres appropriately by extracting the path components free of extensions and trailing separators.
 
 ```python
 file_records = map(
@@ -537,25 +512,20 @@ file_records = map(
     )
 ```
 
-- In contrast to Python, Groovy uses a terser syntax for defining anonymous functions called [closures](https://groovy-lang.org/closures.html), providing an implicit parameter `it`
-- Additionally, [map literals](https://groovy-lang.org/groovy-dev-kit.html#Collections-Maps), Groovy's version of Python dictionaries, are delimited with square brackets, and string keys don't require quotes
-- However, other than these cosmetic differences, the two are equivalent
+In contrast to Python, Groovy uses a terser syntax for defining anonymous functions called [closures](https://groovy-lang.org/closures.html), providing an implicit parameter `it`. Additionally, [map literals](https://groovy-lang.org/groovy-dev-kit.html#Collections-Maps), Groovy's version of Python dictionaries, are delimited with square brackets, and string keys don't require quotes. However, other than these cosmetic differences, the two are equivalent.
 
 ### Aggregating the count statistics
-- The remaining implementation largely follows a similar pattern where each script has a corresponding process which is then applied to the proper channel in the workflow definition
-- For brevity, I'll leave those details for the full workflow file hosted on this post's associated GitHub [repo](https://github.com/marcsingleton/workflow_tutorial/blob/main/workflow.nf)
-- There are, however, two tricky parts that require some finesse
-- The first of these is when the individual word count statistics are gathered into a single file
-- Alone, the `basic_stats` process (which runs `basic_stats.py`) produces a TSV of statistics derived from the word count distribution of each book that looks something like the following, using `romeo-and-juliet.txt` as an example again
+The remaining implementation largely follows a similar pattern where each script has a corresponding process which is then applied to the proper channel in the workflow definition. For brevity, I'll leave those details for the full workflow file hosted on this post's associated GitHub [repo](https://github.com/marcsingleton/workflow_tutorial/blob/main/workflow.nf).
+
+There are, however, two tricky parts that require some finesse. The first of these is when the individual word count statistics are gathered into a single file. Alone, the `basic_stats` process (which runs `basic_stats.py`) produces a TSV of statistics derived from the word count distribution of each book that looks something like the following, using `romeo-and-juliet.txt` as an example again:
 
 | vocab_size | longest_word | most_common_word | entropy |
 | --- | --- | --- | --- |
 | 3762 | serving-creature’s | and | 6.432 |
 
-- (For brevity, only a subset of the full output is shown here)
-- Looking at 13 TSVs individually is pretty tedious, so we'd would like to essentially stack them on top of each other
-- Nextflow fortunately has a method for manipulating channels (an [operator](https://www.nextflow.io/docs/latest/operator.html) in Nextflow jargon) to do exactly this called `collectFile`
-- Accordingly, we can expand our workflow definition to calculate and aggregate these statistics with the following lines
+(For brevity, only a subset of the full output is shown here.)
+
+Looking at 13 TSVs individually is pretty tedious, so we'd would like to essentially stack them on top of each other. Nextflow fortunately has a method for manipulating channels (an [operator](https://www.nextflow.io/docs/latest/operator.html) in Nextflow jargon) to do exactly this called `collectFile`. Accordingly, we can expand our workflow definition to calculate and aggregate these statistics with the following lines:
 
 ```java
 // Count words and calculate basic stats of counts
@@ -566,12 +536,9 @@ basic_records = basic_stats(count_records)
                  keepHeader: true, skip: 1)
 ```
 
-- The closure selects the text from each file in the incoming tuples (a convenience offered by Nextflow for inputs marked with `path` qualifiers), and the options `keepHeader` and `skip` work together to keep the header of the first file while skipping the first line of the remaining files
-- Additionally, Groovy is more flexible in allowing method calls over line breaks than Python, so chained methods are commonly started on new lines
+The closure selects the text from each file in the incoming tuples (a convenience offered by Nextflow for inputs marked with `path` qualifiers), and the options `keepHeader` and `skip` work together to keep the header of the first file while skipping the first line of the remaining files. Additionally, Groovy is more flexible in allowing method calls over line breaks than Python, so chained methods are commonly started on new lines.
 
-- There is a small problem though -- the individual TSVs don't have columns for the title and genre of their books, so when they're combined, we have no way of knowing which lines came from which files
-- To solve this, we'll introduce an intermediate process that does a little surgery on our files
-- Nextflow's ability to capture terminal output in a channel and the standard Unix utility `paste` make this a simple one-liner
+There is a small problem though--the individual TSVs don't have columns for the title and genre of their books, so when they're combined, we have no way of knowing which lines came from which files. To solve this, we'll introduce an intermediate process that does a little surgery on our files. Nextflow's ability to capture terminal output in a channel and the standard Unix utility `paste` make this a simple one-liner.
 
 ```java
 process paste_ids {
@@ -588,11 +555,9 @@ process paste_ids {
 }
 ```
 
-- For anyone unfamiliar with these commands or their options, `echo -n` prints the argument to output without a newline character since we've already included it
-- `paste` concatenates tabular data from multiple files, handling the line endings appropriately
-  - Here `-` is common Unix convention indicating the first argument refers to the `stdin` from the pipe operator rather than a file name
+For anyone unfamiliar with these commands or their options, `echo -n` prints the argument to output without a newline character since we've already included it. `paste` concatenates tabular data from multiple files, handling the line endings appropriately. Here `-` is common Unix convention indicating the first argument refers to the `stdin` from the pipe operator rather than a file name.
 
-- We'll now modify the workflow to incorporate this new process and the `sort` option on `collectFile` to order the lines by genre
+We'll now modify the workflow to incorporate this new process and the `sort` option on `collectFile` to order the lines by genre
 
 ```java
 // Count words and calculate basic stats of counts
@@ -612,11 +577,7 @@ yielding the following output (again truncated for brevity):
 | shakespeare | romeo-and-juliet | 3762 | serving-creature’s | and | 6.432 |
 
 ### Calculating and aggregating pairwise similarities
-- The next difficulty comes when calculating and aggregating the pairwise similarities between books
-- The main conceptual leap is in generating the pairs in the first place, but this is also the easiest because Nextflow has a channel operator `combine` that produces all combinations of items between two source channels
-- Thus, we can simply combine `count_records` with itself to create a channel of pairs
-- However, because this is a self combination, it will generate *permutations*, meaning the resulting channel will include both (`hamlet.txt`, `peter-pan.txt`) and (`peter-pan.txt`, `hamlet.txt`) as distinct pairs, for example
-- Because our similarity metric, the JSD, is symmetric, this is an unnecessary recalculation, so we'll remove the duplicates with the `unique` operator called on a closure that generates a unique key for each pair by sorting their titles alphabetically
+The next difficulty comes when calculating and aggregating the pairwise similarities between books. The main conceptual leap is in generating the pairs in the first place, but this is also the easiest because Nextflow has a channel operator `combine` that produces all combinations of items between two source channels. Thus, we can simply combine `count_records` with itself to create a channel of pairs. However, because this is a self combination, it will generate *permutations*, meaning the resulting channel will include both (`hamlet.txt`, `peter-pan.txt`) and (`peter-pan.txt`, `hamlet.txt`) as distinct pairs, for example. Because our similarity metric, the JSD, is symmetric, this is an unnecessary recalculation, so we'll remove the duplicates with the `unique` operator called on a closure that generates a unique key for each pair by sorting their titles alphabetically.
 
 ```java
 count_pairs = count_records
@@ -630,10 +591,9 @@ count_pairs = count_records
     .unique({[it[0].title1, it[0].title2].sort()})
 ```
 
-- Before, though, we apply the `map` operator to combine the metadata from each item in the pair for readability purposes
-- This is largely an exercise in manipulating maps (the data structure, not the function) in Groovy, so I'll link directly to the documentation for the [`collectEntries`](https://docs.groovy-lang.org/latest/html/groovy-jdk/java/lang/Iterable.html#collectEntries()) method
+Before, though, we apply the `map` operator to combine the metadata from each item in the pair for readability purposes. This is largely an exercise in manipulating maps (the data structure, not the function) in Groovy, so I'll link directly to the documentation for the [`collectEntries`](https://docs.groovy-lang.org/latest/html/groovy-jdk/java/lang/Iterable.html#collectEntries()) method.
 
-- We'll next call the `jsd_divergence` process on the pairs of count distributions, aggregate them into a single file, and finally compare the JSD between genres with `group_jsd_stats`
+We'll next call the `jsd_divergence` process on the pairs of count distributions, aggregate them into a single file, and finally compare the JSD between genres with `group_jsd_stats`.
 
 ```java
 jsd_records = jsd_divergence(count_pairs)
@@ -651,8 +611,7 @@ jsd_merged = jsd_records
 group_jsd_records = group_jsd_stats(jsd_merged)
 ```
 
-- The aggregation step here uses constructions similar to the previous two code blocks, so I won't discuss it further besides linking to the documentation for the [`join`](https://docs.groovy-lang.org/latest/html/groovy-jdk/java/lang/Iterable.html#join(java.lang.String)) and [`collect`](https://docs.groovy-lang.org/latest/html/groovy-jdk/java/lang/Iterable.html#collect(groovy.lang.Closure)) methods
-- Fortunately, these are the last steps of our workflow, so we should be able to run it from start to finish now, so download the repo and try for yourself!
+The aggregation step here uses constructions similar to the previous two code blocks, so I won't discuss it further besides linking to the documentation for the [`join`](https://docs.groovy-lang.org/latest/html/groovy-jdk/java/lang/Iterable.html#join(java.lang.String)) and [`collect`](https://docs.groovy-lang.org/latest/html/groovy-jdk/java/lang/Iterable.html#collect(groovy.lang.Closure)) methods. Fortunately, these are the last steps of our workflow, so we should be able to run it from start to finish now, so download the repo and try for yourself!
 
 ## Linking the pieces with Snakemake
 ### Basic Snakemake syntax

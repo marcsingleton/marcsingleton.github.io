@@ -615,10 +615,7 @@ The aggregation step here uses constructions similar to the previous two code bl
 
 ## Linking the pieces with Snakemake
 ### Basic Snakemake syntax
-- Having seen the Nextflow implementation of our pipeline, let's see how Snakemake expresses the same relationships between the inputs and outputs of our analysis steps
-- Before getting into specifics, however, we'll quickly review Snakemake's workflow model and introduce its syntax
-- In contrast to Nextflow, which builds workflows from processes, Snakemake is based on files and the rules that create those files
-- For example, the hypothetical process we used in for the Nextflow syntax introduction would be written as
+Having seen the Nextflow implementation of our pipeline, let's see how Snakemake expresses the same relationships between the inputs and outputs of our analysis steps. Before getting into specifics, however, we'll quickly review Snakemake's workflow model and introduce its syntax. In contrast to Nextflow, which builds workflows from processes, Snakemake is based on files and the rules that create those files. For example, the hypothetical process we used in for the Nextflow syntax introduction would be written as
 
 ```python
 rule rule_name_1
@@ -640,21 +637,14 @@ rule rule_name_1
         '''
 ```
 
-in Snakemake
+in Snakemake.
 
-- Snakemake rules are analogous to Nextflow's processes both in terms of function and structure, so there are many similarities between the two
-- There are also some key differences, however
-- First, both inputs and outputs are strings for names of files (or patterns with wildcards to match names of files)
-  - In contrast, for Nextflow processes, inputs are more like argument names of functions, though outputs marked with `path` qualifiers are similar
-- I should also note that Snakemake's syntax is derived from Python, so the indentation level is a necessary part of a properly formed rule
-  - Another common gotcha is different inputs and outputs are separated by commas
-- The second difference is Snakemake does not have a distinct workflow object
-  - Whereas in Nextflow, processes are templates for generating outputs that must be applied to inputs in a workflow, in Snakemake rules can encompass general patterns as well as specific files
-  - In fact, a workflow file needs at least one rule whose inputs and outputs don't have any wildcards, as this allows Snakemake to transform an abstract collection of rules into a concrete chain of operations
-  - This difference will be clearer when we implement our pipeline, though, so let's jump right in
+Snakemake rules are analogous to Nextflow's processes both in terms of function and structure, so there are many similarities between the two. There are also some key differences, however. First, both inputs and outputs are strings for names of files (or patterns with wildcards to match names of files). In contrast, for Nextflow processes, inputs are more like argument names of functions, though outputs marked with `path` qualifiers are similar. I should also note that Snakemake's syntax is derived from Python, so the indentation level is a necessary part of a properly formed rule. Another common gotcha is inputs and outputs are separated by commas.
+
+The second difference is Snakemake does not have a distinct workflow object. Whereas in Nextflow, processes are templates for generating outputs that must be applied to inputs in a workflow, in Snakemake rules can encompass general patterns as well as specific files. In fact, a workflow file needs at least one rule whose inputs and outputs don't have any wildcards, as this allows Snakemake to transform an abstract collection of rules into a concrete chain of operations. This difference will be clearer when we implement our pipeline, though, so let's jump right in!
 
 ### Defining rules
-- As in Nextflow, we'll include a docstring and some path constants at the top
+As in Nextflow, we'll include a docstring and some path constants at the top.[^8]
 
 ```python
 """Snakemake pipeline for book text analysis."""
@@ -666,10 +656,9 @@ code_path = 'code'
 env_path = 'env.yml'
 ```
 
-- Footnote?: Unlike Nextflow, the constants aren't stored under a `params` object, and we can't directly modify them from the command line
-  - Snakemake does offer a similar feature for parameters stored in a [configuration file](https://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html), however
+[^8]: Unlike Nextflow, the constants aren't stored under a `params` object, and we can't directly modify them from the command line. Snakemake does offer a similar feature for parameters stored in a [configuration file](https://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html), however.
 
-- Let's now write a rule for running `remove_pg.py` on an input file
+Let's now write a rule for running `remove_pg.py` on an input file.
 
 ```python
 rule remove_pg:
@@ -683,15 +672,11 @@ rule remove_pg:
         '''
 ```
 
-- In Snakemake, placeholders in file names and shell commands are delimited with single sets of curly brackets
-- However, in this example the file names are given as [f-strings](https://docs.python.org/3/tutorial/inputoutput.html#formatted-string-literals), so we can substitute the constants we defined earlier
-- To distinguish these cases, we double the braces for the placeholders
-  - The difference between the two can be confusing at first, but it's helpful to think of Snakemake as processing a workflow file in two passes
-  - In the first, it substitutes the value of all expressions in single brackets in f-strings
-  - In the second, any remaining names delimited by single brackets in normal strings and double brackets in f-strings are iteratively matched against any needed inputs and outputs until all wildcards are resolved into a concrete chain of operations
-  - (Another nuance is the shell block does not permit direct use of the wildcard names defined in the input block; they are instead accessed as attributes of the `wildcards` object, *e.g.* `wildcards.genre`)
+In Snakemake, placeholders in file names and shell commands are delimited with single sets of curly brackets. However, in this example the file names are given as [f-strings](https://docs.python.org/3/tutorial/inputoutput.html#formatted-string-literals), so we can substitute the constants we defined earlier. To distinguish these cases, we double the braces for the placeholders.
 
-- The rule for the second script in the pipeline, `count_word.py`, is written similarly, though we can avoid duplicating the pattern for the output of `remove_pg` by directly referencing it via the `rules` object
+The difference between the two can be confusing at first, but it's helpful to think of Snakemake as processing a workflow file in two passes. In the first, it substitutes the value of all expressions in single brackets in f-strings. In the second, any remaining names delimited by single brackets in normal strings and double brackets in f-strings are iteratively matched against any needed inputs and outputs until all wildcards are resolved into a concrete chain of operation. (Another nuance is the shell block does not permit direct use of the wildcard names defined in the input block; they are instead accessed as attributes of the `wildcards` object, *e.g.* `wildcards.genre`).
+
+The rule for the second script in the pipeline, `count_word.py`, is written similarly, though we can avoid duplicating the pattern for the output of `remove_pg` by directly referencing it via the `rules` object.
 
 ```python
 rule count_words:
@@ -705,13 +690,10 @@ rule count_words:
         '''
 ```
 
-- In this case, `remove_pg` creates a single file, so we can use the `output` attribute without further specification
-
 ### Aggregating count statistics
-- Many of the remaining rule definitions follow a similar pattern, so I'll again link to the [full workflow file](https://github.com/marcsingleton/workflow_tutorial/blob/main/workflow.smk) on GitHub instead of covering them in detail here
-- As in Nextflow, though, aggregating the count statistics requires some additional tricks we haven't covered yet since in Snakemake these kinds of "gather" steps are typically where wildcards are replaced with literal names
-- First, though, we need to tell Snakemake where to find the data and how to extract the metadata from the file paths
-- Fortunately, Snakemake has a built-in function `glob_wildcards` that does exactly this
+Many of the remaining rule definitions follow a similar pattern, so I'll again link to the [full workflow file](https://github.com/marcsingleton/workflow_tutorial/blob/main/workflow.smk) on GitHub instead of covering them in detail here. As in Nextflow, though, aggregating the count statistics requires some additional tricks we haven't covered yet since in Snakemake these kinds of "gather" steps are typically where wildcards are replaced with literal names. 
+
+First, though, we need to tell Snakemake where to find the data and how to extract the metadata from the file paths. Fortunately, Snakemake has a built-in function `glob_wildcards` that does exactly this.
 
 ```python
 # Collect metadata
@@ -719,10 +701,7 @@ GENRES, TITLES = glob_wildcards(f'{data_path}/{{genre}}/{{title}}.txt')
 META = list(zip(GENRES, TITLES))
 ```
 
-- We've also gone ahead and zipped together the `GENRE` and `TITLE` lists into combined metadata tuples since this will make generating pairwise combinations easier
-- These lines together perform a similar function to the first two commands in the Nextflow workflow
-  - However, as Snakemake doesn't have an explicit workflow definition, we'll instead write these lines immediately under the path constants at the top of the workflow file since they effectively act as a different set of constants within the workflow
-- Now we can write the rule that aggregates the count statistics into a single file 
+We've also gone ahead and zipped together the `GENRE` and `TITLE` lists into combined metadata tuples since this will make generating pairwise combinations easier. These lines together perform a similar function to the first two commands in the Nextflow workflow. However, as Snakemake doesn't have an explicit workflow definition, we'll instead write these lines immediately under the path constants at the top of the workflow file since they effectively act as a different set of constants within the workflow. Now we can write the rule that aggregates the count statistics into a single file.
 
 ```python
 rule merge_basic_stats:
@@ -747,28 +726,12 @@ rule merge_basic_stats:
         '''
 ```
 
-- We'll tackle the input block first
-- `expand` is another Snakemake convenience function that fills in wildcards using lists of values provided by matching keyword arguments
-  - For example, `rules.basic_stats.output` is the string `'f'results_smk/{genre}/{title}_stats.tsv'`, so Snakemake will use the `GENRE` and `TITLE` lists to generate the path to the count statistics for every book
-  - (By default, `expand` yields every combination of the provided wildcard values, but we can specify matched inputs by providing `zip` as the second argument)
+We'll tackle the input block first. `expand` is another Snakemake convenience function that fills in wildcards using lists of values provided by matching keyword arguments. For example, `rules.basic_stats.output` is the string `'f'results_smk/{genre}/{title}_stats.tsv'`, so Snakemake will use the `GENRE` and `TITLE` lists to generate the path to the count statistics for every book. (By default, `expand` yields every combination of the provided wildcard values, but we can specify matched inputs by providing `zip` as the second argument).
 
-- Now let's take a look at the shell block
-- In contrast to its counterpart in Nextflow, this script for merging the TSVs is considerably more involved
-- Because Snakemake only models the relationship between files, it lacks features for directly manipulating metadata and file contents
-- Instead, we must extract this information from the file paths themselves using a variety of bash scripting tricks
-  - Most of the commands use familiar idioms like redirection and command substitution, but some involve less common syntax
-  - For example, the first line reads the input into an array variable using a [here string](https://tldp.org/LDP/abs/html/x17837.html)
-    - Because the `read` command splits its input using whitespace, this single line forces the pipeline to disallow spaces in its input file names
-    - This is generally good practice anyway, but it does illustrate how using bash for data manipulation can introduce unexpected constraints
-  - Another example of advanced syntax is the line `title=${{base%%_*}}`, which uses a bash feature for [trimming substrings from variables](https://tldp.org/LDP/abs/html/string-manipulation.html) to extract the title from the input file
+Now let's take a look at the shell block. In contrast to its counterpart in Nextflow, this script for merging the TSVs is considerably more involved. Because Snakemake only models the relationship between files, it lacks features for directly manipulating metadata and file contents. Instead, we must extract this information from the file paths themselves using a variety of bash scripting tricks. Most of the commands use familiar idioms like redirection and command substitution, but some involve less common syntax. For example, the first line reads the input into an array variable using a [here string](https://tldp.org/LDP/abs/html/x17837.html). Because the `read` command splits its input using whitespace, this single line forces the pipeline to disallow spaces in its input file names. This is generally good practice anyway, but it does illustrate how using bash for data manipulation can introduce unexpected constraints. Another piece of advanced syntax is the line `title=${{base%%_*}}`, which uses a bash feature for [trimming substrings from variables](https://tldp.org/LDP/abs/html/string-manipulation.html) to extract the title from the input file.
 
 ### Calculating and aggregating pairwise similarities
-- Likewise, calculating and aggregating the pairwise similarities presents additional challenges
-- As before, we'll save explicitly enumerating the input files until the "gather" step, so the rule for running `jsd_divergence.py` will use wildcards
-- There's a problem though
-- `jsd_divergence.py` accepts two file paths, which in this case are produced by the same rule and have the same wildcard names (`genre` and `title`)
-- As a result, there's no way to distinguish the two when constructing the output file path
-- However, because rule inputs and outputs are strings, we can easily modify the wildcard names with built-in Python methods
+Likewise, calculating and aggregating the pairwise similarities presents additional challenges. As before, we'll save explicitly enumerating the input files until the "gather" step, so the rule for running `jsd_divergence.py` will use wildcards. There's a problem though. `jsd_divergence.py` accepts two file paths, which in this case are produced by the same rule and have the same wildcard names (`genre` and `title`). As a result, there's no way to distinguish the two when constructing the output file path. However, because rule inputs and outputs are strings, we can easily modify the wildcard names with built-in Python methods.
 
 ```python
 rule jsd_divergence:
@@ -783,14 +746,11 @@ rule jsd_divergence:
         '''
 ```
 
-- This rule also demonstrates a few other features of Snakemake rule syntax
-- For example, if a specific input or output is needed from multiple options, they can be selected by index or [as an attribute](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#the-expand-function) by assigning names
-- Additionally, unlike in Nextflow, in Snakemake we can't directly capture terminal output, so we need to redirect it to a temporary file
-  - Footnote: While each output file is uniquely identified by its combination of titles, making the genre information unnecessary, Snakemake requires that all wildcards in the input files of a rule are also used in its output files
-- Fortunately, Snakemake workflows can mark outputs as `temp`, which are automatically deleted after all rules that use it as input are completed
+This rule also demonstrates a few other features of Snakemake rule syntax. For example, if a specific input or output is needed from multiple options, they can be selected by index or [as an attribute](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#the-expand-function) by assigning names. Additionally, unlike in Nextflow, in Snakemake we can't directly capture terminal output, so we need to redirect it to a temporary file.[^9] Fortunately, Snakemake workflows can mark outputs as `temp`, which are automatically deleted after all rules that use it as input are completed.
 
-- We're now ready to merge these temporary files, so as before we'll use `expand` to generate the literal file names that will kickstart the rule resolution order
-- The unique pairwise combinations themselves are easily create with the `combinations_with_replacement` function from Python's `itertools` module, though there is some additional massaging needed to separate the wildcard values into individual lists
+[^9]: While each output file is uniquely identified by its combination of titles, making the genre information unnecessary, Snakemake requires that all wildcards in the input files of a rule are also used in its output files.
+
+We're now ready to merge these temporary files, so as before we'll use `expand` to generate the literal file names that will kickstart the rule resolution order. The unique pairwise combinations themselves are easily create with the `combinations_with_replacement` function from Python's `itertools` module, though there is some additional massaging needed to separate the wildcard values into individual lists.
 
 ```python
 from itertools import combinations_with_replacement
@@ -819,19 +779,12 @@ rule merge_jsd_divergence:
         '''
 ```
 
-- The shell block has a similar structure to that of `merge_basic_stats`; the only additional trick I'll note here is `echo "$meta\t$jsd" | tr "|" "\t"` constructs each record from the file names themselves, replacing the field separators with tabs
-  - (Incidentally, this also introduces coupling between this rule and `merge_jsd_divergence`, though in principle we could replace the literal instances with a workflow constant)
+The shell block has a similar structure to that of `merge_basic_stats`; the only additional trick I'll note here is `echo "$meta\t$jsd" | tr "|" "\t"` constructs each record from the file names themselves, replacing the field separators with tabs. Incidentally, this also introduces coupling between this rule and `merge_jsd_divergence`, though in principle we could replace the literal instances with a workflow constant.
 
-- As a final note in this section, I should mention `expand` doesn't create any special links between rules; it's only a convenience function that generates 91 different file paths as a one-liner
-  - The computational graph is instead inferred via Snakemake's pattern matching rules after all f-strings and other function calls in the input and output blocks are resolved
-  - Snakemake doesn't even require consistent names for the wildcards between rules, as this example illustrates, though it does recommend that each rule saves its output files into a unique directory to accelerate the resolution of rule dependencies
+As a final note in this section, I should mention `expand` doesn't create any special links between rules; it's only a convenience function that generates 91 different file paths as a one-liner. The computational graph is instead inferred via Snakemake's pattern matching rules after all f-strings and other function calls in the input and output blocks are resolved. Snakemake doesn't even require consistent names for the wildcards between rules, as this example illustrates, though it does recommend that each rule saves its output files into a unique directory to accelerate the resolution of rule dependencies.
   
 ### Targets and default rules
-- One of the strengths of Snakemake over Nextflow is that its invocation on the command line can accept a specific rule as an argument to only generate the outputs needed by or created by that rule
-- In the absence of an input rule, Snakemake will use the first rule in the workflow file as its default
-- As a result, it's common to define a "run everything" rule conventionally called `all` as the first rule
-- However, if we want to access the outputs of previous rules to avoid duplicating file names, our `all` rule will need to appear after its dependencies
-- Fortunately, we can manually designate it as the default with the `default_target` directive as shown below
+A strength of Snakemake over Nextflow is that its invocation on the command line can accept a specific rule as an argument to only generate the outputs needed by or created by that rule. In the absence of an input rule, Snakemake will use the first rule in the workflow file as its default. As a result, it's common to define a "run everything" rule conventionally called `all` as the first rule. However, if we want to access the outputs of previous rules to avoid duplicating file names, our `all` rule will need to appear after its dependencies. Fortunately, we can manually designate it as the default with the `default_target` directive as shown below:
 
 ```python
 rule group_jsd_stats:
@@ -853,15 +806,13 @@ rule all:
         rules.group_jsd_stats.output
 ```
 
-- Here the `all` rule uses the output of `merge_basic_stats` and `group_jsd_stats` (as also shown in the above code block) for its inputs
-  - As these are the two "terminal" computations in our workflow, they are the minimum inputs needed to trigger Snakemake to run the complete analysis pipeline
-  - If we were to add any subsequent calculations or new branches to the pipeline, we would have to update the inputs accordingly, however
-- With this final rule, the workflow is complete, so try running it and compare the results with the Nextflow ones!
+Here the `all` rule uses the output of `merge_basic_stats` and `group_jsd_stats` (as also shown in the above code block) for its inputs. As these are the two "terminal" computations in our workflow, they are the minimum inputs needed to trigger Snakemake to run the complete analysis pipeline. If we were to add any subsequent calculations or new branches to the pipeline, we would have to update the inputs accordingly, however.
+
+With this final rule, the workflow is complete, so try running it and compare the results with the Nextflow ones!
 
 ## Discussion
 ### Are the genres really any different?
-- Though the question about whether the word distributions of books in the same genre are more similar than those between genres was mostly an excuse to write a pipeline, I feel that after all this, it would be a letdown to not take a look at the final results
-- The relevant output is produced by `group_jsd_stats.py` and stored in `grouped_jsd.txt` by both pipelines:
+Though the question about whether the word distributions of books in the same genre are more similar than those between genres was mostly an excuse to write a pipeline, I feel that after all this, it would be a letdown to not take a look at the final results. The relevant output is produced by `group_jsd_stats.py` and stored in `grouped_jsd.txt` by both pipelines:
 
 ```
 inter_mean: 0.2178663166067625
@@ -876,31 +827,13 @@ mannwhitneyu_statistic: 46.0
 mannwhitneyu_pvalue: 7.418770284720211e-11
 ```
 
-- The inter-group and intra-group JSD means are 0.218 and 0.155, respectively
-- Furthermore, this difference is highly significant, with a *p*-value of 7.42 x 10<sup>-11</sup>
-- Since JSD is a measure of distance, we can say with a high degree of confidence that in this data set, books in the same genre have more similar word count distributions than books between genres
-- Of course, our conclusions are fairly limited since our data set contains only 13 texts whose groupings are at least a little suspect
-- Additionally, this analysis doesn't tell us if a particular genre was more responsible for this result than the others
-  - For example, it's possible that we observe a significant increase in intra-genre similarity only because the "shakespeare" genre only contains books written by a single author
-  - This wouldn't mean our analysis is wrong *per se*, but it is in some senses a less interesting result
-- These questions, however, are beyond the scope of this scope of this post, though they would make a great project for an applied statistics course 😉
+The inter-group and intra-group JSD means are 0.218 and 0.155, respectively. Furthermore, this difference is highly significant, with a *p*-value of 7.42 x 10<sup>-11</sup>. Since JSD is a measure of distance, we can say with a high degree of confidence that in this data set, books in the same genre have more similar word count distributions than books between genres.
+
+Of course, our conclusions are fairly limited since our data set contains only 13 texts whose groupings are at least a little suspect. Additionally, this analysis doesn't tell us if a particular genre was more responsible for this result than the others. For example, it's possible that we observe a significant increase in intra-genre similarity only because the "shakespeare" genre only contains books written by a single author. This wouldn't mean our analysis is wrong *per se*, but it is in some senses a less interesting result. These questions, however, are beyond the scope of this scope of this post, though they would make a great project for an applied statistics course. 😉
 
 ### Is one tool better than the other?
-- Having implemented toy pipeline (but a fairly sophisticated one) using both workflow managers, we're now in a good position to judge their relative strengths and weaknesses
-- Though I know it'll disappoint anyone looking for a definitive answer, I believe both tools have their use cases
-  - Of the two, Nextflow is the more powerful and an overall better fit for productionizing pipelines
-    - Part of this advantage derives from Nextflow's fundamentally more flexible abstraction for representing and organizing computations
-    - By conceptualizing pipelines as composed of channels (streams) of data and processes that operate on those channels, Nextflow workflows can efficiently manipulate data and order operations regardless of their underlying representation or any dependence on explicit "outputs"
-      - Furthermore, Nextflow includes many utilities for easily accessing and manipulating file contents or metadata, particularly in commonly used bioinformatics formats like FASTA
-    - In contrast, in Snakemake everything is a file, so every step in a pipeline is tied to an object in the file system, which can force the use of temporary files or other *ad hoc* features to emulate stream-like behavior
-  - On the other hand, I prefer Snakemake for prototyping and development
-    - Snakemake's rules-based model facilitates rapid iteration since it's easy to extend or add branches of computation without needing to organize them into an explicit workflow
-    - This more implicit organization also allows users to selectively execute certain portions of their pipeline by targeting specific rules
-      - When I'm working on a project, I often frequently update certain branches of a pipeline in rapid succession while leaving others untouched, so this feature for avoiding unnecessarily re-running computationally intensive steps
-      - While Nextflow can resume a workflow, its caching behavior is [complex](https://www.nextflow.io/blog/2019/demystifying-nextflow-resume.html), and there's no way to target specific processes
-- Turning to a broader perspective on their workflow models, I've seen some users contrast Nextflow and Snakemake as "forward" and "backward," respectively, but two fit squarely into existing programming paradigms
-  - In Nextflow, the designer has to explicitly define the relationship between processes and their order of execution by connecting their channels
-  - This kind of step-by-step description of the operations used to compute a result is called imperative programming
-  - In contrast, in Snakemake the user asks the program to compute a result, here a file output, and the program determines the operations needed to achieve that
-  - This is called declarative programming
-  - In practice, many programming languages and problem-solving strategies incorporate elements from both paradigms, so learning to recognize the common patterns across different domains is one of the most valuable skills a programmer can develop
+Having implemented toy pipeline (but a fairly sophisticated one) using both workflow managers, we're now in a good position to judge their relative strengths and weaknesses. Though I know it'll disappoint anyone looking for a definitive answer, I believe both tools have their use cases. Of the two, Nextflow is the more powerful and an overall better fit for productionizing pipelines. Part of this advantage derives from Nextflow's fundamentally more flexible abstraction for representing and organizing computations. By conceptualizing pipelines as composed of channels (streams) of data and processes that operate on those channels, Nextflow workflows can efficiently manipulate data and order operations regardless of their underlying representation or any dependence on explicit "outputs". Furthermore, Nextflow includes many utilities for easily accessing and manipulating file contents or metadata, particularly in commonly used bioinformatics formats like FASTA.. In contrast, in Snakemake everything is a file, so every step in a pipeline is tied to an object in the file system, which can force the use of temporary files or other *ad hoc* features to emulate stream-like behavior.
+
+On the other hand, I prefer Snakemake for prototyping and development. Snakemake's rules-based model facilitates rapid iteration since it's easy to extend or add branches of computation without needing to organize them into an explicit workflow. This more implicit organization also allows users to selectively execute certain portions of their pipeline by targeting specific rules. When I'm working on a project, I often frequently update certain branches of a pipeline in rapid succession while leaving others untouched, so this feature for avoiding unnecessarily re-running computationally intensive steps. While Nextflow can resume a workflow, its caching behavior is [complex](https://www.nextflow.io/blog/2019/demystifying-nextflow-resume.html), and there's no way to target specific processes.
+
+Turning to a broader perspective on their workflow models, I've seen some users contrast Nextflow and Snakemake as "forward" and "backward," respectively, but two fit squarely into existing programming paradigms. In Nextflow, the designer has to explicitly define the relationship between processes and their order of execution by connecting their channels. This kind of step-by-step description of the operations used to compute a result is called imperative programming. In contrast, in Snakemake the user asks the program to compute a result, here a file output, and the program determines the operations needed to achieve that. This is called declarative programming. In practice, many programming languages and problem-solving strategies incorporate elements from both paradigms, so learning to recognize the common patterns across different domains is one of the most valuable skills a programmer can develop.

@@ -405,7 +405,7 @@ Besides this trick, the script is a straightforward application of pandas' built
 ### Basic Nextflow syntax
 At this point we've written the core pieces of our pipeline, so now we're finally ready to use our first workflow manager, Nextflow, to automate executing these scripts on the right inputs in the right order. Before implementing writing any code specific for our analysis, though, let's look at some prototypes of Nextflow objects. As discussed in the [overview on each manager's process model](#process-model), the building blocks of a Nextflow workflow are processes and channels where processes represent operations on streams of data carried by channels. In Nextflow syntax, this is formally written as:
 
-```java
+```groovy
 process process_name_1 {
   input:
   input_type_1 input_name_1
@@ -430,7 +430,7 @@ This structure is largely self-explanatory. Processes declare their inputs, a sc
 
 Processes are somewhat like functions, where the inputs and output are still placeholders for some literal values. Accordingly, Nextflow defines another structure called a workflow that links processes together by applying them to data.
 
-```java
+```groovy
 workflow {
   p0_results = process_name_0()
   p1_results = process_name_1(p0_results[0], p0_results[1])
@@ -446,7 +446,7 @@ We'll now implement a process and workflow for the first step of our pipeline. A
 
 [^7]: Any attribute of the `param` object is implicitly a configuration setting, meaning Nextflow can set its value from multiple locations in a [predetermined order](https://www.nextflow.io/docs/latest/config.html).
 
-```java
+```groovy
 // Nextflow pipeline for book text analysis
 
 // Paths
@@ -459,7 +459,7 @@ These constants are the paths to various directories in our workflow, so if we e
 
 With the constants out of the way, let's define our first Nextflow process, which will run the `remove_pg.py` script on an input file to remove the Project Gutenberg header and footer.
 
-```java
+```groovy
 process remove_pg {
     publishDir "$params.output_path/"
 
@@ -491,7 +491,7 @@ As a final note, Nextflow takes a flexible approach to parentheses, allowing the
 ### Defining a workflow
 Processes only define rules for obtaining outputs from some inputs, so to apply the `remove_pg` process to our input data, we need to use it in a workflow Notice, though, that `remove_pg` doesn't contain any references to the input data and, moreover, depends on an existing channel that emits tuples of a metadata map and a path. To kickstart workflows with this kind of information, Nextflow provides channel factories that can create channels from various inputs, including Unix-style glob patterns. For example, in the workflow snippet below, `channel.fromPath` matches all files in the `data/` directory, and the following line manipulates the channel to produce a new channel of tuples containing a file and its associated metadata. The resulting `file_records` are then passed directly into the `remove_pg` which effectively acts as a function applied to each tuple in the incoming stream.
 
-```java
+```groovy
 workflow {
     // Find paths to data and convert into tuples with metadata
     file_paths = channel.fromPath("$params.data_path/*/*.txt")
@@ -528,7 +528,7 @@ There are, however, two steps that require some finesse. The first of these is w
 
 Looking at 13 TSVs individually is tedious, so we'd like to combine them by essentially stacking the rows. Nextflow fortunately has a method for manipulating channels (an [operator](https://www.nextflow.io/docs/latest/operator.html) in Nextflow jargon) to do exactly this called `collectFile`. Accordingly, we can expand our workflow definition to calculate and aggregate these statistics with the following lines.
 
-```java
+```groovy
 // Count words and calculate basic stats of counts
 count_records = count_words(clean_records)
 basic_records = basic_stats(count_records)
@@ -541,7 +541,7 @@ The closure selects the text from each file in the incoming tuples (a convenienc
 
 There is a small problem though---the individual TSVs don't have columns for the title and genre of their books, so when they're combined, we have no way of knowing which lines came from which files. To solve this, we'll introduce an intermediate process that does a little surgery on our files. Nextflow's ability to capture terminal output in a channel and the standard Unix utility `paste` make this a simple one-liner.
 
-```java
+```groovy
 process paste_ids {
     input:
     tuple val(meta), path(input_path)
@@ -560,7 +560,7 @@ For anyone unfamiliar with these commands or their options, `echo -n` prints the
 
 We'll now modify the workflow to incorporate this new process and the `sort` option on `collectFile` to order the lines by genre:
 
-```java
+```groovy
 // Count words and calculate basic stats of counts
 count_records = count_words(clean_records)
 basic_records = basic_stats(count_records)
@@ -580,7 +580,7 @@ yielding the following output (again truncated for brevity).
 ### Calculating and aggregating pairwise similarities
 The next difficulty comes when calculating and aggregating the pairwise similarities between books. The main conceptual leap is in generating the pairs in the first place, but this is also the easiest because Nextflow has a channel operator `combine` that produces all combinations of items between two source channels. Thus, we can simply combine `count_records` with itself to create a channel of pairs. However, because this is a self combination, it will generate *permutations*, meaning the resulting channel will include both (`hamlet.txt`, `peter-pan.txt`) and (`peter-pan.txt`, `hamlet.txt`) as distinct pairs, for example. Because our similarity metric, the JSD, is symmetric, this is an unnecessary recalculation, so we'll remove the duplicates with the `unique` operator called on a closure that generates a unique key for each pair by sorting their titles alphabetically.
 
-```java
+```groovy
 count_pairs = count_records
     .combine(count_records)
     .map({
@@ -596,7 +596,7 @@ Before, though, we apply the `map` operator to combine the metadata from each it
 
 We'll next call the `jsd_divergence` process on the pairs of count distributions, aggregate them into a single file, and finally compare the JSD between genres with `group_jsd_stats`.
 
-```java
+```groovy
 jsd_records = jsd_divergence(count_pairs)
 jsd_merged = jsd_records
     .map({

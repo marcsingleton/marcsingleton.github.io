@@ -27,15 +27,13 @@ While both tools thoroughly document their commands, to my knowledge neither has
 #### Nextflow
 Of the two, Nextflow likely has the more intuitive workflow model. The basic building blocks of a Nextflow workflow are *processes* and *channels*. Processes are operations that accept input channels and transform them into output channels. I like to imagine channels as black boxes with pipes going in and coming out.
 
-(Diagram of processes)
+{{< figure src="process.svg" caption="Processes are one of Nextflow's primitives, which accept and emit messages via channels." >}}
 
 The pipes are channels which carry messages from one process to another in discrete chunks, similar to pneumatic tubes. Furthermore, processes will match messages from multiple input channels in the order they are received, like Python's `zip` function. This can yield unintended results, however, because Nextflow's concurrent process execution doesn't preserve order. Unlike pneumatic tubes, though, channels can be duplicated by connecting them to multiple processes or manipulated in more complex ways via operators.
 
-(Image of channel with input1, input2, ... then output3, output10, ...)
-
 Workflows are defined in Nextflow by explicitly declaring an output channel of process as an input channel of another. Channels are the only interfaces by which processes communicate, so one process can't see what's happening in the black box of another---they only know about channels. We as the human designers can, but our abstraction of the workflow is independent of the messy details of what happens during the execution of a process.
 
-(Diagram of processes with channels linked together)
+{{< figure src="nextflow_overview.svg" caption="In Nextflow, processes are explicitly linked together in a workflow." >}}
   
 In terms of the actual execution, Nextflow runs processes in isolated working directories, so any files created by a process are saved relative to this working directory unless absolute paths are used.[^1] Outputs intended for human users or use in downstream processes must be explicitly declared. This effectively distinguishes the pipes emerging from our black box processes from any side effects that may occur during their execution. For example, in a process we may call an external tool from the command line. However, this tool is "messy" and doesn't clean up its temporary files, but since we didn't write this tool, we have no direct control over this behavior. Nextflow's explicit declaration of outputs, though, allows it to identify and track which files are part of the chain of execution and which are side effects. Additionally, the working directories containing outputs are hidden and not linked to a public folder unless they are explicitly tagged with an "publish directive," which adds another layer of separation between "intermediate" and "final" outputs produced by a workflow.
 
@@ -44,7 +42,7 @@ In terms of the actual execution, Nextflow runs processes in isolated working di
 #### Snakemake
 In contrast, Snakemake's workflow model is centered around *rules* which encoded the relationships between files. Like Nextflow's processes, these rules declare input and output files and define the operations relating them. However, Snakemake differs from Nextflow in that rules are never linked together in an explicit workflow. Snakemake instead infers the chain of operations that compose a workflow from the names of the input and output files in each rule. While the inputs and outputs to rules can be literal file names like `input_01.tsv` and `output_01.tsv`, Snakemake derives its flexibility and power from its pattern matching engine. For example, the previous file names can be generalized by writing them as `input_{sample_id}.tsv` and `output_{sample_id}.tsv`. Snakemake interprets `{sample_id}` as a wildcard, allowing it recognize both (`input_01.tsv`, `output_01.tsv`) and (`input_A.tsv`, `output_A.tsv`) as possible input/output pairs. Snakemake then links these pattern-matched rules to infer the chain of operations which compose the workflow. This approach is inspired from its namesake, Make, a classic Unix program used for automating and streamlining the compilation of source code into executable files. It's still widely used today, though, as a tool dating from the early days of Unix, its syntax tends towards compactness over readability.
 
-(Diagram of rules being matched to create DAG)
+{{< figure src="snakemake_overview.svg" caption="In Snakemake, rules define relationships between input and output files, implicitly forming a workflow." >}}
 
 Snakemake also differs from Nextflow in that all commands are run from the directory of its workflow definition file by default. This is likely more intuitive for most users since it's how processes usually run in shells. However, there is a "gotcha" in its treatment of output directories which is likely one of the more frustrating aspects of first learning Snakemake. Output directories are made automatically unless the directory itself is explicitly an output, as marked with a `directory()` flag. This can cause errors unless the script has the right logic to account for the existence (or lack therefore) of the directories in its expected output paths.
 
@@ -53,7 +51,7 @@ We'll now implement a toy workflow in both languages to introduce their syntaxes
 
 The overall idea of our pipeline, then, is to count the words in each book, make all pairwise comparisons between these count distributions, and finally aggregate the results. As is typical in data science, though, we'll need to clean up the text files beforehand to remove metadata that shouldn't contribute to our word counts. We'll also add two steps to calculate some basic statistics from the word count distributions individually and aggregate them into a single file. In total, graphically our pipeline will look something like the following.
 
-(DIAGRAM OF PIPELINE)
+{{< figure src="pipeline_overview.svg" caption="Our pipeline is largely sequential with a single secondary branch. Most steps can be executed in parallel on independdent inputs, however." >}}
 
 ### Aside: The scatter-gather pattern
 Although this example is a "toy" in terms of the size of the data and the computing power required in each step, it illustrates several instances of the scatter gather pattern, which is ubiquitous in pipeline design. Because big data processing is often [embarrassingly parallelizable](https://en.wikipedia.org/wiki/Embarrassingly_parallel), the scatter gather pattern splits large jobs into many independent pieces and merges the results together. Here, the pairwise comparisons of the word count distribution is a classic example since each comparison is independent of the others until a downstream process aggregates them together. Throughout this pipeline, individual books are used as the natural unit of work, and we won't subdivide its operations below that level.
@@ -484,7 +482,7 @@ Two details deserve further explanation, however. First is the `publishDir` dire
 
 The second detail is the type qualifiers. As mentioned previously, these type qualifiers function similarly to type declarations in other programming languages, yielding different behaviors for different [input types](https://www.nextflow.io/docs/latest/process.html#inputs). For example, the `path` qualifier indicates a file or folder, so Nextflow will automatically link inputs and outputs to and from their working directories as necessary. In contrast, the `val` qualifier is a variable whose value is available by name in the process script. Here, it's applied to a map object named `meta` containing title and genre metadata which we'll discuss in more detail shortly. Finally, the `tuple` qualifier bundles values together as a single channel. If we didn't apply this qualifier on the outputs or inputs, the process would accept and generate two separate channels of metadata and files. Using our previous metaphor of channels as pneumatic tubes, we can represent this distinction graphically.
 
-(INSERT FIGURE)
+{{< figure src="tuple_channel.svg" caption="Inputs to processes are matched but not ordered, so tuple channels are used to package multiple associated inputs into a single message." >}}
 
 Because Nextflow matches messages from incoming channels like Python's `zip` function but doesn't guarantee their order, the `tuple` qualifier is necessary to ensure the metadata are correctly paired with their corresponding files.
 

@@ -267,6 +267,10 @@ border-bottom-right-radius: 5px;
     padding: 0 5px;
     font-size: 1.5rem;
     border-left: 1px solid var(--text-light);
+    max-height: calc(100vh - 25px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--text-light) #ffffff;
 }
 
 /* base font size of nav */

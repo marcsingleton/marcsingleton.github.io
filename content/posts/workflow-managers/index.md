@@ -520,9 +520,13 @@ The remaining implementation largely follows a similar pattern where each script
 
 There are, however, two steps that require some finesse. The first of these is when the individual word count statistics are gathered into a single file. Alone, the `basic_stats` process (which runs `basic_stats.py`) produces a TSV of statistics derived from the word count distribution of each book that looks something like the following, using `romeo-and-juliet.txt` as an example again.
 
+<div class="wide-table">
+
 | vocab_size | longest_word | most_common_word | entropy |
 | --- | --- | --- | --- |
 | 3762 | serving-creature’s | and | 6.432 |
+
+</div>
 
 (For brevity, only a subset of the full output is shown here.)
 
@@ -571,11 +575,15 @@ basic_merged = paste_ids(basic_records)
 
 yielding the following output (again truncated for brevity).
 
+<div class="wide-table">
+
 |genre| title | vocab_size | longest_word | most_common_word | entropy |
 | --- | --- | --- | --- | --- | --- |
 | childrens | alices-adventures-in-wonderland | 2671 | bread-and-butter | the | 6.023 |
 | ⋮ | ⋮ | ⋮ | ⋮ | ⋮ | ⋮ |
 | shakespeare | romeo-and-juliet | 3762 | serving-creature’s | and | 6.432 |
+
+</div>
 
 ### Calculating and aggregating pairwise similarities
 The next difficulty comes when calculating and aggregating the pairwise similarities between books. The main conceptual leap is in generating the pairs in the first place, but this is also the easiest because Nextflow has a channel operator `combine` that produces all combinations of items between two source channels. Thus, we can simply combine `count_records` with itself to create a channel of pairs. However, because this is a self combination, it will generate *permutations*, meaning the resulting channel will include both (`hamlet.txt`, `peter-pan.txt`) and (`peter-pan.txt`, `hamlet.txt`) as distinct pairs, for example. Because our similarity metric, the JSD, is symmetric, this is an unnecessary recalculation, so we'll remove the duplicates with the `unique` operator called on a closure that generates a unique key for each pair by sorting their titles alphabetically.

@@ -252,6 +252,12 @@ border-bottom-left-radius: 5px;
 border-bottom-right-radius: 5px;
 }
 
+.body-site .wide-table {
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--text-light) #ffffff;
+}
+
 /* ## TABLE OF CONTENTS PROPERTIES */
 .table-of-contents {
     top: 25px;

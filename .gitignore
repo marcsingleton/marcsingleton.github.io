@@ -4,3 +4,7 @@
 # Hidden files
 .hugo_build.lock
 .DS_Store
+
+# IDE and TODO
+/.vscode
+/TODO.md

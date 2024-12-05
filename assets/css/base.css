@@ -370,6 +370,8 @@ border-bottom-right-radius: 5px;
     overflow-x: auto;
     scrollbar-color: #7f7f7f #272822;
     scrollbar-width: thin;
+    font-family: Consolas, monospace;
+    font-size: 1.25rem;
 }
 
 /* Box of highlight with line numbers */
@@ -385,17 +387,6 @@ div.highlight > pre.chroma {
 /* Undo formatting for general tables (removes left border) */
 .body-site table tr td.lntd:first-child {
     border-left: none;
-}
-
-code {
-    font-family: Consolas, monospace;
-    font-size: 1.25rem;
-}
-
-p > code {
-    background-color: var(--text-light);
-    border-radius: 2.5px;
-    padding: 2.5px;
 }
 
 /* ## REMOVING TABLE OF CONTENTS */

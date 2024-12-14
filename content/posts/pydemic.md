@@ -1,6 +1,6 @@
 +++
 author = "Marc Singleton"
-title = "Pydemic: A text-based implementation of the board game Pandemic"
+title = "Pydemic: A command-line implementation of the board game Pandemic"
 date = "2024-12-06"
 summary = "Lessons learned from coding an interactive program on the command line."
 tags = ["python", "object-oriented-programming", "design-patterns", "best-practices"]
@@ -8,7 +8,7 @@ showTableOfContents = true
 +++
 
 ## Introduction
-I recently wrapped up work on a text-based implementation of the board game Pandemic. The origin of this project dates back to 2018 when, during my early days of learning Python, I was curious about object-oriented programming. Games are a great fit for object-oriented patterns since they have complex behaviors and interactions that are represented by literal objects. I had recently bought the game and was familiar with its rules, so I naturally chose it for this project. I ultimately managed to get a mostly usable prototype working before running out of steam and taking a break.
+I recently wrapped up work on a [command-line implementation](https://github.com/marcsingleton/Pydemic) of the board game Pandemic. The origin of this project dates back to 2018 when, during my early days of learning Python, I was curious about object-oriented programming. Games are a great fit for object-oriented patterns since they have complex behaviors and interactions that are represented by literal objects. I had recently bought the game and was familiar with its rules, so I naturally chose it for this project. I ultimately managed to get a mostly usable prototype working before running out of steam and taking a break.
 
 Six years ended up being the right amount of time to forget about my first go-around, so when I recently came across it again while re-organizing my coding projects, I thought it was a shame I left it almost finished. I expected it would only a few weeks in my spare time to tie up the remaining loose ends, but I ended up playing a good joke on myself because it ended up taking several months. Some of this time was undoubtedly spent chasing perfection, but the main reason it took so long is that it turns out game development (even for a simple text-based one) is very complex! I'm sure this is no surprise to anyone who's worked on similar projects, but it honestly caught me off guard. Unlike the data pipelines I usually work on that handle a small number of rigid file formats, this program had to harmonize many interlocking systems, any of which could attempt to put the game into an invalid state during normal operation. It was a new style of programming for me, and since I learned a lot about creating robust and extensible programs, I wanted to briefly reflect on some lessons learned--both for myself and anyone else who might embark on a similar project in the future.
 

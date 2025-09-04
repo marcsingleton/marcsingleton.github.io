@@ -1,0 +1,92 @@
++++
+author = "Marc Singleton"
+title = "Lessons from a first project in C"
+date = "2024-12-06"
+summary = "Lessons learned from coding an interactive program on the command line."
+tags = ["python", "object-oriented-programming", "design-patterns", "best-practices"]
+showTableOfContents = true
++++
+
+- Introduction
+  - Learn a compiled language (that would be useful to me)
+    - Now many packages and libraries used for bioinformatics and data science are written in Python and/or available pre-built for most architectures from repos like PyPI or the conda ecosystem
+      - Less necessary to know the gory details of building software locally
+    - Still it comes in handy for older or more obscure packages or when something inevitably goes wrong with an installation
+  - Had some experience with this and knew the incantation `./configure; make; make install` but it still seemed like a kind of black magic
+    - Wanted to make a medium-sized C project from scratch to both understand the language itself as well as the ecosystem of tools
+  - Knew I needed to build something that I could in theory use day-to-day to stay motivated
+    - Mostly work from command line and have spent a decent amount of time looking at sequence alignments over the years
+    - There's lots of solid options with GUIs, but it always felt clunky to start up the program and point and click through file system
+    - There's also a few command-line based ones, including some built in Python or shell scripts that make clever use of standard command line tools to colorize and view the sequences
+    - I was looking for I could take with me as a single file with no external dependencies other than the standard OS libraries
+    - As a practical matter, probably not the most useful broadly since there's little "new" functionality here
+    - But as a personal motivator, it worked very well!
+- Thoughts
+  - What do you mean no data structures?
+    - One of my biggest pain points and one of the reasons I probably won't develop another project in C by choice
+    - Lists and dicts (or Vecs and Hashmaps for non-Pythonistas) are fundamental data structures for modern programming
+    - They simplify the implementation of algorithms and facilitate countless day-to-day software engineering tasks (reword)
+    - I was more than a little surprised to discover the C standard library doesn't contain implementations
+      - This makes more sense to me now, understanding C's history and prioritization of backwards compatibility
+      - Simply put, C is language where if you need those things, you should be able to write them yourself
+    - Still, I was a little put-off by this
+    - I knew early on that I couldn't get by without a vec type, so I wrote one myself
+    - It wasn't so bad, but I still feel my little dynamic array is a fragile toy compared to the robust and highly optimized versions you would find in a modern language
+      - Footnote: C's lack of support makes extracting any elements from these directly needlessly verbose
+    - For similar reasons, I refused to write an implementation for the much more complicated hashmap
+      - On the one hand, I now have a far deeper appreciation of the engineering that goes into making a good hashmap as well as the implicit cost of computing the hash function for every lookup
+        - I now know that for cases where the set of options is limited and constant-time lookup isn't necessary, iterating through an array is just as good (you can get by without one, and often in ways that are more efficient)
+      - But on the other hand, being able to quickly ask "is this thing in this other one" or being able to quickly index by a human-readable label is such a common task, it's a massive quality of life improvement to express those directly in the language rather than fussing around with for loops and enums
+  - GUIs from scratch is hard
+    - The hardest part was making the GUI and interactions
+    - Display text on a terminal screen is very low-level
+      - At its core, the cursor is digital pen that's moved cell to cell to paint the display
+    - At the same time, integrating this low-level control with the interactivity we expect from windowed programs (even terminal-based ones) took careful attention the overall flow of the program and the interfaces between different modules
+      - How should the interface react to re-sizing?
+    - Finding the right abstractions and "primitives" that bridged this gap effectively took a lot of trial and error
+    - Inherent tension between efficiency and abstraction
+      - Should a move to start of the line use the move left or calculate the indices directly?
+  - The standard library is a mess
+    - C is old and developed organically in its early years
+    - As fundamental computational infrastructure, it prioritizes backwards compatibility above almost all else
+    - That said the standard library is full of footguns
+      - Unsafe functions
+      - Disorganized headers
+      - Lack of namespaces makes finding where a function is defined a scavenger hunt
+  - Pointers aren't so bad (once you get used to them)
+    - Pointers are infamous for causing confusion, and it's true that C's lack of bounds checking can make working with pointers tricky
+    - That said, pointers are at the core a more explicit syntax for the pass-by-reference semantics found in many higher level languages
+    - Coming from a Python background, I was already familiar with concept that names are references to underlying objects
+      - Common introductory example of appending to lists from different names
+      - In C, you have to explicitly opt into this behavior with pointers, and my biggest gotcha was forgetting that struct assignment copies the data rather than moves it from one variable to another
+    - It does take some time to get used to the multiple levels of indirection and for something like char **argv to feel as natural as an array of strings
+  - Understanding memory layout is necessary
+    - Unlike memory managed languages where memory is an abstract resource magically pops in and out of existence as needed, in C memory is managed explicitly
+    - This is the common textbook description, but it extends beyond using malloc/free to get more memory for variable-sized data
+    - I can't imagine writing more complex programs in C without at least a solid understanding of how programs work at a machine level
+    - Without it, you may try to return pointers to stack variables or take the address of a returned value without first storing it in a variable
+  - Tools and resources
+    - Make
+    - otool
+    - ld
+    - nm
+    - objdump
+    - readelf
+    - ldd
+    - leaks
+    - -fsanitize=address
+    - lldb
+    - Links to coding tutorials
+- Conclusions
+  - The heyday of C is over, but it will certainly outlive me (and any hypothetical children of mine)
+    - Its longevity is a testament to its design
+  - For coders and even data scientists trying to interact with and understand their computers at a deeper level, learning a bit of C will continue to pay off
+  - That said, C has many sharp edges
+  - For new projects that don't require squeezing every drop of performance or support for ancient architectures, use Rust
+    - It provides mechanisms for low-level control like C, as well as modern features like standard collection types, namespaces, generics
+    - Its borrow checker can also eliminate many types of memory errors at compile-time
+    - These features have won Rust endorsements from the biggest names in software
+      - The Linux kernel accepted code written in Rust in 2023
+        - Previously the kernel had only contained code written in C
+      - Even the US government recommended memory-safe languages like Rust for new projects in a recent report
+  - Thoughts on 

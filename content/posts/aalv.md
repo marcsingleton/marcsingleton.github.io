@@ -1,28 +1,20 @@
 +++
 author = "Marc Singleton"
 title = "Lessons from a first project in C"
-date = "2024-12-06"
-summary = "Lessons learned from coding an interactive program on the command line."
-tags = ["python", "object-oriented-programming", "design-patterns", "best-practices"]
+date = "2025-12-01"
+summary = "Reflections on learning my first compiled language."
+tags = ["C", "reflections"]
 showTableOfContents = true
+draft = true
 +++
 
-- Introduction
-  - Learn a compiled language (that would be useful to me)
-    - Now many packages and libraries used for bioinformatics and data science are written in Python and/or available pre-built for most architectures from repos like PyPI or the conda ecosystem
-      - Less necessary to know the gory details of building software locally
-    - Still it comes in handy for older or more obscure packages or when something inevitably goes wrong with an installation
-  - Had some experience with this and knew the incantation `./configure; make; make install` but it still seemed like a kind of black magic
-    - Wanted to make a medium-sized C project from scratch to both understand the language itself as well as the ecosystem of tools
-  - Knew I needed to build something that I could in theory use day-to-day to stay motivated
-    - Mostly work from command line and have spent a decent amount of time looking at sequence alignments over the years
-    - There's lots of solid options with GUIs, but it always felt clunky to start up the program and point and click through file system
-    - There's also a few command-line based ones, including some built in Python or shell scripts that make clever use of standard command line tools to colorize and view the sequences
-    - I was looking for I could take with me as a single file with no external dependencies other than the standard OS libraries
-    - As a practical matter, probably not the most useful broadly since there's little "new" functionality here
-    - But as a personal motivator, it worked very well!
-- Thoughts
-  - What do you mean no data structures?
+## Introduction
+Nowadays packages and programs used for bioinformatics and data science are written in interpreted languages or available pre-built from repos like PyPI or the conda ecosystem. As a result, it's less necessary to know the gory details of developing and building software with a compiled language. Still, it's a useful skill set when working with less supported software or when something inevitably goes wrong with an installation. I had some experience with this (cue the thousand-yard stare) and knew the incantation `./configure; make; make install`, but it still seemed like black magic. This inspired me to develop a non-trivial project in C, both to understand the language as well as the associated toolchain. While I could have chosen a higher level or more modern language like C++ or Rust, I went with C for two reasons. First, as the mother of all languages and one that I encounter not infrequently in my day-to-day work, it pays to know C even if I never programmed in it again. Second, as a small and lean language, learning C would teach me the low-level programming skills I was after rather than a different set of names for the same concepts I already knew in Python.
+  
+To stay motivated, I knew I needed to build something that I could in theory use day-to-day. I mostly work from the command line and often analyze sequence data, so I on occasion need to view sequence alignments. There's no shortage of options with point-and-click GUIs, and historically I used Aliview, but switching between my terminal window and my desktop environment was always at best clunky and at worst impossible, *e.g.* when working on a remote machine. There are several command line based ones, including some Python packages and at least one shell script that cleverly use other command line programs to colorize and view the sequences. While these get the job done, I was looking for a fast and portable program that I could run as a single executable with no dependencies other than the libraries available in a typical Unix-like environment. As a practical matter, this project was probably not the most broadly useful since there's little functionality here that's not available. But as a personal motivator, it worked very well!
+
+## Thoughts
+### What do you mean no data structures?
     - One of my biggest pain points and one of the reasons I probably won't develop another project in C by choice
     - Lists and dicts (or Vecs and Hashmaps for non-Pythonistas) are fundamental data structures for modern programming
     - They simplify the implementation of algorithms and facilitate countless day-to-day software engineering tasks (reword)
@@ -37,7 +29,8 @@ showTableOfContents = true
       - On the one hand, I now have a far deeper appreciation of the engineering that goes into making a good hashmap as well as the implicit cost of computing the hash function for every lookup
         - I now know that for cases where the set of options is limited and constant-time lookup isn't necessary, iterating through an array is just as good (you can get by without one, and often in ways that are more efficient)
       - But on the other hand, being able to quickly ask "is this thing in this other one" or being able to quickly index by a human-readable label is such a common task, it's a massive quality of life improvement to express those directly in the language rather than fussing around with for loops and enums
-  - GUIs from scratch is hard
+
+### GUIs from scratch is hard
     - The hardest part was making the GUI and interactions
     - Display text on a terminal screen is very low-level
       - At its core, the cursor is digital pen that's moved cell to cell to paint the display
@@ -46,26 +39,30 @@ showTableOfContents = true
     - Finding the right abstractions and "primitives" that bridged this gap effectively took a lot of trial and error
     - Inherent tension between efficiency and abstraction
       - Should a move to start of the line use the move left or calculate the indices directly?
-  - The standard library is a mess
+
+### The standard library is a mess
     - C is old and developed organically in its early years
     - As fundamental computational infrastructure, it prioritizes backwards compatibility above almost all else
     - That said the standard library is full of footguns
       - Unsafe functions
       - Disorganized headers
       - Lack of namespaces makes finding where a function is defined a scavenger hunt
-  - Pointers aren't so bad (once you get used to them)
+
+### Pointers aren't so bad (once you get used to them)
     - Pointers are infamous for causing confusion, and it's true that C's lack of bounds checking can make working with pointers tricky
     - That said, pointers are at the core a more explicit syntax for the pass-by-reference semantics found in many higher level languages
     - Coming from a Python background, I was already familiar with concept that names are references to underlying objects
       - Common introductory example of appending to lists from different names
       - In C, you have to explicitly opt into this behavior with pointers, and my biggest gotcha was forgetting that struct assignment copies the data rather than moves it from one variable to another
     - It does take some time to get used to the multiple levels of indirection and for something like char **argv to feel as natural as an array of strings
-  - Understanding memory layout is necessary
+
+### Understanding memory layout is necessary
     - Unlike memory managed languages where memory is an abstract resource magically pops in and out of existence as needed, in C memory is managed explicitly
     - This is the common textbook description, but it extends beyond using malloc/free to get more memory for variable-sized data
     - I can't imagine writing more complex programs in C without at least a solid understanding of how programs work at a machine level
     - Without it, you may try to return pointers to stack variables or take the address of a returned value without first storing it in a variable
-  - Tools and resources
+
+### Tools and resources
     - Make
     - otool
     - ld
@@ -77,7 +74,8 @@ showTableOfContents = true
     - -fsanitize=address
     - lldb
     - Links to coding tutorials
-- Conclusions
+
+## Conclusions
   - The heyday of C is over, but it will certainly outlive me (and any hypothetical children of mine)
     - Its longevity is a testament to its design
   - For coders and even data scientists trying to interact with and understand their computers at a deeper level, learning a bit of C will continue to pay off

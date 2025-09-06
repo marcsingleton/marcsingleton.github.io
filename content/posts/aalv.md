@@ -15,20 +15,9 @@ To stay motivated, I knew I needed to build something that I could in theory use
 
 ## Thoughts
 ### What do you mean no data structures?
-    - One of my biggest pain points and one of the reasons I probably won't develop another project in C by choice
-    - Lists and dicts (or Vecs and Hashmaps for non-Pythonistas) are fundamental data structures for modern programming
-    - They simplify the implementation of algorithms and facilitate countless day-to-day software engineering tasks (reword)
-    - I was more than a little surprised to discover the C standard library doesn't contain implementations
-      - This makes more sense to me now, understanding C's history and prioritization of backwards compatibility
-      - Simply put, C is language where if you need those things, you should be able to write them yourself
-    - Still, I was a little put-off by this
-    - I knew early on that I couldn't get by without a vec type, so I wrote one myself
-    - It wasn't so bad, but I still feel my little dynamic array is a fragile toy compared to the robust and highly optimized versions you would find in a modern language
-      - Footnote: C's lack of support makes extracting any elements from these directly needlessly verbose
-    - For similar reasons, I refused to write an implementation for the much more complicated hashmap
-      - On the one hand, I now have a far deeper appreciation of the engineering that goes into making a good hashmap as well as the implicit cost of computing the hash function for every lookup
-        - I now know that for cases where the set of options is limited and constant-time lookup isn't necessary, iterating through an array is just as good (you can get by without one, and often in ways that are more efficient)
-      - But on the other hand, being able to quickly ask "is this thing in this other one" or being able to quickly index by a human-readable label is such a common task, it's a massive quality of life improvement to express those directly in the language rather than fussing around with for loops and enums
+I was more than a little surprised to discover the C standard library doesn't contain implementations of standard data structures like dynamic arrays and hashmaps (lists and dictionaries in Python world). Now knowing more about C's history, its prioritization of backwards compatibility, and the niche it fills relative to C++, this absence makes more sense to me. Simply put, C is language where if you need those things, you should be able to write them yourself. Still, I was a little put-off by this. I knew early on that I couldn't get by without a dynamic array, so I wrote one myself. It wasn't so bad, but I still feel my implementation is a toy compared to the robust and highly optimized versions found in any modern language.[^1] Given that hashmaps are far more complicated, I refused to sink any time into reinventing that particular wheel, which made some instances of mapping a string to something else a little more involved. On one hand, I now have a far deeper appreciation of the engineering that goes into making a good hashmap as well as the implicit cost of computing the hash function for every lookup, especially compared to just iterating over a short list of options. But on the other hand, being able to quickly index by a human-readable label is such a common task, it's a massive quality of life improvement to express those directly in the language rather than fussing around with loops and enums. I'm glad I learned C first to get a handle on low-level concepts before layering on the complexity of C++, but for any future projects of this size I'll probably go with C++ (or learn Rust).
+
+[^1]: C's lack of built-in support also makes extracting an element needlessly verbose.
 
 ### GUIs from scratch is hard
     - The hardest part was making the GUI and interactions

@@ -20,14 +20,39 @@ I was more than a little surprised to discover the C standard library doesn't co
 [^1]: C's lack of built-in support also makes extracting an element needlessly verbose.
 
 ### GUIs from scratch is hard
-    - The hardest part was making the GUI and interactions
-    - Display text on a terminal screen is very low-level
-      - At its core, the cursor is digital pen that's moved cell to cell to paint the display
-    - At the same time, integrating this low-level control with the interactivity we expect from windowed programs (even terminal-based ones) took careful attention the overall flow of the program and the interfaces between different modules
-      - How should the interface react to re-sizing?
-    - Finding the right abstractions and "primitives" that bridged this gap effectively took a lot of trial and error
-    - Inherent tension between efficiency and abstraction
-      - Should a move to start of the line use the move left or calculate the indices directly?
+By far the hardest part of this project was implementing the GUI and user interactions. Displaying a GUI on a terminal screen is fundamentally a low-level operation, as the cursor is not much more than a digital pen that's moved from cell to cell to write characters.[^2] Finding the right abstractions to bridge the gap between this low-level control and the high-level interactivity we expect from programs (even terminal-based ones) took careful attention to the separation of concerns and interface design. Ultimately, the main loop is less than two dozen lines of code. 
+
+```
+while (1)
+{
+    input_read_key(&input_buffer, STDIN_FILENO);
+
+    code = input_parse_keys(&input_buffer, &count, &cmd);
+    switch (code)
+    {
+    case 0:
+        input_execute_command(count, cmd);
+        input_buffer.len = 0;
+        break;
+    case 1:
+        break;
+    case 2:
+        input_buffer.len = 0;
+        break;
+    }
+
+    display_refresh(&output_buffer);
+    input_buffer_flush(&output_buffer);
+    }
+```
+
+The overall idea is that the program first reads a key press into a buffer. It then attempts to parse these keys into a known command. If it's successful, a function corresponding to that command is executed. Otherwise, the buffer is cleared or left unchanged depending on if it matches the prefix of a recognized sequence of keys. Finally, the changes to the display are written to an output buffer and flushed to the terminal in two separate steps, which prevents visual artifacts like flashing by writing only complete updates to the terminal.
+
+Of course, each of these functions hides significant complexity. For example, the command executions themselves don't modify the display. Instead they change internal values, for example the position of the cursor in the window or the window's offsets from the first row and column. When these are modified, the program in turn sets flags indicating if certain panes need to be redrawn, and `display_refresh` uses this information to write the necessary updates to the output buffer. But even this explanation hides many details, as the command executions only calculate the new values of the program's internal state and delegate updating them to dedicated setters.
+
+The design of interfaces always involves a tension between efficiency and abstraction. For example, once a command to move the cursor one cell left is written, a command to move the cursor to the start of the line can be implemented by repeating it as many times as the cursor's current column. While this simplifies the calculations by delegating them to a another function, it's also less efficient than calculating the new position and offset directly. In general, these choices will depend on a combination of factors, including the relative importance of speed and maintainability for a particular use case as well as stylistic tastes. In this case, speed and a preference for independence won out, so in the initial release, no command is implemented in terms of another.
+
+[^2]: While the curses library provides a standard interface that hides some details, the programmer is still responsible for constructing their GUI from primitives like moving the cursor to a certain cell or clearing a line.
 
 ### The standard library is a mess
     - C is old and developed organically in its early years

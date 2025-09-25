@@ -60,12 +60,32 @@ C is old and developed organically in its early years. Moreover, as fundamental 
 [^3] Feel free to search "C unsafe functions" to get a sample of the Internet's opinions.
 
 ### Pointers aren't so bad (once you get used to them)
-    - Pointers are infamous for causing confusion, and it's true that C's lack of bounds checking can make working with pointers tricky
-    - That said, pointers are at the core a more explicit syntax for the pass-by-reference semantics found in many higher level languages
-    - Coming from a Python background, I was already familiar with concept that names are references to underlying objects
-      - Common introductory example of appending to lists from different names
-      - In C, you have to explicitly opt into this behavior with pointers, and my biggest gotcha was forgetting that struct assignment copies the data rather than moves it from one variable to another
-    - It does take some time to get used to the multiple levels of indirection and for something like char **argv to feel as natural as an array of strings
+Pointers are infamous for causing confusion, and it's true that C's lack of bounds checking can make working with pointers tricky. At the same time, pointers are essentially a more explicit syntax for the pass-by-reference semantics found in many higher level languages. Coming from a Python background, I was already familiar with concept that names are references to underlying objects. Many introductory Python tutorials illustrate this behavior with the following example:
+
+```
+x = [1, 2, 3]
+y = x
+y.append(4)
+print(x)
+```
+
+Because `x` and `y` refer to the same underlying object in memory, the `4` is appended to same list as `x` and the above code displays `[1, 2, 3, 4]`. In C, a similar example is written as:
+
+```
+#include <stdio.h>
+#define N 4
+
+int main()
+{
+    int x[N] = {1, 2, 3};
+    int *y = x;
+    y[N - 1] = 4;
+    for (int i = 0; i < N; i++)
+        printf("%d\n", x[i]);
+}
+```
+
+The basic idea is the same, but C requires explicitly marking `y` as a kind of reference value. Admittedly, there are a few gotchas when working with structs, and it does take some time for something like `char **argv` to immediately parse as an array of strings, but with practice pointers become just another way of labeling and accessing data.
 
 ### Understanding memory layout is necessary
     - Unlike memory managed languages where memory is an abstract resource magically pops in and out of existence as needed, in C memory is managed explicitly

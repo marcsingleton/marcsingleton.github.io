@@ -55,12 +55,9 @@ The design of interfaces always involves a tension between efficiency and abstra
 [^2]: While the curses library provides a standard interface that hides some details, the programmer is still responsible for constructing their GUI from primitives like moving the cursor to a certain cell or clearing a line.
 
 ### The standard library is a mess
-    - C is old and developed organically in its early years
-    - As fundamental computational infrastructure, it prioritizes backwards compatibility above almost all else
-    - That said the standard library is full of footguns
-      - Unsafe functions
-      - Disorganized headers
-      - Lack of namespaces makes finding where a function is defined a scavenger hunt
+C is old and developed organically in its early years. Moreover, as fundamental piece of computational infrastructure, its designers rightfully prioritize backwards compatibility above almost all else. That said the standard library is full of footguns, most notably the various "unsafe" functions. Safety is a sliding scale, so the list varies depending on the speaker and context,[^3] but it usually includes string manipulation functions that don't check bounds, like `strcpy` or `strlen`. Some aren't problematic when it can be guaranteed a buffer overflow can't occur, but when in doubt the truncated versions of these functions, *e.g.* `strncpy` and `strnlen`, are safer alternatives. In one notable case, the security vulnerabilities of `gets` were so irrevocable that it was deprecated in C99 and fully removed in C11. These functions are the worst offenders, but the library's overall organization also has its share of sharp edges. It makes sense once you get the hang of it, but for the newcomer keeping the differences straight between similar sounding headers can be maddening. (I'm looking at you, `stdint.h`, `limits.h`, and `inttypes.h`.) This isn't helped by the lack of namespaces, which makes finding where a function is defined a scavenger hunt. All I can say is thank god for Google--I don't know how anyone programmed without it.
+
+[^3] Feel free to search "C unsafe functions" to get a sample of the Internet's opinions.
 
 ### Pointers aren't so bad (once you get used to them)
     - Pointers are infamous for causing confusion, and it's true that C's lack of bounds checking can make working with pointers tricky

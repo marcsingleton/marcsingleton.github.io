@@ -88,10 +88,38 @@ int main()
 The basic idea is the same, but C requires explicitly marking `y` as a kind of reference value. Admittedly, there are a few gotchas when working with structs, and it does take some time for something like `char **argv` to immediately parse as an array of strings, but with practice pointers become just another way of labeling and accessing data.
 
 ### Understanding memory layout is necessary
-    - Unlike memory managed languages where memory is an abstract resource magically pops in and out of existence as needed, in C memory is managed explicitly
-    - This is the common textbook description, but it extends beyond using malloc/free to get more memory for variable-sized data
-    - I can't imagine writing more complex programs in C without at least a solid understanding of how programs work at a machine level
-    - Without it, you may try to return pointers to stack variables or take the address of a returned value without first storing it in a variable
+Unlike in garbage-collected languages where memory is an abstract resource that magically pops in and out of existence as needed, in C memory is managed explicitly. In practical terms, this means using `malloc` to accommodate data whose size isn't known in advance and releasing that memory back to the system with `free`. This is a common high-level description of manual memory management, but using memory properly in C involves much more than rote calls to `malloc` and `free`. Avoiding more subtle bugs and opaque compiler errors requires understanding a program's memory layout. For example, the following function will almost certainly cause incorrect results or segmentation faults.
+
+```
+int *increment(int x)
+{
+    int y = x + 1;
+    return &y;
+}
+```
+
+While it's easy to memorize "Don't return pointers except from `malloc`," the rule will never make sense without understanding what the stack is and how it differs from the heap.
+
+Here's another tricky example.
+
+```
+int main(void)
+{
+    char s1[] = "Hello";
+    char *s2 = "World!";
+    int v[] = {0, 1, 2};
+    
+    s1[0] = 'h';
+    s2[0] = 'w';
+    v[0] = 1;
+}
+```
+
+The problem is the assignment to `s2`. Because `s2` is a pointer rather than an array, C only makes space on the stack for a pointer. The string itself is stored elsewhere, typically in read-only memory, so attempting to modify it is an error.[^4] In contrast, `s1` is an array, so the string "Hello" is copied from the read-only segment onto the stack where it can be modified.
+
+While these examples are artificial, it's easy to forget these nuances in practice. In the best cases, the program will crash, but sometimes it will silently corrupt memory or produce incorrect results. Unsurprisingly, these bugs can be extremely difficult to identify and fix, so the defense is to develop a mental model of how data is organized in a program.
+
+[^4]: The C standard technically only specifies that string literals have static storage duration, but in practice most compilers put them in read-only memory segments.
 
 ### Tools and resources
     - Make

@@ -55,7 +55,7 @@ The design of interfaces always involves a tension between efficiency and abstra
 [^2]: While the curses library provides a standard interface that hides some details, the programmer is still responsible for constructing their GUI from primitives like moving the cursor to a certain cell or clearing a line.
 
 ### The standard library is a mess
-C is old and developed organically in its early years. Moreover, as fundamental piece of computational infrastructure, its designers rightfully prioritize backwards compatibility above almost all else. That said the standard library is full of footguns, most notably the various "unsafe" functions. Safety is a sliding scale, so the list varies depending on the speaker and context,[^3] but it usually includes string manipulation functions that don't check bounds, like `strcpy` or `strlen`. Some aren't problematic when it can be guaranteed a buffer overflow can't occur, but when in doubt the truncated versions of these functions, *e.g.* `strncpy` and `strnlen`, are safer alternatives. In one notable case, the security vulnerabilities of `gets` were so irrevocable that it was deprecated in C99 and fully removed in C11. These functions are the worst offenders, but the library's overall organization also has its share of sharp edges. It makes sense once you get the hang of it, but for the newcomer keeping the differences straight between similar sounding headers can be maddening. (I'm looking at you, `stdint.h`, `limits.h`, and `inttypes.h`.) This isn't helped by the lack of namespaces, which makes finding where a function is defined a scavenger hunt. All I can say is thank god for Google--I don't know how anyone programmed without it.
+C is old and developed organically in its early years. Moreover, as fundamental piece of computational infrastructure, its designers rightfully prioritize backwards compatibility above almost all else. That said the standard library is full of footguns, most notably the various "unsafe" functions. Safety is a sliding scale, so the list varies depending on the speaker and context,[^3] but it usually includes string manipulation functions that don't check bounds, like `strcpy` or `strlen`. Some aren't problematic when it can be guaranteed a buffer overflow can't occur, but when in doubt the truncated versions of these functions, *e.g.* `strncpy` and `strnlen`, are safer alternatives. In one case, the security vulnerabilities of a function, `gets`, were so irrevocable that it was deprecated in C99 and fully removed in C11. These are the worst offenders, but the library's overall organization also has its share of sharp edges. It makes sense once you get the hang of it, but for the newcomer keeping the differences straight between similar sounding headers can be maddening. (I'm looking at you, `stdint.h`, `limits.h`, and `inttypes.h`.) This isn't helped by the lack of namespaces, which makes finding where a function is defined a scavenger hunt. All I can say is thank god for Google--I don't know how anyone programmed without it.
 
 [^3] Feel free to search "C unsafe functions" to get a sample of the Internet's opinions.
 
@@ -122,17 +122,30 @@ While these examples are artificial, it's easy to forget these nuances in practi
 [^4]: The C standard technically only specifies that string literals have static storage duration, but in practice most compilers put them in read-only memory segments.
 
 ### Tools and resources
-    - Make
-    - otool
-    - ld
-    - nm
-    - objdump
-    - readelf
-    - ldd
-    - leaks
-    - -fsanitize=address
-    - lldb
-    - Links to coding tutorials
+Part of this journey was simply learning the ecosystem of tools and resources that make it possible to write compiled programs and probe their workings when things inevitably go wrong. Many of these are "obvious," but sometimes the most obvious information is the hardest to find, so here's a short list grouped by theme:
+
+  - Build tools
+    - Make: classic Unix program automating actions; commonly used for compiling executables
+    - `ld`: linker--typically called by other programs like `gcc` or `clang`, so some options are documented in its manual entry
+  - Inspecting binaries
+    - `readelf`: displays information about ELF binaries (executable format on Linux); shows headers, sections, symbols, and more
+    - `otool`: the macOS equivalent to `readelf`
+    - `objdump`: cross-platform disassembler and object file analyzer
+    - `ldd`: lists dynamic library dependencies of an executable; useful for tracking down missing shared libraries
+    - `nm`: lists symbols from object files; helpful for finding function names and checking what's exported
+  - Debugging
+    - `gdb`: GNU Debugger--the classic option for debugging binaries
+    - `lldb`: the LLVM alternative; included on macOS with Xcode
+    - `leaks`: detects memory leaks; a macOS-friendly alternative to Valgrind
+    - `fsanitize=address`: a compiler flag (for GCC/Clang) that instruments code to detect memory errors like buffer overflows and use-after-free at runtime
+
+I also countless blogs, tutorials, and manuals, some good, some bad, some linked below. Of these, the Kilo tutorial is the highlight for its coverage of low-level terminal IO, and, more broadly, how to even start a project like this from scratch. I would have been lost without it.
+
+- [Kilo: Build Your Own Text Editor](https://viewsourcecode.org/snaptoken/kilo/index.html): a step-by-step tutorial for writing a text editor from scratch
+- [The GNU C Library Manual](https://sourceware.org/glibc/manual/): a good reference for Unix concepts
+- [The POSIX Standard](https://pubs.opengroup.org/onlinepubs/9799919799/): the authoritative standard, including what exactly is in a the standard library header files
+- [Learn Makefiles](https://makefiletutorial.com/): learning Make from scratch
+- [Understanding and Using Makefile Flags](https://earthly.dev/blog/make-flags/): notes on some common Makefile flags for C programs
 
 ## Conclusions
   - The heyday of C is over, but it will certainly outlive me (and any hypothetical children of mine)

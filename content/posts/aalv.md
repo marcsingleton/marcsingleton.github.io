@@ -148,15 +148,8 @@ I also countless blogs, tutorials, and manuals, some good, some bad, some linked
 - [Understanding and Using Makefile Flags](https://earthly.dev/blog/make-flags/): notes on some common Makefile flags for C programs
 
 ## Conclusions
-  - The heyday of C is over, but it will certainly outlive me (and any hypothetical children of mine)
-    - Its longevity is a testament to its design
-  - For coders and even data scientists trying to interact with and understand their computers at a deeper level, learning a bit of C will continue to pay off
-  - That said, C has many sharp edges
-  - For new projects that don't require squeezing every drop of performance or support for ancient architectures, use Rust
-    - It provides mechanisms for low-level control like C, as well as modern features like standard collection types, namespaces, generics
-    - Its borrow checker can also eliminate many types of memory errors at compile-time
-    - These features have won Rust endorsements from the biggest names in software
-      - The Linux kernel accepted code written in Rust in 2023
-        - Previously the kernel had only contained code written in C
-      - Even the US government recommended memory-safe languages like Rust for new projects in a recent report
-  - Thoughts on 
+The heyday of C is over, but it will certainly outlive all of us living in the year 2025. This longevity is a testament to its design, striking a balance between simplicity and expressivity.[^6] Vast portions of our computational infrastructure are still written in C or related languages, and while it's possible to make a living as a programmer without ever touching C, for those trying to interact with and understand their computers at a deeper level, learning a bit of C will continue to pay off.
+
+That said, C has many sharp edges, and for new projects that don't require squeezing out every drop of performance or support for legacy architectures, Rust is rapidly gaining momentum as the industry standard. Like C, it provides mechanisms for low-level control but is also a fully modern language with builtin collection types, namespaces, and generics. Most significantly, its concept of ownership eliminates many types of memory errors at compile-time. This feature has won Rust endorsements from the biggest names in software, including the [US government](https://www.darpa.mil/news/2024/memory-safety-vulnerabilities). Rust has even made it into the Linux kernel, though not without some controversy. Time will tell if Rust is here to stay, but C will remain, diligently doing the essential but thankless work in computing--for those willing to tell it how.
+
+[^6]: It's also a testament to lock-in and inertia, but the point that C got a lot of things right still applies.

@@ -1,11 +1,11 @@
 +++
 author = "Marc Singleton"
 title = "Lessons from a first project in C"
-date = "2025-12-01"
+date = "2025-10-05"
 summary = "Reflections on learning my first compiled language."
 tags = ["C", "reflections"]
 showTableOfContents = true
-draft = true
+draft = false
 +++
 
 ## A personal project to learn C

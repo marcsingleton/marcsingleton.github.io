@@ -50,7 +50,7 @@ while (1)
 
 The overall idea is that the program first reads a key press into a buffer. It then attempts to parse these keys into a known command. If it's successful, a function corresponding to that command is executed. Otherwise, the buffer is cleared or left unchanged depending on if it matches the prefix of a recognized sequence of keys. Finally, the changes to the display are written to an output buffer and flushed to the terminal in two separate steps, which prevents visual artifacts like flashing by writing only complete updates to the terminal.
 
-Each of these functions hides significant complexity. For example, the command themselves don't modify the display. Instead they change internal values--for example, the cursor position in the window or the window's offsets from the first row and column. When these are modified, the program in turn sets flags indicating if certain panes need to be redrawn, and `display_refresh` uses this information to write the necessary updates to the output buffer. Yet even this explanation hides many details, as the commands only calculate the new values of the program's internal state and delegate updating them to dedicated setters.
+Each of these functions hides significant complexity. For example, the command themselves don't modify the display. Instead they change internal values---for example, the cursor position in the window or the window's offsets from the first row and column. When these are modified, the program in turn sets flags indicating if certain panes need to be redrawn, and `display_refresh` uses this information to write the necessary updates to the output buffer. Yet even this explanation hides many details, as the commands only calculate the new values of the program's internal state and delegate updating them to dedicated setters.
 
 The design of interfaces always involves a tension between efficiency and abstraction. For example, a command to move the cursor by multiple cells can be implemented by repeating one that moves it only one. While this simplifies the calculations and checks by delegating them to another function, it's less efficient than doing them directly a single time. In general, these choices depend on a combination of contextual factors, including the importance of speed over maintainability as well as personal style. In this case, I prioritized speed and independence, so no command depends on another.
 
@@ -101,7 +101,7 @@ int *increment(int x)
 }
 ```
 
-For these cases, memorizing "Don't return pointers except from malloc" isn't enough--the rule only makes sense once you understand the stack, the heap, and how they differ.
+For these cases, memorizing "Don't return pointers except from malloc" isn't enough---the rule only makes sense once you understand the stack, the heap, and how they differ.
 
 Here's another tricky example.
 
@@ -129,7 +129,7 @@ Part of this journey was learning the ecosystem of tools that make it possible t
 
   - Build tools
     - Make: classic Unix program automating actions; commonly used for compiling executables
-    - `ld`: linker--typically called by other programs like `gcc` or `clang`, so some options are documented in its manual entry
+    - `ld`: linker---typically called by other programs like `gcc` or `clang`, so some options are documented in its manual entry
   - Inspecting binaries
     - `readelf`: displays information about ELF binaries (executable format on Linux); shows headers, sections, symbols, and more
     - `otool`: the macOS equivalent to `readelf`
@@ -137,7 +137,7 @@ Part of this journey was learning the ecosystem of tools that make it possible t
     - `ldd`: lists dynamic library dependencies of an executable; useful for tracking down missing shared libraries
     - `nm`: lists symbols from object files; helpful for finding function names and checking what's exported
   - Debugging
-    - `gdb`: GNU Debugger--the classic option for debugging binaries
+    - `gdb`: GNU Debugger---the classic option for debugging binaries
     - `lldb`: the LLVM alternative; included on macOS with Xcode
     - `leaks`: detects memory leaks; a macOS-friendly alternative to Valgrind
     - `fsanitize=address`: a compiler flag (for GCC/Clang) that instruments code to detect memory errors like buffer overflows and use-after-free at runtime
@@ -153,6 +153,6 @@ I also read countless blogs, tutorials, and manuals, some good, some bad. I've l
 ## C: Imperfect, but here to stay
 The heyday of C is over, but it will certainly outlive all of us. This longevity is a testament to its design, striking a balance between simplicity and expressivity.[^6] Much of our computational infrastructure is still written in C or related languages, and while it's possible to program for years without ever touching C, for those trying to understand their computers at a deeper level, learning C will continue to pay off.
 
-That said, C has many sharp edges, and for new projects that don't require maximum performance or support for legacy architectures, Rust is becoming an industry favorite. Like C, it provides mechanisms for low-level control but also supports modern features like built-in collection types, namespaces, and generics. Most significantly, its concept of ownership eliminates many types of memory errors at compile-time. This feature has won Rust endorsements from leading companies and even the [US government](https://www.darpa.mil/news/2024/memory-safety-vulnerabilities). Time will tell if Rust will stand the test of time, but C will remain, diligently doing the essential but thankless work in computing--for those willing to tell it how.
+That said, C has many sharp edges, and for new projects that don't require maximum performance or support for legacy architectures, Rust is becoming an industry favorite. Like C, it provides mechanisms for low-level control but also supports modern features like built-in collection types, namespaces, and generics. Most significantly, its concept of ownership eliminates many types of memory errors at compile-time. This feature has won Rust endorsements from leading companies and even the [US government](https://www.darpa.mil/news/2024/memory-safety-vulnerabilities). Time will tell if Rust will stand the test of time, but C will remain, diligently doing the essential but thankless work in computing---for those willing to tell it how.
 
 [^6]: It's also a testament to lock-in and inertia, but the point that C got a lot of things right still applies.
